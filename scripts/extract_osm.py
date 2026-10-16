@@ -10,7 +10,10 @@ XMIN, XMAX, YMIN, YMAX = 74.72, 74.90, 33.99, 34.20
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 AMENITY = {"restaurant","cafe","fast_food","bank","atm","pharmacy","clinic","doctors","dentist","hospital",
            "fuel","bar","pub","ice_cream","marketplace","bureau_de_change","car_rental","car_wash",
-           "veterinary","internet_cafe","food_court"}
+           "veterinary","internet_cafe","food_court","driving_school","events_venue","childcare",
+           "cinema","nightclub","studio","training","money_transfer","payment_centre","post_depot"}
+LEISURE = {"fitness_centre","sports_centre","dance","swimming_pool"}
+PLACES = {"suburb","neighbourhood","quarter","village","hamlet","locality","town"}
 TOURISM = {"hotel","guest_house","hostel","motel","apartment"}
 ROADS = {"motorway","trunk","primary","secondary","tertiary","unclassified","residential","living_street"}
 
@@ -23,11 +26,12 @@ def biz_category(t):
     if "craft" in t: return f"craft={t['craft']}"
     if "office" in t: return f"office={t['office']}"
     if "healthcare" in t: return f"healthcare={t['healthcare']}"
+    if t.get("leisure") in LEISURE: return f"leisure={t['leisure']}"
     return None
 
 class H(osmium.SimpleHandler):
     def __init__(s):
-        super().__init__(); s.pois = []; s.roads = []; s.water = []
+        super().__init__(); s.pois = []; s.roads = []; s.water = []; s.places = []
     def _poi(s, kind, oid, t, x, y):
         cat = biz_category(t)
         if cat is None or not inside(x, y): return
@@ -35,11 +39,16 @@ class H(osmium.SimpleHandler):
         addr = ", ".join(t[k] for k in ("addr:housenumber","addr:street","addr:suburb","addr:city") if k in t) or None
         s.pois.append(dict(osm_id=f"{kind}/{oid}", name=t.get("name") or t.get("name:en"), category=cat,
             phone=g("phone","contact:phone","mobile","contact:mobile"), website=g("website","contact:website","url"),
-            social=g("contact:facebook","contact:instagram","facebook","instagram"),
+            social=g("contact:facebook","facebook"), instagram=g("contact:instagram","instagram"),
+            whatsapp=g("contact:whatsapp","whatsapp"), email=g("email","contact:email"),
+            brand=t.get("brand"), postcode=t.get("addr:postcode"),
             opening_hours=t.get("opening_hours"), address=addr, lon=x, lat=y, n_tags=len(t)))
     def node(s, n):
         if n.tags and n.location.valid():
-            s._poi("node", n.id, dict(n.tags), n.location.lon, n.location.lat)
+            t = dict(n.tags); x, y = n.location.lon, n.location.lat
+            s._poi("node", n.id, t, x, y)
+            if t.get("place") in PLACES and "name" in t and XMIN-0.05 <= x <= XMAX+0.05 and YMIN-0.05 <= y <= YMAX+0.05:
+                s.places.append(dict(name=t.get("name:en") or t["name"], place=t["place"], lon=x, lat=y))
     def way(s, w):
         t = dict(w.tags)
         try: pts = [(n.lon, n.lat) for n in w.nodes]
@@ -59,4 +68,6 @@ out = ROOT / "osm_srinagar_places.parquet"
 duckdb.sql("COPY (SELECT * FROM df) TO '%s' (FORMAT parquet)" % out)
 (ROOT / "data_raw").mkdir(exist_ok=True)
 json.dump({"roads": h.roads, "water": h.water}, open(ROOT / "data_raw" / "osm_basemap_full.json", "w"), separators=(",",":"))
-print(f"{len(df)} OSM business POIs -> {out}; {len(h.roads)} road ways, {len(h.water)} water features")
+pl = pd.DataFrame(h.places)
+duckdb.sql("COPY (SELECT * FROM pl) TO '%s' (FORMAT parquet)" % (ROOT / "data_raw" / "osm_localities.parquet"))
+print(f"{len(pl)} locality names; {len(df)} OSM business POIs -> {out}; {len(h.roads)} road ways, {len(h.water)} water features")

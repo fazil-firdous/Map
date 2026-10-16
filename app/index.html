@@ -1,0 +1,356 @@
+<title>Srinagar Shops Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+.leaflet-image-layer,.leaflet-layer,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-pane,.leaflet-pane>canvas,.leaflet-pane>svg,.leaflet-tile,.leaflet-tile-container,.leaflet-zoom-box{position:absolute;left:0;top:0}.leaflet-container{overflow:hidden}.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-user-drag:none}.leaflet-tile::selection{background:0 0}.leaflet-safari .leaflet-tile{image-rendering:-webkit-optimize-contrast}.leaflet-safari .leaflet-tile-container{width:1600px;height:1600px;-webkit-transform-origin:0 0}.leaflet-marker-icon,.leaflet-marker-shadow{display:block}.leaflet-container .leaflet-overlay-pane svg{max-width:none!important;max-height:none!important}.leaflet-container .leaflet-marker-pane img,.leaflet-container .leaflet-shadow-pane img,.leaflet-container .leaflet-tile,.leaflet-container .leaflet-tile-pane img,.leaflet-container img.leaflet-image-layer{max-width:none!important;max-height:none!important;width:auto;padding:0}.leaflet-container img.leaflet-tile{mix-blend-mode:plus-lighter}.leaflet-container.leaflet-touch-zoom{-ms-touch-action:pan-x pan-y;touch-action:pan-x pan-y}.leaflet-container.leaflet-touch-drag{-ms-touch-action:pinch-zoom;touch-action:none;touch-action:pinch-zoom}.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom{-ms-touch-action:none;touch-action:none}.leaflet-container{-webkit-tap-highlight-color:transparent}.leaflet-container a{-webkit-tap-highlight-color:rgba(51,181,229,.4)}.leaflet-tile{filter:inherit;visibility:hidden}.leaflet-tile-loaded{visibility:inherit}.leaflet-zoom-box{width:0;height:0;-moz-box-sizing:border-box;box-sizing:border-box;z-index:800}.leaflet-overlay-pane svg{-moz-user-select:none}.leaflet-pane{z-index:400}.leaflet-tile-pane{z-index:200}.leaflet-overlay-pane{z-index:400}.leaflet-shadow-pane{z-index:500}.leaflet-marker-pane{z-index:600}.leaflet-tooltip-pane{z-index:650}.leaflet-popup-pane{z-index:700}.leaflet-map-pane canvas{z-index:100}.leaflet-map-pane svg{z-index:200}.leaflet-vml-shape{width:1px;height:1px}.lvml{behavior:url(#default#VML);display:inline-block;position:absolute}.leaflet-control{position:relative;z-index:800;pointer-events:visiblePainted;pointer-events:auto}.leaflet-bottom,.leaflet-top{position:absolute;z-index:1000;pointer-events:none}.leaflet-top{top:0}.leaflet-right{right:0}.leaflet-bottom{bottom:0}.leaflet-left{left:0}.leaflet-control{float:left;clear:both}.leaflet-right .leaflet-control{float:right}.leaflet-top .leaflet-control{margin-top:10px}.leaflet-bottom .leaflet-control{margin-bottom:10px}.leaflet-left .leaflet-control{margin-left:10px}.leaflet-right .leaflet-control{margin-right:10px}.leaflet-fade-anim .leaflet-popup{opacity:0;-webkit-transition:opacity .2s linear;-moz-transition:opacity .2s linear;transition:opacity .2s linear}.leaflet-fade-anim .leaflet-map-pane .leaflet-popup{opacity:1}.leaflet-zoom-animated{-webkit-transform-origin:0 0;-ms-transform-origin:0 0;transform-origin:0 0}svg.leaflet-zoom-animated{will-change:transform}.leaflet-zoom-anim .leaflet-zoom-animated{-webkit-transition:-webkit-transform .25s cubic-bezier(0,0,.25,1);-moz-transition:-moz-transform .25s cubic-bezier(0,0,.25,1);transition:transform .25s cubic-bezier(0,0,.25,1)}.leaflet-pan-anim .leaflet-tile,.leaflet-zoom-anim .leaflet-tile{-webkit-transition:none;-moz-transition:none;transition:none}.leaflet-zoom-anim .leaflet-zoom-hide{visibility:hidden}.leaflet-interactive{cursor:pointer}.leaflet-grab{cursor:-webkit-grab;cursor:-moz-grab;cursor:grab}.leaflet-crosshair,.leaflet-crosshair .leaflet-interactive{cursor:crosshair}.leaflet-control,.leaflet-popup-pane{cursor:auto}.leaflet-dragging .leaflet-grab,.leaflet-dragging .leaflet-grab .leaflet-interactive,.leaflet-dragging .leaflet-marker-draggable{cursor:move;cursor:-webkit-grabbing;cursor:-moz-grabbing;cursor:grabbing}.leaflet-image-layer,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-pane>svg path,.leaflet-tile-container{pointer-events:none}.leaflet-image-layer.leaflet-interactive,.leaflet-marker-icon.leaflet-interactive,.leaflet-pane>svg path.leaflet-interactive,svg.leaflet-image-layer.leaflet-interactive path{pointer-events:visiblePainted;pointer-events:auto}.leaflet-container{background:#ddd;outline-offset:1px}.leaflet-container a{color:#0078a8}.leaflet-zoom-box{border:2px dotted #38f;background:rgba(255,255,255,.5)}.leaflet-container{font-family:"Helvetica Neue",Arial,Helvetica,sans-serif;font-size:12px;font-size:.75rem;line-height:1.5}.leaflet-bar{box-shadow:0 1px 5px rgba(0,0,0,.65);border-radius:4px}.leaflet-bar a{background-color:#fff;border-bottom:1px solid #ccc;width:26px;height:26px;line-height:26px;display:block;text-align:center;text-decoration:none;color:#000}.leaflet-bar a,.leaflet-control-layers-toggle{background-position:50% 50%;background-repeat:no-repeat;display:block}.leaflet-bar a:focus,.leaflet-bar a:hover{background-color:#f4f4f4}.leaflet-bar a:first-child{border-top-left-radius:4px;border-top-right-radius:4px}.leaflet-bar a:last-child{border-bottom-left-radius:4px;border-bottom-right-radius:4px;border-bottom:none}.leaflet-bar a.leaflet-disabled{cursor:default;background-color:#f4f4f4;color:#bbb}.leaflet-touch .leaflet-bar a{width:30px;height:30px;line-height:30px}.leaflet-touch .leaflet-bar a:first-child{border-top-left-radius:2px;border-top-right-radius:2px}.leaflet-touch .leaflet-bar a:last-child{border-bottom-left-radius:2px;border-bottom-right-radius:2px}.leaflet-control-zoom-in,.leaflet-control-zoom-out{font:bold 18px 'Lucida Console',Monaco,monospace;text-indent:1px}.leaflet-touch .leaflet-control-zoom-in,.leaflet-touch .leaflet-control-zoom-out{font-size:22px}.leaflet-control-layers{box-shadow:0 1px 5px rgba(0,0,0,.4);background:#fff;border-radius:5px}.leaflet-control-layers-toggle{background-image:url(images/layers.png);width:36px;height:36px}.leaflet-retina .leaflet-control-layers-toggle{background-image:url(images/layers-2x.png);background-size:26px 26px}.leaflet-touch .leaflet-control-layers-toggle{width:44px;height:44px}.leaflet-control-layers .leaflet-control-layers-list,.leaflet-control-layers-expanded .leaflet-control-layers-toggle{display:none}.leaflet-control-layers-expanded .leaflet-control-layers-list{display:block;position:relative}.leaflet-control-layers-expanded{padding:6px 10px 6px 6px;color:#333;background:#fff}.leaflet-control-layers-scrollbar{overflow-y:scroll;overflow-x:hidden;padding-right:5px}.leaflet-control-layers-selector{margin-top:2px;position:relative;top:1px}.leaflet-control-layers label{display:block;font-size:13px;font-size:1.08333em}.leaflet-control-layers-separator{height:0;border-top:1px solid #ddd;margin:5px -10px 5px -6px}.leaflet-default-icon-path{background-image:url(images/marker-icon.png)}.leaflet-container .leaflet-control-attribution{background:#fff;background:rgba(255,255,255,.8);margin:0}.leaflet-control-attribution,.leaflet-control-scale-line{padding:0 5px;color:#333;line-height:1.4}.leaflet-control-attribution a{text-decoration:none}.leaflet-control-attribution a:focus,.leaflet-control-attribution a:hover{text-decoration:underline}.leaflet-attribution-flag{display:inline!important;vertical-align:baseline!important;width:1em;height:.6669em}.leaflet-left .leaflet-control-scale{margin-left:5px}.leaflet-bottom .leaflet-control-scale{margin-bottom:5px}.leaflet-control-scale-line{border:2px solid #777;border-top:none;line-height:1.1;padding:2px 5px 1px;white-space:nowrap;-moz-box-sizing:border-box;box-sizing:border-box;background:rgba(255,255,255,.8);text-shadow:1px 1px #fff}.leaflet-control-scale-line:not(:first-child){border-top:2px solid #777;border-bottom:none;margin-top:-2px}.leaflet-control-scale-line:not(:first-child):not(:last-child){border-bottom:2px solid #777}.leaflet-touch .leaflet-bar,.leaflet-touch .leaflet-control-attribution,.leaflet-touch .leaflet-control-layers{box-shadow:none}.leaflet-touch .leaflet-bar,.leaflet-touch .leaflet-control-layers{border:2px solid rgba(0,0,0,.2);background-clip:padding-box}.leaflet-popup{position:absolute;text-align:center;margin-bottom:20px}.leaflet-popup-content-wrapper{padding:1px;text-align:left;border-radius:12px}.leaflet-popup-content{margin:13px 24px 13px 20px;line-height:1.3;font-size:13px;font-size:1.08333em;min-height:1px}.leaflet-popup-content p{margin:17px 0;margin:1.3em 0}.leaflet-popup-tip-container{width:40px;height:20px;position:absolute;left:50%;margin-top:-1px;margin-left:-20px;overflow:hidden;pointer-events:none}.leaflet-popup-tip{width:17px;height:17px;padding:1px;margin:-10px auto 0;pointer-events:auto;-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-ms-transform:rotate(45deg);transform:rotate(45deg)}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#fff;color:#333;box-shadow:0 3px 14px rgba(0,0,0,.4)}.leaflet-container a.leaflet-popup-close-button{position:absolute;top:0;right:0;border:none;text-align:center;width:24px;height:24px;font:16px/24px Tahoma,Verdana,sans-serif;color:#757575;text-decoration:none;background:0 0}.leaflet-container a.leaflet-popup-close-button:focus,.leaflet-container a.leaflet-popup-close-button:hover{color:#585858}.leaflet-popup-scrolled{overflow:auto}.leaflet-oldie .leaflet-popup-content-wrapper{-ms-zoom:1}.leaflet-oldie .leaflet-popup-tip{width:24px;margin:0 auto}.leaflet-oldie .leaflet-control-layers,.leaflet-oldie .leaflet-control-zoom,.leaflet-oldie .leaflet-popup-content-wrapper,.leaflet-oldie .leaflet-popup-tip{border:1px solid #999}.leaflet-div-icon{background:#fff;border:1px solid #666}.leaflet-tooltip{position:absolute;padding:6px;background-color:#fff;border:1px solid #fff;border-radius:3px;color:#222;white-space:nowrap;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,.4)}.leaflet-tooltip.leaflet-interactive{cursor:pointer;pointer-events:auto}.leaflet-tooltip-bottom:before,.leaflet-tooltip-left:before,.leaflet-tooltip-right:before,.leaflet-tooltip-top:before{position:absolute;pointer-events:none;border:6px solid transparent;background:0 0;content:""}.leaflet-tooltip-bottom{margin-top:6px}.leaflet-tooltip-top{margin-top:-6px}.leaflet-tooltip-bottom:before,.leaflet-tooltip-top:before{left:50%;margin-left:-6px}.leaflet-tooltip-top:before{bottom:0;margin-bottom:-12px;border-top-color:#fff}.leaflet-tooltip-bottom:before{top:0;margin-top:-12px;margin-left:-6px;border-bottom-color:#fff}.leaflet-tooltip-left{margin-left:-6px}.leaflet-tooltip-right{margin-left:6px}.leaflet-tooltip-left:before,.leaflet-tooltip-right:before{top:50%;margin-top:-6px}.leaflet-tooltip-left:before{right:0;margin-right:-12px;border-left-color:#fff}.leaflet-tooltip-right:before{left:0;margin-left:-12px;border-right-color:#fff}@media print{.leaflet-control{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+/* Layout: a working phone-sized app on the left, the design notes beside it; on phones the app fills the screen and notes follow. */
+:root {
+  --bg: #e9eeec; --app: #f7f9f8; --card: #ffffff; --ink: #172426; --muted: #5b6b6a; --line: #dbe2df;
+  --teal: #0d5f62; --teal-soft: #d7e9e8; --rust: #b4461f; --rust-soft: #f6e2d9; --good: #2f7a3a; --warn: #9a6400;
+  --land: #edf0eb; --water: #b6d1d4; --road: #dadfd8; --road-major: #cdbb9f;
+  --f-display: "Young Serif", Georgia, serif; --f-body: "IBM Plex Sans", system-ui, sans-serif; --f-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1112; --app: #111a1c; --card: #172325; --ink: #e4ecea; --muted: #94a6a4; --line: #26353a;
+  --teal: #4cc0b8; --teal-soft: #173a3b; --rust: #f08458; --rust-soft: #3a2219; --good: #6cc77a; --warn: #e2b44a;
+  --land: #121c1e; --water: #1f3d43; --road: #263437; --road-major: #4f4535; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0b1112; --app: #111a1c; --card: #172325; --ink: #e4ecea; --muted: #94a6a4; --line: #26353a;
+  --teal: #4cc0b8; --teal-soft: #173a3b; --rust: #f08458; --rust-soft: #3a2219; --good: #6cc77a; --warn: #e2b44a;
+  --land: #121c1e; --water: #1f3d43; --road: #263437; --road-major: #4f4535; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); }
+.page { display: grid; grid-template-columns: auto minmax(0, 520px); gap: 48px; justify-content: center; align-items: start;
+  padding-block: 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.phone { width: 390px; height: 800px; border-radius: 44px; padding: 10px; background: #0d1314; box-shadow: 0 30px 60px -20px rgb(0 0 0 / .35); position: sticky; top: 24px; }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 34px; overflow: hidden; background: var(--app); display: flex; flex-direction: column; }
+.notes { min-width: 0; line-height: 1.55; }
+.notes h1 { font-family: var(--f-display); font-weight: 400; font-size: 34px; line-height: 1.1; margin: 0 0 10px; text-wrap: balance; }
+.notes h2 { font-family: var(--f-display); font-weight: 400; font-size: 20px; margin: 28px 0 8px; }
+.notes p, .notes li { color: var(--muted); max-width: 62ch; }
+.notes ul { padding-left: 18px; margin: 0; display: grid; gap: 6px; }
+.notes b { color: var(--ink); font-weight: 600; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 18px; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+.stat .v { font-family: var(--f-mono); font-size: 20px; font-variant-numeric: tabular-nums; }
+.stat .k { font-size: 12px; color: var(--muted); }
+@media (max-width: 900px) {
+  .page { grid-template-columns: minmax(0, 1fr); gap: 28px; padding-block: 0 32px; }
+  .phone { width: auto; height: 100svh; max-height: 860px; border-radius: 0; padding: 0; background: none; box-shadow: none; position: static;
+    margin-left: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); margin-right: calc(-1 * max(16px, env(safe-area-inset-right, 0px))); }
+  .screen { border-radius: 0; }
+}
+
+/* ---- app chrome ---- */
+.top { padding: 18px 18px 10px; background: var(--app); }
+.brand { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.brand h2 { font-family: var(--f-display); font-weight: 400; font-size: 21px; margin: 0; white-space: nowrap; }
+.area { font: inherit; font-size: 13px; color: var(--teal); background: var(--teal-soft); border: 0; border-radius: 99px; padding: 5px 10px; max-width: 150px; min-width: 0; }
+.search { margin-top: 12px; display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 0 12px; }
+.search svg { flex: none; color: var(--muted); }
+.search input { flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 15px; color: var(--ink); padding: 12px 0; outline: none; }
+.search:focus-within { border-color: var(--teal); }
+.view { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 4px 18px 18px; }
+.view[data-v="map"] { padding: 0; overflow: hidden; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); background: var(--card); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.tabs button { font: inherit; font-size: 11px; color: var(--muted); background: none; border: 0; padding: 9px 0 10px; display: grid; justify-items: center; gap: 3px; cursor: pointer; }
+.tabs button[aria-current="page"] { color: var(--teal); font-weight: 600; }
+button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.sec { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; font-weight: 600; color: var(--muted); margin: 18px 0 10px; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tile { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 8px 10px; display: grid; justify-items: center; gap: 6px; cursor: pointer; font: inherit; color: var(--ink); text-align: center; }
+.tile svg { color: var(--teal); }
+.tile .t { font-size: 12px; line-height: 1.2; }
+.tile .n { font-size: 11px; color: var(--muted); font-family: var(--f-mono); }
+.craft { background: var(--rust-soft); border-radius: 16px; padding: 14px; margin-top: 14px; }
+.craft h3 { font-family: var(--f-display); font-weight: 400; margin: 0 0 4px; font-size: 18px; color: var(--rust); }
+.craft p { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
+.chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.chip { flex: none; font: inherit; font-size: 13px; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 99px; padding: 6px 11px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: var(--app); }
+.craft .chip { border-color: transparent; }
+.list { display: grid; gap: 10px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 13px 14px; display: grid; gap: 6px; cursor: pointer; text-align: left; font: inherit; color: var(--ink); width: 100%; }
+.card h4 { margin: 0; font-size: 15px; font-weight: 600; line-height: 1.3; }
+.meta { font-size: 13px; color: var(--muted); }
+.badges { display: flex; flex-wrap: wrap; gap: 5px; }
+.b { font-size: 11px; border-radius: 6px; padding: 2px 6px; background: var(--teal-soft); color: var(--teal); font-weight: 500; }
+.b.ok { background: color-mix(in srgb, var(--good) 15%, transparent); color: var(--good); }
+.b.warn { background: color-mix(in srgb, var(--warn) 15%, transparent); color: var(--warn); }
+.count { font-size: 13px; color: var(--muted); margin: 12px 0 8px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.count select { font: inherit; font-size: 13px; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 3px 6px; }
+.more { font: inherit; width: 100%; margin-top: 10px; padding: 10px; border-radius: 12px; border: 1px dashed var(--line); background: none; color: var(--teal); cursor: pointer; }
+#map { position: absolute; inset: 0; background: var(--land); }
+.mapwrap { position: relative; height: 100%; }
+.leaflet-container { font-family: var(--f-body); background: var(--land); }
+.leaflet-bar a { background: var(--card); color: var(--ink); border-color: var(--line); }
+.leaflet-control-attribution { background: color-mix(in srgb, var(--card) 85%, transparent) !important; color: var(--muted); font-size: 10px; }
+.leaflet-control-attribution a { color: var(--teal); }
+.leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--card); color: var(--ink); }
+.leaflet-popup-content { margin: 10px 12px; }
+.pop b { display: block; font-size: 14px; } .pop button { margin-top: 6px; font: inherit; font-size: 12px; color: var(--teal); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+/* detail */
+.back { font: inherit; font-size: 14px; color: var(--teal); background: none; border: 0; padding: 8px 0; cursor: pointer; }
+.dname { font-family: var(--f-display); font-weight: 400; font-size: 26px; line-height: 1.15; margin: 4px 0 6px; text-wrap: balance; }
+.actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 16px 0; }
+.act { display: grid; justify-items: center; gap: 4px; font-size: 12px; text-decoration: none; color: var(--teal); background: var(--teal-soft); border-radius: 14px; padding: 11px 4px; border: 0; font-family: inherit; }
+.act[aria-disabled="true"] { opacity: .35; pointer-events: none; }
+.rows { background: var(--card); border: 1px solid var(--line); border-radius: 16px; }
+.row { display: grid; grid-template-columns: 92px 1fr; gap: 10px; padding: 11px 14px; border-top: 1px solid var(--line); font-size: 14px; }
+.row:first-child { border-top: 0; }
+.row dt { color: var(--muted); } .row dd { margin: 0; min-width: 0; overflow-wrap: anywhere; user-select: text; }
+.row a { color: var(--teal); }
+.trust { margin-top: 14px; padding: 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--card); }
+.meter { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; margin: 8px 0; }
+.meter i { display: block; height: 100%; background: var(--teal); border-radius: 99px; }
+.ghost { font: inherit; font-size: 14px; width: 100%; padding: 11px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; margin-top: 8px; }
+.ghost.primary { background: var(--teal); color: var(--app); border-color: var(--teal); font-weight: 600; }
+.note { font-size: 13px; color: var(--muted); }
+/* form */
+form { display: grid; gap: 12px; margin-top: 6px; }
+label.f { display: grid; gap: 5px; font-size: 13px; color: var(--muted); }
+label.f input, label.f select { font: inherit; font-size: 15px; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; }
+.done { background: color-mix(in srgb, var(--good) 12%, var(--card)); border: 1px solid color-mix(in srgb, var(--good) 40%, transparent); border-radius: 14px; padding: 14px; font-size: 14px; }
+@media (prefers-reduced-motion: no-preference) { .view { scroll-behavior: smooth; } }
+</style>
+
+<div class="page">
+  <div class="phone"><div class="screen" id="app">
+    <header class="top">
+      <div class="brand"><h2>Srinagar Shops</h2>
+        <select class="area" id="area" aria-label="Your area"><option value="-1">All of Srinagar</option></select></div>
+      <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Search shops, e.g. bakery, pashmina" aria-label="Search shops" autocomplete="off"></label>
+    </header>
+    <main class="view" id="view" data-v="home"></main>
+    <nav class="tabs" aria-label="Main">
+      <button data-tab="home" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg>Explore</button>
+      <button data-tab="map"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 4l6 2 5-2v16l-5 2-6-2-5 2V6z"/><path d="M9 4v16M15 6v16"/></svg>Map</button>
+      <button data-tab="add"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/></svg>Add a shop</button>
+    </nav>
+  </div></div>
+
+  <section class="notes">
+    <h1>How the app looks and works</h1>
+    <p>This prototype runs on the real merged dataset. Everything you tap is live: search, browse by type and area, open a shop, see it on the map. The add and edit forms show the flow but save nothing yet.</p>
+    <div class="stats">
+      <div class="stat"><div class="v" id="st-shops">10,055</div><div class="k">businesses</div></div>
+      <div class="stat"><div class="v" id="st-areas">94</div><div class="k">areas with 15+ shops</div></div>
+      <div class="stat"><div class="v" id="st-phone">65%</div><div class="k">with their own phone</div></div>
+    </div>
+    <h2>Three screens do most of the work</h2>
+    <ul>
+      <li><b>Explore</b> starts from what people ask for in Srinagar: a type of shop in an area. Kashmiri crafts get their own row, because visitors look for them first.</li>
+      <li><b>Shop page</b> puts Call, WhatsApp, Directions and Instagram at thumb height. Most shops here sell over WhatsApp and Instagram, so these matter more than a website.</li>
+      <li><b>Map</b> shows the same results you searched, not every pin in the city.</li>
+    </ul>
+    <h2>Trust is shown, not hidden</h2>
+    <ul>
+      <li>Each shop shows how many sources list it and a trust bar, so people can tell a confirmed shop from a guess.</li>
+      <li>An "Approximate location" tag appears when we only know the neighbourhood, which is about 1 shop in 10.</li>
+      <li>Nothing is marked "Verified" until a person confirms it, either the owner or a visitor who was there.</li>
+    </ul>
+    <h2>People fill the gaps</h2>
+    <ul>
+      <li><b>Add a shop</b> takes the name, type, area, phone or Instagram, and a pin. It needs five fields and no account.</li>
+      <li><b>Suggest an edit</b> and <b>Mark as closed</b> on every shop page keep the data fresh.</li>
+      <li><b>Own this shop?</b> lets an owner claim the listing with an OTP to the shop's phone, then update hours, photos and their Instagram.</li>
+      <li>New entries go to a review queue first. Two independent confirmations, or one owner claim, make a shop "Verified".</li>
+    </ul>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+(async function () {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const tok = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const fmt = n => n.toLocaleString("en-IN");
+  const ICON = {
+    "Food & Drink": "M5 8h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z M16 10h2a2 2 0 0 1 0 4h-2",
+    "Groceries": "M4 9h16l-2 10H6z M8 9l3-5 M16 9l-3-5",
+    "Fashion": "M8 4l-4 3 2 3 2-1v11h8V9l2 1 2-3-4-3-2 2h-4z",
+    "Kashmiri Crafts": "M12 3l2 5 5-1-3 4 4 3-5 1 1 5-4-3-4 3 1-5-5-1 4-3-3-4 5 1z",
+    "Stay & Travel": "M3 15h18l-2 4H5z M6 15V9h12v6 M9 9V6h6v3",
+    "Health": "M10 4h4v6h6v4h-6v6h-4v-6H4v-4h6z",
+    "Money": "M3 7h18v10H3z M14.5 12a2.5 2.5 0 1 1-5 0a2.5 2.5 0 1 1 5 0",
+    "Electronics": "M8 3h8v18H8z M11 18h2",
+    "Home & Hardware": "M14 4l6 6-3 3-6-6z M11 9l-7 7 3 3 7-7",
+    "Automotive": "M4 15l2-6h12l2 6v3H4z M7 18v2 M17 18v2",
+    "Beauty & Fitness": "M8 7a2 2 0 1 1-4 0a2 2 0 1 1 4 0 M8 17a2 2 0 1 1-4 0a2 2 0 1 1 4 0 M8 8l12 9 M8 16l12-9",
+    "Services": "M4 8h16v11H4z M9 8V5h6v3",
+    "Shopping": "M5 8h14l-1 12H6z M9 8a3 3 0 0 1 6 0",
+    "Other": "M6 12h.01 M12 12h.01 M18 12h.01",
+  };
+  const icon = (g, s = 24) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${ICON[g] || ICON.Other}"/></svg>`;
+
+  const [data, base] = await Promise.all([fetch("shops.json").then(r => r.json()), fetch("basemap.json").then(r => r.json())]);
+  const { groups: G, categories: C, areas: A } = data;
+  // row: 0 id,1 name,2 g,3 c,4 locality,5 areaIdx,6 phone,7 wa,8 web,9 ig,10 fb,11 addr,12 lat,13 lon,14 precise,15 hours,16 srcMask,17 score,18 chainPhone,19 pin
+  const S = data.shops;
+  A.forEach((a, i) => $("area").add(new Option(`${a[0]} (${a[1]})`, i)));
+  $("st-shops").textContent = fmt(S.length); $("st-areas").textContent = A.length;
+  $("st-phone").textContent = Math.round(100 * S.filter(s => s[6] && !s[18]).length / S.length) + "%";
+  const byG = G.map(() => 0); S.forEach(s => byG[s[2]]++);
+  const srcNames = m => ["Overture", "OpenStreetMap", "AllThePlaces", "Foursquare"].filter((_, i) => m & (1 << i));
+  const nSrc = m => srcNames(m).length;
+
+  const st = { tab: "home", group: -1, cat: -1, q: "", area: -1, sort: "best", limit: 30, shop: null, from: "home" };
+  const dist = (s, a) => { const dx = (s[13] - a[3]) * 92, dy = (s[12] - a[2]) * 111; return Math.sqrt(dx * dx + dy * dy); };
+
+  function results() {
+    const terms = st.q.toLowerCase().split(/\s+/).filter(Boolean);
+    let r = S.filter(s => (st.group < 0 || s[2] === st.group) && (st.cat < 0 || s[3] === st.cat) &&
+      terms.every(t => (s[1] + " " + C[s[3]] + " " + G[s[2]] + " " + (s[4] || "")).toLowerCase().includes(t)));
+    const a = A[st.area];
+    if (a) r.forEach(s => s._d = dist(s, a));
+    if (st.sort === "near" && a) r.sort((x, y) => x._d - y._d);
+    else r.sort((x, y) => (a ? (x._d > 3) - (y._d > 3) : 0) || y[17] - x[17] || x[1].localeCompare(y[1]));
+    return r;
+  }
+
+  function card(s) {
+    const a = A[st.area], d = a ? (s._d < 1 ? Math.round(s._d * 1000) + " m" : s._d.toFixed(1) + " km") : null;
+    const b = [];
+    if (nSrc(s[16]) >= 2) b.push(`<span class="b ok">Listed by ${nSrc(s[16])} sources</span>`);
+    if (s[6] && !s[18]) b.push(`<span class="b">Phone</span>`);
+    if (s[7]) b.push(`<span class="b">WhatsApp</span>`);
+    if (s[9]) b.push(`<span class="b">Instagram</span>`);
+    if (!s[14]) b.push(`<span class="b warn">Approximate location</span>`);
+    return `<button class="card" data-shop="${esc(s[0])}"><h4>${esc(s[1])}</h4>
+      <div class="meta">${esc(C[s[3]])}${s[4] ? " \u00b7 " + esc(s[4]) : ""}${d ? " \u00b7 " + d : ""}</div>
+      <div class="badges">${b.join("")}</div></button>`;
+  }
+
+  function home() {
+    const crafts = G.indexOf("Kashmiri Crafts");
+    const craftCats = [...new Set(S.filter(s => s[2] === crafts).map(s => s[3]))];
+    return `<p class="sec">Browse by type</p>
+      <div class="grid">${G.map((g, i) => `<button class="tile" data-group="${i}">${icon(g)}<span class="t">${esc(g)}</span><span class="n">${fmt(byG[i])}</span></button>`).join("")}</div>
+      <div class="craft"><h3>Kashmiri crafts</h3><p>Pashmina, carpets, papier-m\u00e2ch\u00e9 and walnut wood, from the people who make them.</p>
+        <div class="chips">${craftCats.map(c => `<button class="chip" data-group="${crafts}" data-cat="${c}">${esc(C[c])}</button>`).join("")}</div></div>
+      <p class="sec">Popular near ${st.area >= 0 ? esc(A[st.area][0]) : "you"}</p>
+      <div class="list">${results().slice(0, 5).map(card).join("")}</div>`;
+  }
+
+  function list() {
+    const r = results();
+    const cats = st.group >= 0 ? [...new Set(S.filter(s => s[2] === st.group).map(s => s[3]))].sort((a, b) => C[a].localeCompare(C[b])) : [];
+    return `<button class="back" data-go="home">\u2039 Explore</button>
+      ${st.group >= 0 ? `<div class="chips"><button class="chip" data-cat="-1" aria-pressed="${st.cat < 0}">All ${esc(G[st.group])}</button>${cats.map(c => `<button class="chip" data-cat="${c}" aria-pressed="${st.cat === c}">${esc(C[c])}</button>`).join("")}</div>` : ""}
+      <div class="count"><span>${fmt(r.length)} ${r.length === 1 ? "place" : "places"}${st.area >= 0 ? " \u00b7 " + esc(A[st.area][0]) + " first" : ""}</span>
+        <select id="sort" aria-label="Sort"><option value="best"${st.sort === "best" ? " selected" : ""}>Most complete</option><option value="near"${st.sort === "near" ? " selected" : ""} ${st.area < 0 ? "disabled" : ""}>Nearest to area</option></select></div>
+      <div class="list">${r.slice(0, st.limit).map(card).join("") || `<p class="note">No shops match. Try fewer words, or add the shop if it is missing.</p><button class="ghost primary" data-go="add">Add a shop</button>`}</div>
+      ${r.length > st.limit ? `<button class="more" data-more>Show ${Math.min(30, r.length - st.limit)} more</button>` : ""}`;
+  }
+
+  function detail(s) {
+    const srcs = srcNames(s[16]), trust = Math.min(100, s[17]);
+    const tel = s[6] && !s[18] ? s[6] : null, wa = s[7] || (tel && /^\+91[6-9]/.test(tel) ? tel : null);
+    const dir = `https://www.google.com/maps/dir/?api=1&destination=${s[12]},${s[13]}`;
+    const act = (href, label, path, on) => `<a class="act" ${on ? `href="${esc(href)}" target="_blank" rel="noopener"` : 'aria-disabled="true"'}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${path}"/></svg>${label}</a>`;
+    const row = (k, v) => v ? `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>` : "";
+    const link = u => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "").slice(0, 38))}</a>`;
+    return `<button class="back" data-go="${st.from}">\u2039 Back</button>
+      <div class="meta">${icon(G[s[2]], 16)} ${esc(C[s[3]])}</div>
+      <h3 class="dname">${esc(s[1])}</h3>
+      <div class="meta">${esc(s[4] || "Srinagar")}${s[19] ? " \u00b7 " + esc(s[19]) : ""}</div>
+      <div class="actions">
+        ${act("tel:" + (tel || ""), "Call", "M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2", !!tel)}
+        ${act("https://wa.me/" + (wa || "").replace(/\D/g, ""), "WhatsApp", "M4 20l1.5-4.5A8 8 0 1 1 8.5 18.5z", !!wa)}
+        ${act(dir, "Directions", "M12 2l7 19-7-4-7 4z", true)}
+        ${act(s[9] || "", "Instagram", "M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4z M16 12a4 4 0 1 1-8 0a4 4 0 1 1 8 0", !!s[9])}
+      </div>
+      <dl class="rows">
+        ${row("Phone", s[6] ? esc(s[6]) + (s[18] ? ' <span class="b warn">head office</span>' : "") : "")}
+        ${row("Address", esc(s[11] || ""))}
+        ${row("Hours", esc(s[15] || ""))}
+        ${row("Website", s[8] ? link(s[8]) : "")}
+        ${row("Facebook", s[10] ? link(s[10]) : "")}
+        ${row("Location", s[14] ? "Exact pin" : '<span class="b warn">Approximate</span> Only the neighbourhood is known')}
+      </dl>
+      <div class="trust"><b>How sure are we?</b><div class="meter"><i style="width:${trust}%"></i></div>
+        <div class="note">Found in ${srcs.join(", ")}. Not yet confirmed by a visitor or the owner.</div></div>
+      <button class="ghost" data-flow="edit">Suggest an edit</button>
+      <button class="ghost" data-flow="closed">Mark as closed</button>
+      <button class="ghost primary" data-flow="claim">Own this shop? Claim it</button>
+      <div id="flow"></div>`;
+  }
+
+  function add() {
+    return `<p class="sec">Add a missing shop</p>
+      <p class="note">Small shops, new shops and Instagram-only sellers are the ones the maps miss. Five fields, no account.</p>
+      <form id="addf">
+        <label class="f">Shop name<input id="f-name" required placeholder="e.g. Mir Bakers"></label>
+        <label class="f">Type<select id="f-cat">${C.map((c, i) => `<option value="${i}">${esc(c)}</option>`).join("")}</select></label>
+        <label class="f">Area<select id="f-area">${A.map((a, i) => `<option value="${i}">${esc(a[0])}</option>`).join("")}</select></label>
+        <label class="f">Phone or WhatsApp<input id="f-phone" inputmode="tel" placeholder="+91 \u2026"></label>
+        <label class="f">Instagram<input id="f-ig" placeholder="@handle"></label>
+        <button class="ghost primary" type="submit">Submit for review</button>
+      </form><div id="addres"></div>`;
+  }
+
+  // ---- map ----
+  let map, dotLayer, baseLayers = [];
+  function mapView() { return `<div class="mapwrap"><div id="map" role="application" aria-label="Map of results"></div></div>`; }
+  function drawMap() {
+    if (map) { map.remove(); map = null; }
+    map = L.map("map", { preferCanvas: true, zoomControl: true, minZoom: 11, maxZoom: 19, maxBounds: [[33.95, 74.66], [34.24, 74.96]] });
+    map.attributionControl.setPrefix(false).addAttribution("&copy; OpenStreetMap &middot; Overture Maps");
+    const rr = L.canvas({ padding: .3 });
+    const wc = tok("--water"); baseLayers = [];
+    base.water.forEach(([area, c]) => { const ll = c.map(([x, y]) => [y, x]);
+      baseLayers.push(area ? L.polygon(ll, { renderer: rr, interactive: false, stroke: false, fillColor: wc, fillOpacity: 1 }) : L.polyline(ll, { renderer: rr, interactive: false, color: wc, weight: 3 })); });
+    const rc = [tok("--road-major"), tok("--road-major"), tok("--road"), tok("--road")], rw = [3.5, 2.6, 1.5, .8];
+    base.roads.sort((a, b) => b[0] - a[0]).forEach(([k, c]) => baseLayers.push(L.polyline(c.map(([x, y]) => [y, x]), { renderer: rr, interactive: false, color: rc[k], weight: rw[k] })));
+    L.layerGroup(baseLayers).addTo(map);
+    const r = results().slice(0, 3000), col = tok("--teal"), warn = tok("--rust"), edge = tok("--card");
+    dotLayer = L.layerGroup(r.map(s => L.circleMarker([s[12], s[13]], { renderer: rr, radius: 5, weight: 1, color: edge, fillColor: s[14] ? col : warn, fillOpacity: .9 })
+      .bindPopup(`<div class="pop"><b>${esc(s[1])}</b>${esc(C[s[3]])}<br><button data-shop="${esc(s[0])}">Open shop</button></div>`))).addTo(map);
+    const a = A[st.area];
+    if (r.length && r.length < 400) map.fitBounds(L.latLngBounds(r.map(s => [s[12], s[13]])).pad(.15), { maxZoom: 16 });
+    else if (a) map.setView([a[2], a[3]], 15); else map.fitBounds([[34.045, 74.78], [34.115, 74.86]]);
+  }
+
+  function render() {
+    const v = $("view");
+    document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-current", b.dataset.tab === st.tab || (st.tab === "list" || st.tab === "shop") && b.dataset.tab === "home" ? "page" : "false"));
+    v.dataset.v = st.tab;
+    if (st.tab === "home") v.innerHTML = home();
+    else if (st.tab === "list") v.innerHTML = list();
+    else if (st.tab === "shop") v.innerHTML = detail(st.shop);
+    else if (st.tab === "add") v.innerHTML = add();
+    else if (st.tab === "map") { v.innerHTML = mapView(); drawMap(); }
+    if (st.tab !== "map" && map) { map.remove(); map = null; }
+  }
+  const go = (tab, keepScroll) => { st.tab = tab; render(); if (!keepScroll) $("view").scrollTop = 0; };
+
+  document.addEventListener("click", e => {
+    const t = e.target.closest("button, a"); if (!t) return;
+    if (t.dataset.tab) { if (t.dataset.tab === "home") { st.group = -1; st.cat = -1; } go(t.dataset.tab); }
+    else if (t.dataset.group !== undefined) { st.group = +t.dataset.group; st.cat = t.dataset.cat !== undefined ? +t.dataset.cat : -1; st.limit = 30; go("list"); }
+    else if (t.dataset.cat !== undefined) { st.cat = +t.dataset.cat; st.limit = 30; go("list", true); }
+    else if (t.dataset.shop) { st.from = st.tab === "shop" ? st.from : st.tab; st.shop = S.find(s => s[0] === t.dataset.shop); go("shop"); }
+    else if (t.dataset.go) { if (t.dataset.go === "home") { st.group = -1; st.cat = -1; st.q = ""; $("q").value = ""; } go(t.dataset.go); }
+    else if (t.hasAttribute("data-more")) { st.limit += 30; go("list", true); }
+    else if (t.dataset.flow) {
+      const msg = { edit: "In the app this opens the shop's details as a form. Your change goes to review, and two matching suggestions update the shop automatically.",
+        closed: "Thanks. In the app, a shop marked closed by two people, or by its owner, is hidden from search.",
+        claim: "In the app the owner gets a one-time code on the shop's phone, then can update hours, photos and their Instagram." }[t.dataset.flow];
+      $("flow").innerHTML = `<div class="done" style="margin-top:10px">${msg}<br><span class="note">Prototype: nothing is saved.</span></div>`;
+    }
+  });
+  let qt; $("q").addEventListener("input", e => { clearTimeout(qt); qt = setTimeout(() => { st.q = e.target.value.trim(); st.limit = 30;
+    if (st.q) { if (st.tab !== "map") { st.group = -1; st.cat = -1; go("list"); } else drawMap(); } else if (st.tab === "list" && st.group < 0) go("home"); else render(); }, 200); });
+  $("area").addEventListener("change", e => { st.area = +e.target.value; if (st.area < 0 && st.sort === "near") st.sort = "best"; render(); });
+  document.addEventListener("change", e => { if (e.target.id === "sort") { st.sort = e.target.value; go("list", true); } });
+  document.addEventListener("submit", e => { if (e.target.id !== "addf") return; e.preventDefault();
+    $("addres").innerHTML = `<div class="done" style="margin-top:12px"><b>${esc($("f-name").value)}</b> is ready for review. In the app it appears as "New, unverified" right away, and becomes verified after a second person confirms it or the owner claims it.<br><span class="note">Prototype: nothing is saved.</span></div>`;
+    e.target.reset(); });
+  const retheme = () => { if (st.tab === "map") drawMap(); };
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", retheme);
+  new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  render();
+})();
+</script>
