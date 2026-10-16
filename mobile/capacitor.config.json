@@ -1,0 +1,10 @@
+{
+  "appId": "in.srinagarbazaar.app",
+  "appName": "Srinagar Bazaar",
+  "webDir": "www",
+  "android": { "allowMixedContent": false, "captureInput": true },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 900, "launchAutoHide": true, "backgroundColor": "#F6F8F8", "androidScaleType": "CENTER_CROP", "showSpinner": false },
+    "StatusBar": { "overlaysWebView": false, "style": "LIGHT", "backgroundColor": "#0D4F57" }
+  }
+}

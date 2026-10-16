@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Srinagar Bazaar · Review</title>
+<style>
+:root { --bg:#f4f6f6; --card:#fff; --ink:#0e1b1e; --muted:#5b6b6e; --line:#e2e7e8; --brand:#0d4f57; --red:#b8361a; }
+* { box-sizing: border-box } body { margin:0; font:14px/1.45 system-ui, sans-serif; background:var(--bg); color:var(--ink) }
+header { background:var(--brand); color:#fff; padding:14px 20px; display:flex; gap:16px; align-items:center; flex-wrap:wrap }
+header b { font-size:17px } header input { padding:7px 9px; border-radius:6px; border:0; min-width:240px }
+main { padding:20px; max-width:1200px; margin:0 auto; display:grid; gap:22px }
+.stats { display:flex; gap:12px; flex-wrap:wrap } .stats div { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 14px }
+.stats b { display:block; font-size:20px }
+h2 { margin:0 0 8px; font-size:16px } section { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; overflow-x:auto }
+table { border-collapse:collapse; width:100%; min-width:640px } td, th { text-align:left; padding:8px; border-top:1px solid var(--line); vertical-align:top }
+th { font-size:12px; color:var(--muted); border-top:0 } .muted { color:var(--muted) } img { max-width:160px; border-radius:6px }
+button { font:inherit; padding:6px 10px; border-radius:6px; border:1px solid var(--line); background:#fff; cursor:pointer; margin-right:4px }
+button.ok { background:var(--brand); color:#fff; border-color:var(--brand) } button.no { color:var(--red) }
+.empty { color:var(--muted); padding:6px 0 } a { color:var(--brand) }
+</style></head><body>
+<header><b>Srinagar Bazaar · Review queue</b><input id="tok" type="password" placeholder="Admin token" autocomplete="off"><button id="load">Load</button><span id="msg"></span></header>
+<main>
+  <div class="stats" id="stats"></div>
+  <section><h2>New shops</h2><div id="shops"></div></section>
+  <section><h2>Claims needing a call</h2><div id="claims"></div></section>
+  <section><h2>Edits and closure reports</h2><div id="edits"></div></section>
+  <section><h2>Photos</h2><div id="photos"></div></section>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+try { $("#tok").value = localStorage.getItem("sb_admin") || ""; } catch {}
+const api = (m, p) => fetch(p, { method: m, headers: { "x-admin-token": $("#tok").value } }).then(r => r.json());
+const map = (lat, lon) => `<a target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=18/${lat}/${lon}">map</a>`;
+const btns = (type, id) => `<button class="ok" data-a="${type}/${id}/approve">Approve</button><button class="no" data-a="${type}/${id}/reject">Reject</button>`;
+const table = (rows, head, fn) => rows.length ? `<table><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr>${rows.map(fn).join("")}</table>` : `<div class="empty">Nothing waiting.</div>`;
+async function load() {
+  try { localStorage.setItem("sb_admin", $("#tok").value); } catch {}
+  const q = await api("GET", "/v1/admin/queue");
+  if (q.error) { $("#msg").textContent = q.error; return; }
+  $("#msg").textContent = "";
+  $("#stats").innerHTML = Object.entries(q.stats).map(([k, v]) => `<div><b>${v.toLocaleString("en-IN")}</b>${k.replace("_", " ")}</div>`).join("");
+  $("#shops").innerHTML = table(q.shops, ["Shop", "Contact", "Where", "By", ""], s => `<tr><td><b>${esc(s.name)}</b><br><span class="muted">${esc(s.category)}</span></td>
+    <td>${esc(s.phone || "")}<br>${esc(s.instagram || "")}</td><td>${esc(s.locality || "")} ${esc(s.address || "")} ${map(s.lat, s.lon)}</td>
+    <td>${esc(s.by_name || "anon")}<br><span class="muted">${s.by_points} pts</span></td><td>${btns("shops", s.id)}</td></tr>`);
+  $("#claims").innerHTML = table(q.claims, ["Shop", "Claimant phone", "Listed phone", "Note", ""], c => `<tr><td>${esc(c.shop_name)}</td><td>${esc(c.phone)}</td>
+    <td>${esc(c.listed_phone || "none")}</td><td>${esc(c.note || "")}</td><td>${btns("claims", c.id)}</td></tr>`);
+  $("#edits").innerHTML = table(q.edits, ["Shop", "Change", "Reports", ""], e => `<tr><td>${esc(e.shop_name)}</td>
+    <td>${e.kind === "closed" ? "<b>Reported closed</b>" : `${esc(e.field)} → <b>${esc(e.value)}</b>`}</td><td>${e.same}</td><td>${btns("edits", e.id)}</td></tr>`);
+  $("#photos").innerHTML = table(q.photos, ["Photo", "Shop", ""], p => `<tr><td><img src="/uploads/${esc(p.file)}" alt=""></td><td>${esc(p.shop_name)}</td><td>${btns("photos", p.id)}</td></tr>`);
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-a]"); if (!b) return;
+  b.disabled = true; const r = await api("POST", "/v1/admin/" + b.dataset.a);
+  if (r.error) { $("#msg").textContent = r.error; b.disabled = false; } else b.closest("tr").remove();
+});
+$("#load").onclick = load; if ($("#tok").value) load();
+</script></body></html>

@@ -1,0 +1,12 @@
+.venv
+data_raw
+**/node_modules
+.git
+*/preview
+brand
+map
+proto
+demo
+mobile
+server/backups
+server/.env

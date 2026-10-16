@@ -1,0 +1,10 @@
+node_modules/
+www/vendor/
+www/data/
+www/js/intent.js
+android/app/build/
+android/.gradle/
+android/build/
+*.keystore
+*.jks
+keystore.properties

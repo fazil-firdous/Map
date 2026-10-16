@@ -1,0 +1,58 @@
+# Srinagar Bazaar on one VPS: database + API + HTTPS. Run from the repository root:
+#   cp server/.env.example server/.env   (fill it in)
+#   docker compose -f server/docker-compose.yml --env-file server/.env up -d --build
+#   docker compose -f server/docker-compose.yml --env-file server/.env exec api node scripts/seed.js   (first time only)
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: bazaar
+      POSTGRES_USER: bazaar
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in server/.env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bazaar -d bazaar"]
+      interval: 10s
+      retries: 10
+    # Not published to the internet: only the API can reach it.
+
+  api:
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      DATABASE_URL: postgres://bazaar:${DB_PASSWORD}@db:5432/bazaar
+      APP_SECRET: ${APP_SECRET:?set APP_SECRET}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:?set ADMIN_TOKEN}
+      PUBLIC_URL: https://${API_DOMAIN}
+      CORS_ORIGINS: capacitor://localhost,http://localhost,https://localhost,https://${WEB_DOMAIN:-localhost}
+      SMS_PROVIDER: ${SMS_PROVIDER:-console}
+      MSG91_AUTH_KEY: ${MSG91_AUTH_KEY:-}
+      MSG91_TEMPLATE_ID: ${MSG91_TEMPLATE_ID:-}
+      TWOFACTOR_API_KEY: ${TWOFACTOR_API_KEY:-}
+    volumes:
+      - uploads:/data/uploads
+
+  caddy:
+    image: caddy:2.8
+    restart: unless-stopped
+    depends_on: [api]
+    ports: ["80:80", "443:443"]
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?set API_DOMAIN, e.g. api.srinagarbazaar.in}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  pgdata:
+  uploads:
+  caddy_data:
+  caddy_config:
