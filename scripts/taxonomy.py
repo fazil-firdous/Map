@@ -39,7 +39,7 @@ RULES = [
     ("Food & Drink", "Bakery & Sweets", r"bakery|pastry|confection|sweet|candy|dessert|chocolat"),
     ("Food & Drink", "Cafe & Tea", r"cafe|coffee|tea_room|\btea\b|juice|smoothie|ice_cream"),
     ("Food & Drink", "Fast Food", r"fast_food|pizza|burger|chicken_restaurant|food_court|food_delivery|kebab"),
-    ("Food & Drink", "Wazwan & Caterers", r"caterer|catering|party_and_event_planning|banquet"),
+    ("Food & Drink", "Wazwan & Caterers", r"caterer|catering|banquet"),
     ("Food & Drink", "Restaurant", r"restaurant|eatery|dhaba|bar_and_grill|\bbar\b|pub\b|lounge|hookah|food_and_drink|\bfood\b|\bdhaba"),
     # Groceries
     ("Groceries", "Supermarket", r"supermarket|superstore|warehouse_club|hypermarket|department_store|shop=mall|discount_store"),
@@ -128,6 +128,7 @@ NAME_FALLBACK = [
     (r"\b(store|stores|mart|shop|emporium|bazaar|general)\b", "Shopping", "Other Shop"),
     (r"\b(traders|enterprises|industries|agency|agencies|company|pvt|ltd|solutions)\b", "Services", "Other Business"),
 ]
+_lodging = re.compile(r"hotel|lodg|guest_?house|resort|hostel|motel|tourism=")
 _school = re.compile(r"\b(school|college|university|vidyalaya|madrasa|darul uloom)\b")
 _not_school = re.compile(r"driving|coaching|tuition|beauty|dance|music|art\b|computer|cooking|language|makeup")
 _fallback = [(re.compile(p, re.I), g, c) for p, g, c in NAME_FALLBACK]
@@ -135,8 +136,10 @@ _fallback = [(re.compile(p, re.I), g, c) for p, g, c in NAME_FALLBACK]
 def classify(raw: str, name: str = ""):
     raw = raw.lower() if isinstance(raw, str) else ""
     name = name.lower() if isinstance(name, str) else ""
+    lodging = _lodging.search(raw) or name.startswith("oyo ")
     for rx, g, c in _name:
-        if rx.search(name):
+        # "OYO Shawl Guest House" is a hotel: name words don't override a lodging tag.
+        if rx.search(name) and not (lodging and c not in ("Houseboat",)):
             return g, c
     for rx, reason in _excl:
         if rx.search(raw):
