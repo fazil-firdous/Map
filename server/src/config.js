@@ -20,6 +20,7 @@ module.exports = {
     twoFactorKey: env.TWOFACTOR_API_KEY || "",
     devReturnCode: env.DEV_RETURN_OTP === "1",       // testing only: returns the OTP in the API response
   },
+  review: { phone: env.REVIEW_PHONE || "", code: env.REVIEW_CODE || "", shopId: "SXR-REVIEW01" },
   // Places within this box only (Srinagar and surroundings)
   bbox: { minLat: 33.9, maxLat: 34.3, minLon: 74.6, maxLon: 75.0 },
 };

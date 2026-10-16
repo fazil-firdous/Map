@@ -46,11 +46,13 @@ function routes(app) {
     if (!isMobile(phone)) throw bad("Enter a 10-digit mobile number");
     const prev = await db.one("SELECT sent_at FROM otps WHERE phone = $1", [phone]);
     if (prev && Date.now() - new Date(prev.sent_at).getTime() < 60_000) throw new HttpError(429, "Wait a minute before asking for another code");
-    const code = otpCode();
+    // Play Store reviewers get a fixed number and code (REVIEW_PHONE / REVIEW_CODE); no SMS is sent.
+    const review = config.review.phone && phone === normPhone(config.review.phone);
+    const code = review ? config.review.code : otpCode();
     await db.q(`INSERT INTO otps (phone, code_hash, expires_at) VALUES ($1, $2, now() + interval '10 minutes')
       ON CONFLICT (phone) DO UPDATE SET code_hash = EXCLUDED.code_hash, attempts = 0, sent_at = now(), expires_at = EXCLUDED.expires_at`,
       [phone, hmac(phone + ":" + code)]);
-    await sendOtp(phone, code, req.log);
+    if (!review) await sendOtp(phone, code, req.log);
     return { sent: true, phone, ...(config.sms.devReturnCode ? { dev_code: code } : {}) };
   });
 
@@ -74,12 +76,26 @@ function routes(app) {
     } else {
       user = await db.one("UPDATE users SET phone = $2 WHERE id = $1 RETURNING *", [req.user.id, phone]);
     }
+    // The Play reviewer's number manages a hidden demo shop, never a real business.
+    if (config.review.phone && phone === normPhone(config.review.phone)) {
+      await db.q("UPDATE shops SET owner_id = $1 WHERE id = $2", [user.id, config.review.shopId]);
+      user = await db.one("UPDATE users SET role = 'owner' WHERE id = $1 AND role = 'user' RETURNING *", [user.id]) || user;
+    }
     return { token: await sessionFor(user.id), user: publicUser(user) };
   });
 
   app.get("/v1/me", { preHandler: needUser }, async (req) => {
     const shops = await db.many("SELECT id, name FROM shops WHERE owner_id = $1", [req.user.id]);
     return { user: publicUser(req.user), shops };
+  });
+  // Delete my data (Play Store requirement). Shops a person added stay, without their name attached.
+  app.delete("/v1/me", { preHandler: needUser }, async (req) => {
+    await db.tx(async c => {
+      await c.query("UPDATE shops SET owner_id = NULL WHERE owner_id = $1", [req.user.id]);
+      await c.query("UPDATE shops SET created_by = NULL WHERE created_by = $1", [req.user.id]);
+      await c.query("DELETE FROM users WHERE id = $1", [req.user.id]);
+    });
+    return { deleted: true };
   });
   app.patch("/v1/me", { preHandler: needUser }, async (req) => {
     const u = await db.one("UPDATE users SET name = COALESCE($2, name) WHERE id = $1 RETURNING *", [req.user.id, str(req.body?.name, 40)]);

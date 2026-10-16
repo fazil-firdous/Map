@@ -73,7 +73,7 @@
   // ---------- small renderers ----------
   const initials = name => { const w = String(name).replace(/^(the|hotel|m\/s)\s+/i, "").split(/\s+/).filter(x => /[a-z0-9]/i.test(x));
     return ((w[0] || "?").match(/[a-z0-9]/i)[0] + ((w[1] || "").match(/[a-z]/i) || [""])[0]).toUpperCase(); };
-  const mcol = s => `var(--m${(s[2] || 0) % 8})`;
+  const mcol = s => `var(--m${((s[3] || 0) * 5 + (s[2] || 0)) % 8})`;
   const liveLabel = { open: t("openNow"), closed_today: t("closedToday"), opens_late: t("opensLate"), busy: t("busy") };
   const contact = s => { const tel = s[6] && !s[18] ? s[6] : null; const wa = s[7] || (tel && /^\+91[6-9]/.test(tel) ? tel : null);
     return { tel, wa, dir: `https://www.google.com/maps/dir/?api=1&destination=${s[12]},${s[13]}`, ig: s[9] }; };
@@ -126,7 +126,7 @@
   function pop() { const top = stack.pop(); if (!top) return false; top.el.classList.add("leave");
     const done = () => top.el.remove(); if (matchMedia("(prefers-reduced-motion: reduce)").matches) done(); else { top.el.addEventListener("animationend", done, { once: true }); setTimeout(done, 400); } return true; }
   const redrawTop = () => { const top = stack[stack.length - 1]; if (top) { const sc = $(".scroll", top.el)?.scrollTop; top.render(top.el, ...top.args); if ($(".scroll", top.el)) $(".scroll", top.el).scrollTop = sc || 0; } else RENDER[curTab](tabs[curTab]); };
-  const rerenderAll = () => { RENDER[curTab](tabs[curTab]); stack.forEach(f => f.render(f.el, ...f.args)); };
+  const rerenderAll = () => { RENDER[curTab](tabs[curTab]); stack.forEach(f => { f.el._detail = null; f.render(f.el, ...f.args); }); };
   let toastT; function toast(msg) { let el = $(".toast", screen); if (!el) { el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); screen.appendChild(el); }
     el.textContent = msg; el.hidden = false; el.classList.remove("show"); void el.offsetWidth; el.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, 2600); }
   function sheet(html, onMount) { const el = document.createElement("div"); el.className = "sheet enter";
@@ -514,7 +514,8 @@
       <p><b style="color:var(--ink)">Location.</b> Used only on this phone to sort shops by distance, and sent only when you add a shop, confirm one, or send a request.</p>
       <p><b style="color:var(--ink)">Your choices.</b> Ask us to delete your data any time from the privacy page. Full policy: srinagarbazaar.in/privacy</p>
       <p><b style="color:var(--ink)">Data sources.</b> Map data © OpenStreetMap contributors (ODbL). Places from Overture Maps Foundation and AllThePlaces, plus shops added by people of Srinagar.</p>
-      <p class="note">Version 1.0.0</p><div style="height:30px"></div></div>`;
+      <button class="btn ghost" data-delme style="color:var(--bad);margin-top:6px">Delete my data</button>
+      <p class="note" style="margin-top:12px">Version 1.0.0</p><div style="height:30px"></div></div>`;
   }
 
   // ---------- Add a shop ----------
@@ -688,6 +689,9 @@
       $("#nf", el).onsubmit = async ev => { ev.preventDefault(); try { const r = await SB.authed("PATCH", "/v1/me", { name: $("#nm", el).value }); SB.setUser(r.user); el.remove(); RENDER.me(tabs.me); } catch (err) { toast(err.message); } }; });
     if (d.lang !== undefined) return sheet(`<h3>${t("language")}</h3><div class="form"><button class="btn ghost" data-setlang="en">English</button><button class="btn ghost" data-setlang="ur">اردو (beta)</button></div>`, el => {
       el.addEventListener("click", ev => { const b = ev.target.closest("[data-setlang]"); if (!b) return; I18N.set(b.dataset.setlang); location.reload(); }); });
+    if (d.delme !== undefined) return sheet(`<h3>Delete my data?</h3><p class="sub">This removes your account, verified number, requests and points. Saved shops on this phone are cleared too. Shops you added stay, without your name.</p>
+      <div class="form"><button class="btn" style="background:var(--bad);color:#fff" data-delyes>Delete</button><button class="btn ghost" data-close>Cancel</button></div>`, el => {
+      $("[data-delyes]", el).onclick = async () => { try { await SB.authed("DELETE", "/v1/me"); localStorage.clear(); el.remove(); toast("Your data was deleted"); setTimeout(() => location.reload(), 900); } catch (err) { toast(err.message); } }; });
     if (d.sync !== undefined) { toast("Checking for updates…"); await SB.sync(); toast(SB.online ? "City data is up to date" : "You're offline"); return RENDER.me(tabs.me); }
   });
 

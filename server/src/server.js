@@ -15,6 +15,8 @@ app.register(require("@fastify/multipart"), { limits: { fileSize: 3 * 1024 * 102
 fs.mkdirSync(config.uploadsDir, { recursive: true });
 app.register(require("@fastify/static"), { root: config.uploadsDir, prefix: "/uploads/", maxAge: "30d", immutable: true });
 app.register(require("@fastify/static"), { root: path.join(__dirname, "..", "admin"), prefix: "/admin/", decorateReply: false });
+// Public pages: privacy policy and account deletion info (needed for the Play Store listing)
+app.register(require("@fastify/static"), { root: path.join(__dirname, "..", "public"), prefix: "/", decorateReply: false, index: false });
 
 app.addHook("preHandler", auth.loadUser);
 app.setErrorHandler((err, req, reply) => {

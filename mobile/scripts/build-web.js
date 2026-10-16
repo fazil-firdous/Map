@@ -19,6 +19,9 @@ cp(path.join(repo, "app", "basemap.json"), path.join(www, "data", "basemap.json"
 for (const f of ["icon-192.png", "logo-horizontal-white.png", "logo-horizontal.png"]) cp(path.join(repo, "brand", "png", f), path.join(www, "img", f));
 
 const api = process.env.SB_API || "http://localhost:8080";
+// The address the installed app talks to (can differ from where the snapshot is fetched).
+const publicApi = process.env.SB_PUBLIC_API || "https://api.srinagarbazaar.in";
+fs.writeFileSync(path.join(www, "js", "config.js"), `window.SB_CONFIG = ${JSON.stringify({ api: publicApi })};\n`);
 (async () => {
   const out = path.join(www, "data", "bundle.json");
   try {

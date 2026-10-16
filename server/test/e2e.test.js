@@ -87,3 +87,21 @@ test("full flow", async () => {
   // Admin endpoints need the token
   assert.equal((await call("GET", "/v1/admin/queue")).status, 403);
 });
+
+test("delete my data", async () => {
+  const tk = await device("deleter");
+  assert.equal((await call("DELETE", "/v1/me", null, tk)).deleted, true);
+  assert.equal((await call("GET", "/v1/me", null, tk)).status, 401);
+});
+
+test("play reviewer gets the hidden demo shop only", async () => {
+  if (!process.env.REVIEW_PHONE) return;
+  const tk = await device("reviewer");
+  const st = await call("POST", "/v1/auth/otp/start", { phone: process.env.REVIEW_PHONE }, tk);
+  const v = await call("POST", "/v1/auth/otp/verify", { phone: process.env.REVIEW_PHONE, code: process.env.REVIEW_CODE }, tk);
+  assert.ok(v.token);
+  const me = await call("GET", "/v1/me", null, v.token);
+  assert.deepEqual(me.shops.map(s => s.id), ["SXR-REVIEW01"]);
+  const b = await (await fetch(API + "/v1/bundle")).json();
+  assert.ok(!b.shops.some(s => s[0] === "SXR-REVIEW01"), "demo shop hidden from public");
+});

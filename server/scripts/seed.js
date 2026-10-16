@@ -53,6 +53,10 @@ const appDir = process.argv[3] || path.join(repo, "app");
       ON CONFLICT (id) DO NOTHING`, [JSON.stringify(batch)]);
     added += res.rowCount;
   }
+  // Hidden demo shop for Google Play reviewers (status 'pending' = never shown to the public).
+  await pool.query(`INSERT INTO shops (id, name, grp, category, geom, sources, status, address, locality)
+    VALUES ('SXR-REVIEW01', 'Demo Shop (for app review)', 'Food & Drink', 'Bakery & Sweets', ST_MakePoint(74.81061, 34.07127)::geography,
+            '{owner}', 'pending', 'Demo address, Lal Chowk', 'Lal Chowk') ON CONFLICT (id) DO NOTHING`);
   const n = (await pool.query("SELECT count(*)::int n FROM shops")).rows[0].n;
   console.log(`added ${added} new shops; ${n} in database`);
   await pool.end();

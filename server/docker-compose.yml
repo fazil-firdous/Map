@@ -36,6 +36,8 @@ services:
       MSG91_AUTH_KEY: ${MSG91_AUTH_KEY:-}
       MSG91_TEMPLATE_ID: ${MSG91_TEMPLATE_ID:-}
       TWOFACTOR_API_KEY: ${TWOFACTOR_API_KEY:-}
+      REVIEW_PHONE: ${REVIEW_PHONE:-}
+      REVIEW_CODE: ${REVIEW_CODE:-}
     volumes:
       - uploads:/data/uploads
 

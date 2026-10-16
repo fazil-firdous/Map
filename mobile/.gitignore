@@ -8,3 +8,5 @@ android/build/
 *.keystore
 *.jks
 keystore.properties
+www/js/config.js
+keys/
