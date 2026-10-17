@@ -1,14 +1,5 @@
 [
  {
-  "name": "KFC",
-  "category": "fast_food_restaurant",
-  "lat": 33.57867,
-  "lon": 75.18408,
-  "phone": null,
-  "address": "Ground Floor, NH 44, Qazigund, Wangund, Anantnag, 192221",
-  "facebook": null
- },
- {
   "name": "Spicy ocean restaurant",
   "category": "indian_restaurant",
   "lat": 33.64678,
@@ -45,15 +36,6 @@
   "facebook": "https://www.facebook.com/1462291847144075"
  },
  {
-  "name": "GOIN    Cafe & Restaurant",
-  "category": "cafe",
-  "lat": 33.57206,
-  "lon": 75.2225,
-  "phone": "+918825090669",
-  "address": "Doru Shahabad",
-  "facebook": "https://www.facebook.com/2243077059348710"
- },
- {
   "name": "City Cafe and Bakers",
   "category": "cafe",
   "lat": 33.64648,
@@ -61,15 +43,6 @@
   "phone": "+917006951261",
   "address": "city cafe & bakers, College RD, opp. degree college",
   "facebook": "https://www.facebook.com/106450121518209"
- },
- {
-  "name": "Cafe 13",
-  "category": "restaurant",
-  "lat": 33.61579,
-  "lon": 75.22977,
-  "phone": "+919596356100",
-  "address": "Peertakiya, Kokernag Road",
-  "facebook": "https://www.facebook.com/106628355119141"
  },
  {
   "name": "brew & bites",
@@ -81,15 +54,6 @@
   "facebook": "https://www.facebook.com/447695391762853"
  },
  {
-  "name": "Hitz",
-  "category": "bakery",
-  "lat": 33.68055,
-  "lon": 75.16591,
-  "phone": "+916005544628",
-  "address": null,
-  "facebook": "https://www.facebook.com/108536118339573"
- },
- {
   "name": "Cafe_yakjaah_kulgam",
   "category": "cafe",
   "lat": 33.64814,
@@ -97,33 +61,6 @@
   "phone": "+917006327442",
   "address": "Degree College Kulgam Road",
   "facebook": "https://www.facebook.com/112856611412089"
- },
- {
-  "name": "Pizza Hut",
-  "category": "pizza_restaurant",
-  "lat": 33.57866,
-  "lon": 75.18407,
-  "phone": null,
-  "address": "Pizza Hut, NH 44, Wangund, Qazigund, Jammu And Kashmir",
-  "facebook": null
- },
- {
-  "name": "The Kingdom",
-  "category": "restaurant",
-  "lat": 33.58865,
-  "lon": 75.158,
-  "phone": "+917889777088",
-  "address": "Shampora, Near The Ornate Door, Qazigund",
-  "facebook": "https://www.facebook.com/110840491366171"
- },
- {
-  "name": "Mughal Inn Cafe and Restaurant",
-  "category": "restaurant",
-  "lat": 33.64687,
-  "lon": 75.1717,
-  "phone": "+917006166570",
-  "address": "opposite to polytechnic college",
-  "facebook": "https://www.facebook.com/100216328502641"
  },
  {
   "name": "Bismillah Bakery",
@@ -144,15 +81,6 @@
   "facebook": "https://www.facebook.com/164279530847653"
  },
  {
-  "name": "Hangul Mart",
-  "category": "food_delivery_service",
-  "lat": 33.66775,
-  "lon": 75.1702,
-  "phone": "+916006755123",
-  "address": "New Colony, near Government Medical College",
-  "facebook": "https://www.facebook.com/110660164001379"
- },
- {
   "name": "Al Nayim Fastfood and Restaurant",
   "category": "fast_food_restaurant",
   "lat": 33.64611,
@@ -162,42 +90,6 @@
   "facebook": "https://www.facebook.com/270177732854739"
  },
  {
-  "name": "Mehjoor_Caferestaurant",
-  "category": "restaurant",
-  "lat": 33.60189,
-  "lon": 75.15646,
-  "phone": "+917780809271",
-  "address": "Devsar Qazigund Road Chowgam",
-  "facebook": "https://www.facebook.com/102244489559299"
- },
- {
-  "name": "The Himalayan Hotel and Restaurant",
-  "category": "restaurant",
-  "lat": 33.68998,
-  "lon": 75.11404,
-  "phone": "+917006608714",
-  "address": null,
-  "facebook": "https://www.facebook.com/184811562338114"
- },
- {
-  "name": "Bhat Bakers larkipora",
-  "category": "bakery",
-  "lat": 33.64511,
-  "lon": 75.17171,
-  "phone": "+16006269386",
-  "address": "Larkipora Anantnag",
-  "facebook": "https://www.facebook.com/101221075661552"
- },
- {
-  "name": "Lazzat Bakeries and Confectioners",
-  "category": "bakery",
-  "lat": 33.55268,
-  "lon": 75.21592,
-  "phone": null,
-  "address": "near PHC",
-  "facebook": "https://www.facebook.com/100894648045639"
- },
- {
   "name": "Fayaz Bakery and Sweets",
   "category": "bakery",
   "lat": 33.64592,
@@ -205,15 +97,6 @@
   "phone": null,
   "address": "Main, Market",
   "facebook": "https://www.facebook.com/101766549200515"
- },
- {
-  "name": "Noorani Hotel & Restaurant",
-  "category": "restaurant",
-  "lat": 33.57294,
-  "lon": 75.22326,
-  "phone": "+919906667658",
-  "address": "Near Townhall Road Dooru Shahabad",
-  "facebook": "https://www.facebook.com/107392658200528"
  },
  {
   "name": "Chunk City-The Restaurant Kulgam",
@@ -243,33 +126,6 @@
   "facebook": "https://www.facebook.com/104677671968573"
  },
  {
-  "name": "Sheen Bakery and Confectionery",
-  "category": "bakery",
-  "lat": 33.53843,
-  "lon": 75.2485,
-  "phone": "+918825016957",
-  "address": "near Post Office",
-  "facebook": "https://www.facebook.com/1064381313761056"
- },
- {
-  "name": "Night Hill Cafe",
-  "category": "cafe",
-  "lat": 33.64326,
-  "lon": 75.17033,
-  "phone": "+917006025209",
-  "address": "road",
-  "facebook": "https://www.facebook.com/100482758592472"
- },
- {
-  "name": "Verinag Cafeteria",
-  "category": "restaurant",
-  "lat": 33.53456,
-  "lon": 75.24843,
-  "phone": "+918494088566",
-  "address": null,
-  "facebook": "https://www.facebook.com/114679411242376"
- },
- {
   "name": "Shahi Zaika Restaurant Nihama",
   "category": "fast_food_restaurant",
   "lat": 33.64662,
@@ -286,33 +142,6 @@
   "phone": "+919797111438",
   "address": "Katrasoo kulgam",
   "facebook": "https://www.facebook.com/103507008747011"
- },
- {
-  "name": "Vyeth cafe",
-  "category": "restaurant",
-  "lat": 33.57294,
-  "lon": 75.22326,
-  "phone": null,
-  "address": "dooru Shahabab",
-  "facebook": "https://www.facebook.com/106612018876866"
- },
- {
-  "name": "Tourist Cafeteria",
-  "category": "coffee_shop",
-  "lat": 33.58998,
-  "lon": 75.17038,
-  "phone": null,
-  "address": "Nh 1A, Upper-Bazar",
-  "facebook": "https://www.facebook.com/182278355306956"
- },
- {
-  "name": "Friends Restaurant Vehil",
-  "category": "indian_restaurant",
-  "lat": 33.6852,
-  "lon": 74.8661,
-  "phone": "+916005753724",
-  "address": "DANGAR PORA",
-  "facebook": "https://www.facebook.com/102169724461909"
  },
  {
   "name": "Spicy Ocean Restaurant-Qaimoh",
@@ -333,24 +162,6 @@
   "facebook": "https://www.facebook.com/104811201654757"
  },
  {
-  "name": "Mir Faizu PAlace & Restaurant",
-  "category": "restaurant",
-  "lat": 33.70569,
-  "lon": 75.15394,
-  "phone": null,
-  "address": "Akad Park",
-  "facebook": "https://www.facebook.com/103577259407305"
- },
- {
-  "name": "Mughal View Restaurant",
-  "category": "restaurant",
-  "lat": 33.68341,
-  "lon": 75.22081,
-  "phone": "+919797227786",
-  "address": "Islamabad Chatpar Road",
-  "facebook": "https://www.facebook.com/109590293811401"
- },
- {
   "name": "Aherbal Restaurant",
   "category": "restaurant",
   "lat": 33.6469,
@@ -358,24 +169,6 @@
   "phone": "+919622456183",
   "address": null,
   "facebook": "https://www.facebook.com/163277697686746"
- },
- {
-  "name": "Netplaza CSC centre",
-  "category": "internet_cafe",
-  "lat": 33.61979,
-  "lon": 74.85459,
-  "phone": "+916005205915",
-  "address": "Hospital road",
-  "facebook": "https://www.facebook.com/110940597274891"
- },
- {
-  "name": "Rahat Restaurant Fast Food and Caterers",
-  "category": "fast_food_restaurant",
-  "lat": 33.71043,
-  "lon": 75.10769,
-  "phone": "+916005198330",
-  "address": "NH 44, near Alstop Bypass",
-  "facebook": "https://www.facebook.com/2033147873651234"
  },
  {
   "name": "Halhallaz Restaurant",
@@ -387,78 +180,6 @@
   "facebook": "https://www.facebook.com/101913962679796"
  },
  {
-  "name": "Zum Zum Restaurant",
-  "category": "restaurant",
-  "lat": 33.59276,
-  "lon": 75.16576,
-  "phone": null,
-  "address": null,
-  "facebook": "https://www.facebook.com/405776836465904"
- },
- {
-  "name": "The Maple",
-  "category": "restaurant",
-  "lat": 33.71583,
-  "lon": 75.15728,
-  "phone": "+917780832493",
-  "address": "PEERTAKIYA KOKERNAG ANANTNAG",
-  "facebook": "https://www.facebook.com/105432961245661"
- },
- {
-  "name": "Zaiqa Restaurant",
-  "category": "restaurant",
-  "lat": 33.68511,
-  "lon": 75.22277,
-  "phone": null,
-  "address": "Achabal Gopalpur Road",
-  "facebook": "https://www.facebook.com/134010220718263"
- },
- {
-  "name": "Royal bakery",
-  "category": "bakery",
-  "lat": 33.64934,
-  "lon": 75.23565,
-  "phone": "+917051756191",
-  "address": null,
-  "facebook": "https://www.facebook.com/115624901122616"
- },
- {
-  "name": "Persian Tandoor",
-  "category": "indian_restaurant",
-  "lat": 33.58907,
-  "lon": 75.17032,
-  "phone": "+917006557220",
-  "address": "Upper Bazar Qazigund",
-  "facebook": "https://www.facebook.com/1306200339422024"
- },
- {
-  "name": "Fayaz Bakery",
-  "category": "bakery",
-  "lat": 33.54003,
-  "lon": 75.24829,
-  "phone": null,
-  "address": "Jamia masjid shareef",
-  "facebook": "https://www.facebook.com/112302762691634"
- },
- {
-  "name": "Crown city",
-  "category": "fast_food_restaurant",
-  "lat": 33.68491,
-  "lon": 74.86681,
-  "phone": "+916006765894",
-  "address": null,
-  "facebook": "https://www.facebook.com/229050000298723"
- },
- {
-  "name": "Smart Cook Restaurant",
-  "category": "restaurant",
-  "lat": 33.71751,
-  "lon": 75.19697,
-  "phone": "+918493087589",
-  "address": "Nunwani Kralpora near (Hazrat Amir Kabir Ziyarat Shareef",
-  "facebook": "https://www.facebook.com/103051892310292"
- },
- {
   "name": "Blue Star Fast Food and Cafe",
   "category": "restaurant",
   "lat": 33.64576,
@@ -466,15 +187,6 @@
   "phone": "+919622891907",
   "address": "123, near town hall",
   "facebook": "https://www.facebook.com/404679710028566"
- },
- {
-  "name": "Harud - The Cosy Cafe Qazigund",
-  "category": "cafe",
-  "lat": 33.59943,
-  "lon": 75.15917,
-  "phone": "+916005591183",
-  "address": "Harud - The Cosy Cafe Qazigund, opposite 100 Yards Departmental Store, Shampora, Semnaan Mohalla, Qazigund, Jammu and Kashmir 192221 Qazigund",
-  "facebook": "https://www.facebook.com/784681561395411"
  },
  {
   "name": "Koshur Darbar Restaurant",
@@ -495,24 +207,6 @@
   "facebook": "https://www.facebook.com/181016468435667"
  },
  {
-  "name": "Street Cafe",
-  "category": "restaurant",
-  "lat": 33.69079,
-  "lon": 75.11254,
-  "phone": "+919906793391",
-  "address": "Mir Bazaar Rd",
-  "facebook": "https://www.facebook.com/109588268070100"
- },
- {
-  "name": "Walltree Foods",
-  "category": "food_and_drink",
-  "lat": 33.71006,
-  "lon": 75.1513,
-  "phone": "+917006933297",
-  "address": "MominAbad Sheer Pora",
-  "facebook": "https://www.facebook.com/216198805429838"
- },
- {
   "name": "Amir maqbool Mir",
   "category": "bakery",
   "lat": 33.64499,
@@ -520,32 +214,5 @@
   "phone": "+919149626577",
   "address": "J2V9 X6R KULGAM DHP",
   "facebook": "https://www.facebook.com/346777588509921"
- },
- {
-  "name": "Hill Town Cafe",
-  "category": "cafe",
-  "lat": 33.53931,
-  "lon": 75.24762,
-  "phone": "+917006828310",
-  "address": "Verinag - Kapran Rd",
-  "facebook": "https://www.facebook.com/100840735431769"
- },
- {
-  "name": "Vernag",
-  "category": "restaurant",
-  "lat": 33.5377,
-  "lon": 75.24501,
-  "phone": null,
-  "address": "verinag",
-  "facebook": "https://www.facebook.com/1180343491828691"
- },
- {
-  "name": "Taste Of Kashmir",
-  "category": "indian_restaurant",
-  "lat": 33.69824,
-  "lon": 75.16084,
-  "phone": "+917889324097",
-  "address": null,
-  "facebook": "https://www.facebook.com/733762999812973"
  }
 ]

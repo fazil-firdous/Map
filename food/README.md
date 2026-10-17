@@ -10,6 +10,11 @@ to restaurant mode in the same app. Each restaurant **delivers with its own ride
 - `data/build_basemap.py`: our own Kulgam map (roads + water from OpenStreetMap). The app routes on it, so
   road distance, delivery fee and rider tracking need no Google Maps key and work offline.
 
+## Design decisions
+
+- **Light theme only.** No dark UI for this app. Style options: `styles/style-A..D.png` (`python styles/make_styles.py && node styles/render.js`).
+- **Kulgam district only.** No restaurants from Qazigund, Anantnag, Shopian or other districts. `data/kulgam_restaurants.json` is filtered to Kulgam district.
+
 ## Order rules (each restaurant can change the numbers)
 
 | Step | Rule | Default |
