@@ -32,15 +32,21 @@ SHOPS = {
     "Food & Drink": ["Restaurant/retry/2", "Restaurant/retry/5"], "Kashmiri Crafts": "Handicrafts/retry/4", "Groceries": "Groceries/4", "Fashion": ["Fashion/3", "Fashion/5"],
 }
 
+# Photos of these exact businesses (shop id -> path under shops/, from sweep_named.py, checked by hand)
+BY_SHOP = {
+    "SXR-27392FC2": "../shops/SXR-27392FC2/0", "SXR-3B6062FF": "../shops/SXR-3B6062FF/0",
+    "SXR-C8F0B869": "../shops/SXR-C8F0B869/0", "SXR-E7AD8D5B": "../shops/SXR-E7AD8D5B/0",
+}
+
 slug = lambda s: re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
 OUT.mkdir(parents=True, exist_ok=True)
-credits, files = {"sights": {}, "shops": {}}, {}
-for kind, picks in (("sights", SIGHTS), ("shops", SHOPS)):
+credits, files = {"sights": {}, "shops": {}, "byShop": {}}, {}
+for kind, picks in (("sights", SIGHTS), ("shops", SHOPS), ("byShop", BY_SHOP)):
     for key, srcs in picks.items():
       for src in [srcs] if isinstance(srcs, str) else srcs:
         *d, n = src.split("/"); folder = CAND.joinpath(*d)
         meta = json.loads((folder / "meta.json").read_text())[int(n)]
-        name = slug(src.replace("/retry", ""))
+        name = slug(src.replace("/retry", "").replace("../shops/", "shop-"))
         if name not in files:
             im = ImageOps.exif_transpose(Image.open(folder / f"{n}.jpg")).convert("RGB")
             ImageOps.fit(im, (720, 405), Image.LANCZOS, centering=(0.5, 0.45)).save(OUT / f"{name}.jpg", quality=66, optimize=True, progressive=True)

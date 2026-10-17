@@ -351,6 +351,38 @@
    "license": "CC BY-SA 2.0",
    "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
    "source": "https://www.flickr.com/photos/78722206@N00/9696914011"
+  },
+  "shop-sxr-27392fc2-0": {
+   "file": "shop-sxr-27392fc2-0.jpg",
+   "title": "Interior of Kashmir Government Arts Emporium - Former Colonial Residency - Srinagar - Jammu & Kashmir - India",
+   "by": "Adam Jones, Ph.D. - Global Photo Archive",
+   "license": "CC BY-SA 2.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+   "source": "https://www.flickr.com/photos/41000732@N04/26232522424"
+  },
+  "shop-sxr-3b6062ff-0": {
+   "file": "shop-sxr-3b6062ff-0.jpg",
+   "title": "File:Srinagar floating market.jpg",
+   "by": "KennyOMG",
+   "license": "CC BY-SA 4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "source": "https://commons.wikimedia.org/w/index.php?curid=59163628"
+  },
+  "shop-sxr-c8f0b869-0": {
+   "file": "shop-sxr-c8f0b869-0.jpg",
+   "title": "Floating vegetable market",
+   "by": "Nagarjun",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/64924693@N00/41069216415"
+  },
+  "shop-sxr-e7ad8d5b-0": {
+   "file": "shop-sxr-e7ad8d5b-0.jpg",
+   "title": "'Young May Flower' houseboat",
+   "by": "flowcomm",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/21162417@N07/8138861810"
   }
  },
  "sights": {
@@ -494,6 +526,20 @@
   "Fashion": [
    "fashion-3",
    "fashion-5"
+  ]
+ },
+ "byShop": {
+  "SXR-27392FC2": [
+   "shop-sxr-27392fc2-0"
+  ],
+  "SXR-3B6062FF": [
+   "shop-sxr-3b6062ff-0"
+  ],
+  "SXR-C8F0B869": [
+   "shop-sxr-c8f0b869-0"
+  ],
+  "SXR-E7AD8D5B": [
+   "shop-sxr-e7ad8d5b-0"
   ]
  }
 }

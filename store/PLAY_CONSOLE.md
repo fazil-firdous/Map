@@ -52,20 +52,22 @@ Search the way you talk. Type "I want to buy bread", "need dawai", "kong", "phon
 • Search shops' stock lists, like "iPhone 15 cover" or "Nike shoes size 9"
 • Ask the bazaar: tell nearby shops what you need and they reply
 • Visiting Srinagar? A one-day plan, houseboats confirmed by several sources, and emergency numbers
+• Today in Srinagar: namaz times (work offline) and the weather
+• Photos of Srinagar's sights, and real shop photos added by owners and visitors
 • Kashmiri crafts: pashmina, carpets, papier-mâché, walnut wood and saffron sellers
 • English and Urdu
 
 For shop owners: claim your shop free with a code sent to your shop's phone. Update today's status, post offers, add your prices and stock, reply to customer requests, and see how many people visited, called and asked for directions. Only you see your numbers.
 
-Help map Srinagar: add a missing shop, fix wrong details or add a photo, and climb the Bazaar Champions leaderboard. Top champions win prizes every month.
+Help map Srinagar: add a missing shop, fix wrong details or add a real photo of a shop, and climb the Bazaar Champions leaderboard. Top champions win prizes every month.
 
-Map data © OpenStreetMap contributors. Places from Overture Maps Foundation and AllThePlaces, plus shops added by the people of Srinagar.
+Map data © OpenStreetMap contributors. Places from Overture Maps Foundation and AllThePlaces, plus shops added by the people of Srinagar. Photos under Creative Commons licences, credited in the app. Weather by Open-Meteo.
 ```
 
 **Graphics** (all in this repository)
 - App icon 512×512: `brand/png/play-icon-512.png`
 - Feature graphic 1024×500: `brand/png/play-feature-graphic-1024x500.png`
-- Phone screenshots, 1080×1920, upload in this order: `store/screenshots/1_home.png` … `7_ask.png`
+- Phone screenshots, 1080×1920, upload in this order: `store/screenshots/1_home.png` … `8_today.png`
 
 **Category and contact**
 - App category: **Travel & Local**
@@ -131,7 +133,7 @@ Data types collected (none of them are shared or sold):
    app signing, choose **"Let Google manage and protect your app signing key"** (Play App Signing).
    Your `.jks` file is then only the *upload* key, and Google can reset it if it's ever lost.
 2. Add 5–10 testers (Gmail addresses), install from the test link, and check on 2–3 real phones.
-3. **Production → Create release.** Promote the same build. Release name: `1.0.1 (2)`.
+3. **Production → Create release.** Promote the same build. Release name: `1.1.0 (3)`.
    Release notes:
    ```
    First release: every shop in Srinagar, nearest first. Works offline.

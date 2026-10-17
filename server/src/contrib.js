@@ -99,6 +99,7 @@ function routes(app) {
     const isOwner = s.owner_id === req.user.id;
     const p = await db.one("INSERT INTO photos (shop_id, user_id, file, status) VALUES ($1, $2, $3, $4) RETURNING id, status",
       [s.id, req.user.id, name, isOwner ? "approved" : "pending"]);
+    if (isOwner) await db.q("UPDATE shops SET updated_at = now() WHERE id = $1", [s.id]);
     return p;
   });
 

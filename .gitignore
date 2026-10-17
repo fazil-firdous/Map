@@ -3,3 +3,8 @@ __pycache__/
 data_raw/
 release/
 brand/photos/candidates/
+brand/photos/shops/*
+!brand/photos/shops/SXR-27392FC2/
+!brand/photos/shops/SXR-3B6062FF/
+!brand/photos/shops/SXR-C8F0B869/
+!brand/photos/shops/SXR-E7AD8D5B/

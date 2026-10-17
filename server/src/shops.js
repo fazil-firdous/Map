@@ -7,20 +7,21 @@ const SRC_BITS = { overture: 1, osm: 2, alltheplaces: 4, foursquare: 8, users: 1
 // Row layout shared with the app (keep in sync with mobile/www/js/data.js):
 // 0 id, 1 name, 2 group id, 3 category id, 4 locality, 5 area id, 6 phone, 7 whatsapp, 8 website, 9 instagram,
 // 10 facebook, 11 address, 12 lat, 13 lon, 14 precise, 15 hours, 16 source bits, 17 score, 18 chain phone,
-// 19 pincode, 20 verified, 21 live status, 22 deal ends (unix s, 0 none), 23 claimed by owner
+// 19 pincode, 20 verified, 21 live status, 22 deal ends (unix s, 0 none), 23 claimed by owner, 24 newest approved photo (file under /uploads)
 const ROW_SQL = `
   SELECT s.id, s.name, t.grp_id, t.id AS cat_id, s.locality, s.phone, s.whatsapp, s.website, s.instagram, s.facebook, s.address,
          ST_Y(s.geom::geometry) AS lat, ST_X(s.geom::geometry) AS lon, s.location_precise, s.opening_hours, s.sources, s.quality_score,
          s.phone_is_chain, s.pincode, s.verified, s.status, s.version,
          CASE WHEN s.live_until IS NULL OR s.live_until > now() THEN s.live_status END AS live_status,
          (SELECT extract(epoch FROM max(d.ends_at))::bigint FROM deals d WHERE d.shop_id = s.id AND d.ends_at > now() AND d.starts_at <= now()) AS deal_ends,
-         s.owner_id IS NOT NULL AS claimed
+         s.owner_id IS NOT NULL AS claimed,
+         (SELECT p.file FROM photos p WHERE p.shop_id = s.id AND p.status = 'approved' ORDER BY p.created_at DESC LIMIT 1) AS photo
   FROM shops s JOIN taxonomy t ON t.category = s.category`;
 
 const toRow = r => [r.id, r.name, r.grp_id, r.cat_id, r.locality, -1, r.phone, r.whatsapp, r.website, r.instagram, r.facebook, r.address,
   Math.round(r.lat * 1e5) / 1e5, Math.round(r.lon * 1e5) / 1e5, r.location_precise ? 1 : 0, r.opening_hours,
   (r.sources || []).reduce((m, s) => m | (SRC_BITS[s] || 0), 0), r.quality_score, r.phone_is_chain ? 1 : 0, r.pincode,
-  r.verified ? 1 : 0, r.live_status, Number(r.deal_ends || 0), r.claimed ? 1 : 0];
+  r.verified ? 1 : 0, r.live_status, Number(r.deal_ends || 0), r.claimed ? 1 : 0, r.photo || null];
 
 async function taxonomy() {
   const t = await db.many("SELECT t.id, t.category, t.grp_id, g.name AS grp FROM taxonomy t JOIN taxonomy_groups g ON g.id = t.grp_id ORDER BY t.id");

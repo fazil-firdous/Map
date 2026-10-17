@@ -14,7 +14,7 @@
   SB.signIn().catch(() => {});
 
   // Row: 0 id,1 name,2 g,3 c,4 locality,5 area,6 phone,7 wa,8 web,9 ig,10 fb,11 addr,12 lat,13 lon,14 precise,15 hours,
-  //      16 src bits,17 score,18 chainPhone,19 pin,20 verified,21 live,22 dealEnds,23 claimed
+  //      16 src bits,17 score,18 chainPhone,19 pin,20 verified,21 live,22 dealEnds,23 claimed,24 photo
   const D = () => SB.data;
   const G = i => D().groups[i] || "Other";
   const C = i => D().categories[i] || "Shop";
@@ -26,9 +26,13 @@
   // Sights have their own photo. Shops without an owner photo get one for their kind of shop, marked "representative".
   const hashOf = str => [...str].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7) >>> 0;
   const sightPhoto = g => (PH.sights[g[0]] || [])[0] || null;
-  const shopPhoto = s => { const v = PH.shops[C(s[3])] || PH.shops[G(s[2])]; return v ? v[hashOf(s[0]) % v.length] : null; };
+  const realPhoto = s => (PH.byShop?.[s[0]] || [])[0] || null; // an openly licensed photo of this very business
+  const shopPhoto = s => { const r = realPhoto(s); if (r) return r; const v = PH.shops[C(s[3])] || PH.shops[G(s[2])]; return v ? v[hashOf(s[0]) % v.length] : null; };
   const pimg = k => k && PH.photos[k] ? "img/photos/" + PH.photos[k].file : null;
   const bgOf = (k, fallback, shade = ".3") => k ? `linear-gradient(rgb(0 0 0 / 0), rgb(0 0 0 / ${shade})), url('${pimg(k)}') center/cover, ${fallback}` : fallback;
+  // Photos people added in the app (owner's go live at once, others after checking) win over everything else.
+  const upl = f => (window.SB_CONFIG?.api || "") + "/uploads/" + f;
+  const shopBg = (s, shade = ".3") => s[24] ? `linear-gradient(rgb(0 0 0 / 0), rgb(0 0 0 / ${shade})), url('${esc(upl(s[24]))}') center/cover, ${mcol(s)}` : bgOf(shopPhoto(s), mcol(s), shade);
   const credit = k => { const p = PH.photos[k]; return p ? `Photo: ${p.by}, ${p.license}` : ""; };
 
   // ---------- location ----------
@@ -104,11 +108,12 @@
     return out.slice(0, 3).join("");
   }
   const row = s => { const k = contact(s);
-    return `<div class="item"><button data-shop="${esc(s[0])}"><span class="mono" style="background:${mcol(s)}">${esc(initials(s[1]))}</span>
+    const real = s[24] || realPhoto(s);
+    return `<div class="item"><button data-shop="${esc(s[0])}"><span class="mono" style="background:${real ? shopBg(s, "0") : mcol(s)}">${real ? "" : esc(initials(s[1]))}</span>
       <span style="min-width:0"><div class="t">${esc(s[1])}</div><div class="s">${esc(C(s[3]))} · ${esc(s[4] || "Srinagar")}</div><div class="tags">${tags(s)}</div></span></button>
       <span class="rt"><span class="d">${fmtD(dist(s))}</span><button class="call" ${k.tel ? `data-call="${esc(s[0])}"` : 'aria-disabled="true"'} aria-label="${t("call")} ${esc(s[1])}">${I("phone", "sm")}</button></span></div>`; };
-  const hcard = s => { const ph = shopPhoto(s);
-    return `<button class="hcard" data-shop="${esc(s[0])}"><div class="art" style="background:${bgOf(ph, mcol(s))}">${ph ? "" : esc(initials(s[1]))}<em>${fmtD(dist(s))}</em>${hasDeal(s) ? `<span class="badge">${t("offers")}</span>` : ""}</div>
+  const hcard = s => { const ph = s[24] || shopPhoto(s);
+    return `<button class="hcard" data-shop="${esc(s[0])}"><div class="art" style="background:${shopBg(s)}">${ph ? "" : esc(initials(s[1]))}<em>${fmtD(dist(s))}</em>${hasDeal(s) ? `<span class="badge">${t("offers")}</span>` : ""}</div>
     <div class="bd"><div class="t">${esc(s[1])}</div><div class="s">${esc(C(s[3]))}</div></div></button>`; };
   const sightInitials = g => g[0].split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase();
   const scard = g => { const food = D().shops.filter(s => s[2] === gIdx("Food & Drink") && KM(g[2], g[3], s[12], s[13]) < 0.8).length;
@@ -198,7 +203,6 @@
 
   // ---------- screens ----------
   const RENDER = {};
-  const leafSvg = `<svg class="leaf" viewBox="0 0 24 24" fill="#fff"><path d="M12 21v-6M12 15c-5 0-8-3.5-8-8 3 0 5 1 6 2.5C10.5 6 11 4 12 3c1 1 1.5 3 2 6.5 1-1.5 3-2.5 6-2.5 0 4.5-3 8-8 8z"/></svg>`;
   RENDER.home = el => {
     const SHOPPY = ["Food & Drink", "Fashion", "Kashmiri Crafts", "Groceries", "Shopping", "Beauty & Fitness", "Electronics"].map(gIdx);
     const near = best(s => SHOPPY.includes(s[2]) && s[14] && (nSrc(s[16]) >= 2 || (s[6] && !s[18]) || s[20]), 10);
@@ -207,10 +211,14 @@
     const counts = {}; D().shops.forEach(s => { if (dist(s) < 3) counts[s[3]] = (counts[s[3]] || 0) + 1; });
     const topCats = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8);
     const h = new Date().getHours(); const hi = h < 12 ? t("morning") : h < 17 ? t("afternoon") : t("evening");
-    el.innerHTML = `<div class="scroll">${offlineBar()}<div class="band safe-top">${leafSvg}
+    const HEROS = ["dal-lake-4", "nishat-bagh-0", "houseboat-2", "shalimar-bagh-3", "nigeen-lake-1", "zero-bridge-1", "shikara-boat-ride-3", "parimahal-3"];
+    const day = Math.floor((Date.now() + 19800000) / 864e5), heroK = HEROS[day % HEROS.length];
+    const np = SBToday.nextPrayer();
+    el.innerHTML = `<div class="scroll">${offlineBar()}<div class="band photo safe-top" style="background:linear-gradient(180deg, rgb(4 34 39 / .55) 0%, rgb(5 40 45 / .72) 45%, rgb(6 48 54 / .97) 100%), url('${pimg(heroK)}') center 40% / cover, var(--brand)">
       <div class="toprow"><button class="loc" data-area-pick>${I("pin", "xs")}<span>${esc(here().name)}</span>${I("down", "xs")}</button>
         <button class="visit-chip" data-go="tourist">${t("visiting")}</button></div>
       <div class="hello"><small>${hi}</small>${t("lookingFor")}</div>
+      <button class="today" data-today><span id="wx"></span><span>${I("clock", "xs")}${np.name} ${SBToday.fmt(np.at)}</span></button>
       <button class="searchbox" data-search>${I("search", "sm")}${t("searchPh")}</button>
       <div class="intents">
         <button class="intent" data-searchq="I want to buy ">${I("bag")}<span>${t("buy")}</span></button>
@@ -219,19 +227,38 @@
         <button class="intent" data-q="hotel">${I("bed")}<span>${t("stay")}</span></button>
       </div></div>
       <div class="pad">
+      <div class="sec"><h2>Explore Srinagar</h2></div>
+      <div class="hrow">${COLLECTIONS.map(([title, sub, q, ph]) => `<button class="coll" data-q="${esc(q)}" style="background:${bgOf(ph, "var(--m5)", ".75")}"><b>${esc(title)}</b><span>${esc(sub)}</span></button>`).join("")}</div>
       ${deals.length ? `<div class="sec"><h2>${t("offersNear")}</h2></div><div class="hrow">${deals.map(hcard).join("")}</div>` : ""}
       <div class="sec"><h2>${t("popular")}</h2><button data-q="shops near me">${t("seeAll")}</button></div>
       <div class="hrow">${near.map(hcard).join("")}</div>
-      <div class="panel-card craft"><h3>${t("crafts")}</h3><p>${t("craftsSub")}</p>
-        <div class="chips">${["pashmina shawl", "carpet", "papier mache", "kong", "walnut wood"].map(q => `<button class="chip" data-q="${q}">${q[0].toUpperCase() + q.slice(1)}</button>`).join("")}</div></div>
       <div class="sec"><h2>${t("placesToVisit")}</h2><button data-q="places to visit">${t("seeAll")}</button></div>
       <div class="hrow">${famous.map(scard).join("")}</div>
       <div class="sec"><h2>${t("catsNear")}</h2></div>
       <div class="cats">${topCats.map(([c, n]) => `<button class="cat" data-q="${esc(C(c))}"><span>${esc(C(c))}</span><small>${n}</small></button>`).join("")}</div>
       <div class="panel-card promo"><h3>${t("missingTitle")}</h3><p>${t("missingSub")}</p><button class="btn sm" data-add>${t("addShop")}</button></div>
       <div class="stats"><span><b>${D().shops.length.toLocaleString("en-IN")}</b>businesses</span><span><b>${D().areas.length}</b>areas</span><span><b>${D().sights.length}</b>sights</span></div>
-      <div style="height:20px"></div></div></div>`;
+      <div class="credit-line">Photo: ${esc(PH.photos[heroK]?.by || "")}</div><div style="height:20px"></div></div></div>`;
+    SBToday.weather().then(w => { const x = $("#wx", el); if (w && x) x.textContent = `${w.icon} ${w.temp}°`; });
   };
+  const COLLECTIONS = [
+    ["Wazwan", "Rista, rogan josh, goshtaba", "wazwan", "wazwan-caterers-3"], ["Bakeries", "Girda, kulcha, bakarkhani", "bakery", "bakery-sweets-0"],
+    ["Houseboats", "Stay on Dal and Nigeen", "houseboat", "houseboat-2"], ["Pashmina", "Shawls straight from makers", "pashmina shawl", "shawls-pashmina-0"],
+    ["Mughal gardens", "Nishat, Shalimar, Cheshma", "mughal gardens", "nishat-bagh-0"], ["Cafes", "Kahwa, coffee and cake", "cafe", "cafe-tea-3"],
+    ["Saffron & dry fruits", "Pampore saffron, walnuts", "saffron", "dry-fruits-saffron-0"], ["Shikara rides", "From the Boulevard ghats", "shikara", "shikara-boat-ride-3"],
+    ["Kebabs & street food", "Khayam, Lal Chowk, Nowhatta", "kebab", "fast-food-0"], ["Crafts", "Papier-mâché, walnut wood, carpets", "handicrafts", "handicrafts-4"],
+  ];
+  function todaySheet() {
+    const now = new Date(), np = SBToday.nextPrayer(now);
+    sheet(`<h3>Today in Srinagar</h3><p class="sub">${now.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}</p>
+      <div id="wxbig" class="wxbig"></div>
+      <div class="label" style="margin-top:6px">Namaz times</div>
+      <div class="list-card prayers">${SBToday.prayers(now).map(p => `<div class="lrow${p.name === np.name && p.at.getDate() === np.at.getDate() ? " next" : ""}"><span>${p.name}</span><b>${SBToday.fmt(p.at)}</b></div>`).join("")}</div>
+      <p class="note pad" style="margin:10px 0 0">Calculated for Srinagar (18°, Hanafi Asr). Your masjid's times can differ by a few minutes.</p><div class="form"><button class="btn ghost" data-close>Close</button></div>`, async el => {
+      const w = await SBToday.weather(); const b = $("#wxbig", el);
+      if (b) b.innerHTML = w ? `<span class="big">${w.icon} ${w.temp}°</span><span>${esc(w.text)}<br><small>High ${w.hi}° · Low ${w.lo}°</small></span>` : `<span class="muted">Weather needs internet</span>`;
+    });
+  }
 
   function searchScreen(el, initial = "") {
     el.innerHTML = `<div class="bar safe-top"><button class="iconbtn" data-back aria-label="Back">${I("back", "flip")}</button>
@@ -318,12 +345,13 @@
     const similar = D().shops.filter(o => o !== s && o[3] === s[3]).map(o => [o, KM(s[12], s[13], o[12], o[13])]).filter(x => x[1] < 1.2).sort((a, b) => a[1] - b[1]).slice(0, 4).map(x => x[0]);
     const isMine = (SB.myShops || []).some(m => m.id === id);
     const act = (attr, icon, label, on, primary) => `<button class="act${primary ? " primary" : ""}" ${on ? attr : 'aria-disabled="true"'}><span class="c">${I(icon)}</span>${label}</button>`;
-    const det = el._detail, own = det?.photos?.length, ph = own ? null : shopPhoto(s);
+    const det = el._detail, own = det?.photos?.length, ph = own || s[24] ? null : shopPhoto(s);
     el.innerHTML = `<div class="scroll">
-      <div class="hero" style="background:${own ? `linear-gradient(rgb(0 0 0 / .15), rgb(0 0 0 / .35)), url('${esc((window.SB_CONFIG?.api || "") + det.photos[0].url)}') center/cover` : bgOf(ph, mcol(s), ".45")}">${own || ph ? "" : esc(initials(s[1]))}
+      <div class="hero" style="background:${own ? `linear-gradient(rgb(0 0 0 / .15), rgb(0 0 0 / .35)), url('${esc((window.SB_CONFIG?.api || "") + det.photos[0].url)}') center/cover` : shopBg(s, ".45")}">${own || ph || s[24] ? "" : esc(initials(s[1]))}
         <div class="hb"><button class="iconbtn" data-back aria-label="Back">${I("back", "flip")}</button>
         <button class="iconbtn" data-save="${esc(id)}" aria-label="${saved ? "Remove from saved" : t("save")}" aria-pressed="${saved}">${I("save")}</button></div>
-        ${own ? "" : `<small>${ph ? "Representative photo" + (s[23] ? "" : " · owner can add real ones") : s[23] ? "" : "Owner can add photos"}</small>`}</div>
+        <button class="addphoto" data-addphoto="${esc(id)}">${I("camera", "xs")}${own || s[24] || realPhoto(s) ? "Add photo" : "Add a real photo"}</button>
+        ${own ? "" : `<small>${!ph ? "" : realPhoto(s) ? esc(credit(ph)) : "Representative photo"}</small>`}</div>
       ${offlineBar()}
       <div class="dhead"><h1>${esc(s[1])}</h1><div class="s">${esc(C(s[3]))} · ${esc(s[4] || "Srinagar")} · ${fmtD(dist(s))}</div>
         ${s[21] ? `<div class="live ${s[21]}"><i></i>${esc(liveLabel[s[21]])}${det?.live_note ? " · " + esc(det.live_note) : ""}</div>` : ""}
@@ -347,7 +375,7 @@
       ${similar.length ? `<div class="pad"><div class="sec"><h2>Similar nearby</h2></div><div class="hrow">${similar.map(hcard).join("")}</div></div>` : ""}
       ${isMine ? `<div class="owner-cta"><b>This is your shop</b><p>Update today's status, offers, prices and stock, and see your visits.</p><button class="btn sm" data-dash="${esc(id)}">Open shop dashboard</button></div>`
         : s[23] ? "" : `<div class="owner-cta"><b>Own this business?</b><p>Claim it free with a code sent to the shop's phone. Then add photos, hours, offers and your Instagram, and see how many people called.</p><button class="btn sm" data-claim="${esc(id)}">Claim this business</button></div>`}
-      <div class="links"><button data-confirm="${esc(id)}">Still here? Confirm</button><button data-edit="${esc(id)}">Suggest an edit</button><button data-closed="${esc(id)}">Report closed</button></div></div>`;
+      <div class="links"><button data-addphoto="${esc(id)}">Add a photo (+3)</button><button data-confirm="${esc(id)}">Still here? Confirm</button><button data-edit="${esc(id)}">Suggest an edit</button><button data-closed="${esc(id)}">Report closed</button></div></div>`;
     if (!el._detail && SB.online) SB.api("GET", "/v1/shops/" + encodeURIComponent(id)).then(d => {
       el._detail = d; const i = D().shops.findIndex(x => x[0] === id); if (i >= 0) { D().shops[i] = d.row; SB.byId.set(id, d.row); }
       if (el.isConnected) { const sc = $(".scroll", el).scrollTop; shopScreen(el, id); $(".scroll", el).scrollTop = sc; }
@@ -546,10 +574,10 @@
       <p><b style="color:var(--ink)">Location.</b> Used only on this phone to sort shops by distance, and sent only when you add a shop, confirm one, or send a request.</p>
       <p><b style="color:var(--ink)">Your choices.</b> Ask us to delete your data any time from the privacy page. Full policy: <button class="link" data-ext="https://api.45-92-1-150.sslip.io/privacy.html">api.45-92-1-150.sslip.io/privacy.html</button></p>
       <p><b style="color:var(--ink)">Contact.</b> <span class="selectable">fazil.mastu@gmail.com</span></p>
-      <p><b style="color:var(--ink)">Data sources.</b> Map data © OpenStreetMap contributors (ODbL). Places from Overture Maps Foundation and AllThePlaces, plus shops added by people of Srinagar.</p>
-      <p><b style="color:var(--ink)">Photos.</b> Openly licensed photos from Flickr and Wikimedia Commons photographers. Shop photos are representative unless the owner added their own. <button class="link" data-go="credits">See photo credits</button></p>
+      <p><b style="color:var(--ink)">Data sources.</b> Map data © OpenStreetMap contributors (ODbL). Places from Overture Maps Foundation and AllThePlaces, plus shops added by people of Srinagar. Weather data by Open-Meteo.com (CC BY 4.0).</p>
+      <p><b style="color:var(--ink)">Photos.</b> Openly licensed photos from Flickr and Wikimedia Commons photographers. Shop photos marked "Representative" show the kind of shop, not the shop itself. Owners and visitors can add real ones. <button class="link" data-go="credits">See photo credits</button></p>
       <button class="btn ghost" data-delme style="color:var(--bad);margin-top:6px">Delete my data</button>
-      <p class="note" style="margin-top:12px">Version 1.0.1</p><div style="height:30px"></div></div>`;
+      <p class="note" style="margin-top:12px">Version 1.1.0</p><div style="height:30px"></div></div>`;
   }
 
   function creditsScreen(el) {
@@ -658,6 +686,16 @@
       try { const blob = await shrink(f); const fd = new FormData(); fd.append("photo", blob, "photo.jpg"); await SB.authed("POST", `/v1/shops/${id}/photos`, fd); toast("Photo added"); }
       catch (err) { toast(err.message); } };
   }
+  // Anyone can add a photo of a shop they're at: it's checked, then goes live with +3 Champion points.
+  function addPhoto(id) {
+    const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*";
+    inp.onchange = async () => { const f = inp.files[0]; if (!f) return; toast("Uploading…");
+      try { const blob = await shrink(f); const fd = new FormData(); fd.append("photo", blob, "photo.jpg");
+        const r = await SB.authed("POST", `/v1/shops/${id}/photos`, fd);
+        toast(r.status === "approved" ? "Photo added" : "Thanks! We'll check it and add +3 points"); }
+      catch (err) { toast(err.message); } };
+    inp.click();
+  }
   async function shrink(file, max = 1600) {
     const img = await createImageBitmap(file); const k = Math.min(1, max / Math.max(img.width, img.height));
     const cv = document.createElement("canvas"); cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
@@ -703,6 +741,7 @@
     if (d.tabgo) return showTab(d.tabgo);
     if (d.back !== undefined) return pop();
     if (d.areaPick !== undefined) return pickArea();
+    if (d.today !== undefined) return todaySheet();
     if (d.search !== undefined) return push(searchScreen, d.search || "");
     if (d.searchq !== undefined) return push(searchScreen, d.searchq);
     if (d.q !== undefined) { SB.remember(d.q); return push(resultsScreen, d.q); }
@@ -723,6 +762,7 @@
     if (d.copy) { try { await navigator.clipboard.writeText(d.copy); toast("Number copied"); } catch { toast(pretty(d.copy)); } return; }
     if (d.claim) return claim(d.claim);
     if (d.edit) return editSheet(d.edit);
+    if (d.addphoto) return addPhoto(d.addphoto);
     if (d.closed) { try { await SB.authed("POST", `/v1/shops/${d.closed}/closed`, {}); toast("Thanks. We'll check and hide it if it has closed."); } catch (err) { toast(err.message); } return; }
     if (d.confirm) { try { toast("Checking your location…"); const p = await SB.position(); const r = await SB.authed("POST", `/v1/shops/${d.confirm}/confirm`, p);
         toast(r.already ? "You already confirmed this shop" : r.verified ? "Confirmed. Shop is now verified, +1 point" : "Confirmed, +1 point"); } catch (err) { toast(err.message); } return; }

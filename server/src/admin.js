@@ -81,7 +81,7 @@ function routes(app) {
     return db.tx(async c => {
       const p = (await c.query("UPDATE photos SET status = $2 WHERE id = $1 AND status = 'pending' RETURNING *", [req.params.id, ok ? "approved" : "rejected"])).rows[0];
       if (!p) throw notFound();
-      if (ok) await award(c, p.user_id, "photo", p.shop_id);
+      if (ok) { await award(c, p.user_id, "photo", p.shop_id); await c.query("UPDATE shops SET updated_at = now() WHERE id = $1", [p.shop_id]); } // new version: phones sync the photo
       return { ok: true };
     });
   });

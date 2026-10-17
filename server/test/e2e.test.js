@@ -110,3 +110,19 @@ test("sync reports the server's latest version", async () => {
   const r = await call("GET", "/v1/sync?since=999999999");
   assert.ok(typeof r.latest === "number" && r.latest < 999999999 && r.shops.length === 0);
 });
+
+test("an approved photo reaches phones through sync", async () => {
+  const tk = await device("photographer");
+  const b = await (await fetch(API + "/v1/bundle")).json();
+  const shop = b.shops.find(s => !s[24]);
+  // smallest valid JPEG header is enough for the server's type check
+  const jpg = Buffer.from("ffd8ffe000104a46494600010100000100010000ffd9", "hex");
+  const fd = new FormData(); fd.append("photo", new Blob([jpg], { type: "image/jpeg" }), "p.jpg");
+  const up = await (await fetch(API + `/v1/shops/${shop[0]}/photos`, { method: "POST", headers: { authorization: "Bearer " + tk }, body: fd })).json();
+  assert.equal(up.status, "pending");
+  assert.ok(!(await call("GET", `/v1/sync?since=${b.version}`)).shops.some(s => s[0] === shop[0] && s[24]), "not public before review");
+  assert.equal((await call("POST", `/v1/admin/photos/${up.id}/approve`, null, null, { "x-admin-token": ADMIN })).ok, true);
+  const row = (await call("GET", `/v1/sync?since=${b.version}`)).shops.find(s => s[0] === shop[0]);
+  assert.ok(row && row[24], "photo in the synced row");
+  assert.equal((await fetch(API + "/uploads/" + row[24])).status, 200);
+});
