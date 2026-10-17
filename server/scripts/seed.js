@@ -50,6 +50,8 @@ const appDir = process.argv[3] || path.join(repo, "app");
       FROM jsonb_to_recordset($1::jsonb) AS x(id text, name text, grp text, category text, brand text, phone text, phones_other text[],
            phone_is_chain boolean, whatsapp text, website text, instagram text, facebook text, email text, address text, locality text,
            pincode text, lat float8, lon float8, location_precise boolean, opening_hours text, sources text[], source_ids text[], quality_score int)
+      -- skip existing ids up front: ON CONFLICT alone still uses up a sync version per row on every re-run
+      WHERE NOT EXISTS (SELECT 1 FROM shops s WHERE s.id = x.id)
       ON CONFLICT (id) DO NOTHING`, [JSON.stringify(batch)]);
     added += res.rowCount;
   }

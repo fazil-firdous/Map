@@ -32,18 +32,20 @@
   }
   const fmt = d => d.toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit", hour12: true }).replace(/\s?([ap])m/i, (_, x) => " " + x.toLowerCase() + "m");
 
-  const WX = [[0, "☀️", "Clear"], [2, "⛅", "Partly cloudy"], [3, "☁️", "Cloudy"], [48, "🌫️", "Fog"], [57, "🌦️", "Drizzle"], [67, "🌧️", "Rain"],
-    [77, "❄️", "Snow"], [82, "🌧️", "Showers"], [86, "🌨️", "Snow showers"], [99, "⛈️", "Thunderstorm"]];
+  // WMO weather codes -> Lucide icon, label
+  const WX = [[0, "sun", "Clear"], [2, "cloud-sun", "Partly cloudy"], [3, "cloud", "Cloudy"], [48, "cloud-fog", "Fog"], [57, "cloud-drizzle", "Drizzle"], [67, "cloud-rain", "Rain"],
+    [77, "cloud-snow", "Snow"], [82, "cloud-rain", "Showers"], [86, "cloud-snow", "Snow showers"], [99, "cloud-lightning", "Thunderstorm"]];
   const wxOf = code => WX.find(([c]) => code <= c) || WX[WX.length - 1];
   async function weather() {
-    let c = null; try { c = JSON.parse(localStorage.getItem("sb_wx") || "null"); } catch {}
+    let c = null; try { c = JSON.parse(localStorage.getItem("sb_wx2") || "null"); } catch {}
     if (c && Date.now() - c.t < 30 * 60000) return c;
     try {
-      const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FKolkata&forecast_days=1`);
+      const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FKolkata&forecast_days=1`);
       const j = await r.json();
-      const [, icon, text] = wxOf(j.current.weather_code);
+      let [, icon, text] = wxOf(j.current.weather_code);
+      if (!j.current.is_day && icon === "sun") icon = "moon";
       c = { t: Date.now(), temp: Math.round(j.current.temperature_2m), icon, text, hi: Math.round(j.daily.temperature_2m_max[0]), lo: Math.round(j.daily.temperature_2m_min[0]) };
-      try { localStorage.setItem("sb_wx", JSON.stringify(c)); } catch {}
+      try { localStorage.setItem("sb_wx2", JSON.stringify(c)); } catch {}
       return c;
     } catch { return c; } // offline: last known, or nothing
   }
