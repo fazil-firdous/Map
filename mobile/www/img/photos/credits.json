@@ -1,0 +1,499 @@
+{
+ "photos": {
+  "dal-lake-4": {
+   "file": "dal-lake-4.jpg",
+   "title": "Sunset over Dal Lake - Srinagar - Jammu & Kashmir - India - 01",
+   "by": "Adam Jones, Ph.D. - Global Photo Archive",
+   "license": "CC BY-SA 2.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+   "source": "https://www.flickr.com/photos/41000732@N04/26744307672"
+  },
+  "nigeen-lake-1": {
+   "file": "nigeen-lake-1.jpg",
+   "title": "sunset on nigeen lake",
+   "by": "irumge",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/61168676@N00/3851370677"
+  },
+  "jamia-masjid-0": {
+   "file": "jamia-masjid-0.jpg",
+   "title": "A view of Jamia Masjid and Old city.",
+   "by": "daiyaan.db",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/131839705@N03/21326185881"
+  },
+  "khanqah-shah-e-hamadan-1": {
+   "file": "khanqah-shah-e-hamadan-1.jpg",
+   "title": "Detail of Facade - Khanqah Shah-i-Hamadan - Wooden Mosque - Old City - Srinagar - Jammu & Kashmir - India - 01",
+   "by": "Adam Jones, Ph.D. - Global Photo Archive",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/41000732@N04/26552241420"
+  },
+  "makhdoom-sahib-shrine-0": {
+   "file": "makhdoom-sahib-shrine-0.jpg",
+   "title": "Makhdoom Sahib Shrine",
+   "by": "Mike Prince",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/70804987@N00/14548480812"
+  },
+  "cheshme-shahi-1": {
+   "file": "cheshme-shahi-1.jpg",
+   "title": "Srinagar - Chashm-e-shahi gardens",
+   "by": "Ankur Panchbudhe",
+   "license": "CC BY-SA 2.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+   "source": "https://www.flickr.com/photos/28747587@N00/15725723422"
+  },
+  "ghanta-ghar-lal-chowk-1": {
+   "file": "ghanta-ghar-lal-chowk-1.jpg",
+   "title": "Lal Chowk",
+   "by": "varunshiv",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/72155957@N00/6133464099"
+  },
+  "nishat-bagh-0": {
+   "file": "nishat-bagh-0.jpg",
+   "title": "India - Srinagar - 023 - Nishat Bagh Mughal Gardens",
+   "by": "mckaysavage",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/56796376@N00/3919399962"
+  },
+  "shalimar-bagh-3": {
+   "file": "shalimar-bagh-3.jpg",
+   "title": "shalimar Mughal garden",
+   "by": "shahbasharat",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/20681804@N03/2776602642"
+  },
+  "dargah-hazratbal-0": {
+   "file": "dargah-hazratbal-0.jpg",
+   "title": "Hazratbal Shrine",
+   "by": "shahbasharat",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/20681804@N03/2775648763"
+  },
+  "shankaracharya-temple-1": {
+   "file": "shankaracharya-temple-1.jpg",
+   "title": "Kashmir Temple Jyeshteswara Shankaracharya Takht-i-Suliman Hill, Srinagar. Probably it dates to 220 BCE Kashmir. nærheten av Srinagar. Sannsynlig dato 220 f.Kr.",
+   "by": "saamiblog",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/28772513@N07/8583250899"
+  },
+  "hari-parbat-4": {
+   "file": "hari-parbat-4.jpg",
+   "title": "Srinagar - Hari Parbat",
+   "by": "Ankur Panchbudhe",
+   "license": "CC BY-SA 2.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+   "source": "https://www.flickr.com/photos/28747587@N00/15724104235"
+  },
+  "parimahal-3": {
+   "file": "parimahal-3.jpg",
+   "title": "Pari Mahal",
+   "by": "shahbasharat",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/20681804@N03/2775731891"
+  },
+  "zero-bridge-1": {
+   "file": "zero-bridge-1.jpg",
+   "title": "River Jehlum, old 'Zero Bridge'",
+   "by": "shahbasharat",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/20681804@N03/2775669325"
+  },
+  "pathar-masjid-0": {
+   "file": "pathar-masjid-0.jpg",
+   "title": "Pathar Masjid in Srinagar",
+   "by": "Indrajit Das",
+   "license": "CC BY-SA 4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "source": "https://commons.wikimedia.org/w/index.php?curid=51160470"
+  },
+  "shikara-boat-ride-3": {
+   "file": "shikara-boat-ride-3.jpg",
+   "title": "Shikara on Dal Lake",
+   "by": "BOMBMAN",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/99622129@N00/10434926295"
+  },
+  "houseboat-2": {
+   "file": "houseboat-2.jpg",
+   "title": "Dal Lake",
+   "by": "shahbasharat",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/20681804@N03/2776577162"
+  },
+  "hotel-guesthouse-1": {
+   "file": "hotel-guesthouse-1.jpg",
+   "title": "The Gulab Bhavan Palace",
+   "by": "BOMBMAN",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/99622129@N00/10435169583"
+  },
+  "travel-agent-tours-4": {
+   "file": "travel-agent-tours-4.jpg",
+   "title": "Gulmarg",
+   "by": "shahbasharat",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/20681804@N03/2776520556"
+  },
+  "taxi-car-rental-0": {
+   "file": "taxi-car-rental-0.jpg",
+   "title": "Taxis",
+   "by": "4nitsirk",
+   "license": "CC BY-SA 2.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+   "source": "https://www.flickr.com/photos/26223114@N02/2808730425"
+  },
+  "shawls-pashmina-0": {
+   "file": "shawls-pashmina-0.jpg",
+   "title": "Details in the fabric",
+   "by": "Soumyadeep Paul",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/56933894@N07/9013810069"
+  },
+  "carpets-rugs-5": {
+   "file": "carpets-rugs-5.jpg",
+   "title": "IN Kashmir Srinagar carpet weaving - 1963 (W63-K44-05)",
+   "by": "David Pirmann",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/9905418@N05/51690702921"
+  },
+  "handicrafts-4": {
+   "file": "handicrafts-4.jpg",
+   "title": "Papier-mâché Walls of Shah-e-Hamdan",
+   "by": "Mike Prince",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/70804987@N00/14594288023"
+  },
+  "dry-fruits-saffron-0": {
+   "file": "dry-fruits-saffron-0.jpg",
+   "title": "Saffron crocus, Pampore - Kashmir",
+   "by": "Dr. Partha Sarathi Sahana",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/124018523@N04/13899621557"
+  },
+  "bakery-sweets-0": {
+   "file": "bakery-sweets-0.jpg",
+   "title": "bakery",
+   "by": "Paul Keller",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/18259771@N00/66160159"
+  },
+  "cafe-tea-3": {
+   "file": "cafe-tea-3.jpg",
+   "title": "#evening #tea #chai #india #incredibleindia",
+   "by": "Mano Ranjan",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/12206913@N05/19933559079"
+  },
+  "restaurant-4": {
+   "file": "restaurant-4.jpg",
+   "title": "Kashmiri Saffron tea",
+   "by": "shahbasharat",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/20681804@N03/2253093712"
+  },
+  "restaurant-2": {
+   "file": "restaurant-2.jpg",
+   "title": "Kashmiri Naan AUD4.90 - Bombay Beat",
+   "by": "avlxyz",
+   "license": "CC BY-SA 2.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+   "source": "https://www.flickr.com/photos/10559879@N00/3752396132"
+  },
+  "restaurant-5": {
+   "file": "restaurant-5.jpg",
+   "title": "Kashmiri street food",
+   "by": "daiyaan.db",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/131839705@N03/21241808413"
+  },
+  "wazwan-caterers-3": {
+   "file": "wazwan-caterers-3.jpg",
+   "title": "Lamb Rogan Josh, Goat Curry, Spinach and Beans with half-rice and 1 roti - Zam Zam AUD8",
+   "by": "avlxyz",
+   "license": "CC BY-SA 2.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+   "source": "https://www.flickr.com/photos/10559879@N00/2786164923"
+  },
+  "fast-food-0": {
+   "file": "fast-food-0.jpg",
+   "title": "Smoked to Perfection",
+   "by": "saish746",
+   "license": "CC BY-SA 2.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+   "source": "https://www.flickr.com/photos/40873058@N00/9453863267"
+  },
+  "fast-food-1": {
+   "file": "fast-food-1.jpg",
+   "title": "Ready for sell",
+   "by": "saish746",
+   "license": "CC BY-SA 2.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+   "source": "https://www.flickr.com/photos/40873058@N00/9453890725"
+  },
+  "groceries-4": {
+   "file": "groceries-4.jpg",
+   "title": "Shop Too",
+   "by": "the_steve_cox",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/35468147898@N01/69607921"
+  },
+  "groceries-3": {
+   "file": "groceries-3.jpg",
+   "title": "VARIETY IS THE SPICE OF LIFE",
+   "by": "RubyGoes",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/61997808@N00/15281038429"
+  },
+  "fruit-veg-meat-1": {
+   "file": "fruit-veg-meat-1.jpg",
+   "title": "Negotiation",
+   "by": "Nagarjun",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/64924693@N00/28097487808"
+  },
+  "fashion-3": {
+   "file": "fashion-3.jpg",
+   "title": "Open for Business at the Cloth Market",
+   "by": "AJ Photographic Art",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/82448203@N04/11314792293"
+  },
+  "fashion-5": {
+   "file": "fashion-5.jpg",
+   "title": "Hangin' Out at the Cloth Market",
+   "by": "AJ Photographic Art",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/82448203@N04/11315254026"
+  },
+  "jewellery-watches-0": {
+   "file": "jewellery-watches-0.jpg",
+   "title": "'Infinite Bangles' - Churi Bazzar @ Charminar",
+   "by": "Debajyoti_Das",
+   "license": "CC BY-SA 2.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+   "source": "https://www.flickr.com/photos/64297698@N07/7591987656"
+  },
+  "beauty-fitness-2": {
+   "file": "beauty-fitness-2.jpg",
+   "title": "Barber shop",
+   "by": "Milosz1",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/14652508@N08/6129101981"
+  },
+  "home-hardware-3": {
+   "file": "home-hardware-3.jpg",
+   "title": "Bin of 10 Penny Nails at the hardware store",
+   "by": "WereOutThere",
+   "license": "CC BY 2.0",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "source": "https://www.flickr.com/photos/59558974@N05/5547532092"
+  },
+  "automotive-0": {
+   "file": "automotive-0.jpg",
+   "title": "Auto Service in India",
+   "by": "MyStockPhotos",
+   "license": "CC0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "source": "https://www.flickr.com/photos/136375272@N05/47263766131"
+  },
+  "money-4": {
+   "file": "money-4.jpg",
+   "title": "Den lokale ATM",
+   "by": "Gullig",
+   "license": "CC BY-SA 2.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+   "source": "https://www.flickr.com/photos/12557689@N00/4442241125"
+  },
+  "electronics-0": {
+   "file": "electronics-0.jpg",
+   "title": "Computerised Mobile Repairing",
+   "by": "string_bass_dave",
+   "license": "CC BY-SA 2.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+   "source": "https://www.flickr.com/photos/16069488@N00/1062769976"
+  },
+  "shopping-0": {
+   "file": "shopping-0.jpg",
+   "title": "Life in Srinagar's market",
+   "by": "Fulvio Spada",
+   "license": "CC BY-SA 2.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+   "source": "https://www.flickr.com/photos/78722206@N00/9696914011"
+  }
+ },
+ "sights": {
+  "Dal Lake": [
+   "dal-lake-4"
+  ],
+  "Nigeen Lake": [
+   "nigeen-lake-1"
+  ],
+  "Jamia Masjid": [
+   "jamia-masjid-0"
+  ],
+  "Khanqah Shah-e-Hamadan": [
+   "khanqah-shah-e-hamadan-1"
+  ],
+  "Makhdoom Sahib Shrine": [
+   "makhdoom-sahib-shrine-0"
+  ],
+  "Cheshme Shahi": [
+   "cheshme-shahi-1"
+  ],
+  "Ghanta Ghar, Lal Chowk": [
+   "ghanta-ghar-lal-chowk-1"
+  ],
+  "Nishat Bagh": [
+   "nishat-bagh-0"
+  ],
+  "Shalimar Bagh": [
+   "shalimar-bagh-3"
+  ],
+  "Dargah Hazratbal": [
+   "dargah-hazratbal-0"
+  ],
+  "Shankaracharya Hill": [
+   "shankaracharya-temple-1"
+  ],
+  "Hari Parbat": [
+   "hari-parbat-4"
+  ],
+  "Parimahal": [
+   "parimahal-3"
+  ],
+  "Zero Bridge": [
+   "zero-bridge-1"
+  ],
+  "Pathar masjid": [
+   "pathar-masjid-0"
+  ],
+  "Boat Tour": [
+   "shikara-boat-ride-3"
+  ]
+ },
+ "shops": {
+  "Houseboat": [
+   "houseboat-2"
+  ],
+  "Shikara & Boat Ride": [
+   "shikara-boat-ride-3"
+  ],
+  "Hotel & Guesthouse": [
+   "hotel-guesthouse-1"
+  ],
+  "Travel Agent & Tours": [
+   "travel-agent-tours-4"
+  ],
+  "Taxi & Car Rental": [
+   "taxi-car-rental-0"
+  ],
+  "Shawls & Pashmina": [
+   "shawls-pashmina-0"
+  ],
+  "Carpets & Rugs": [
+   "carpets-rugs-5"
+  ],
+  "Handicrafts": [
+   "handicrafts-4"
+  ],
+  "Dry Fruits & Saffron": [
+   "dry-fruits-saffron-0"
+  ],
+  "Bakery & Sweets": [
+   "bakery-sweets-0"
+  ],
+  "Cafe & Tea": [
+   "cafe-tea-3",
+   "restaurant-4"
+  ],
+  "Restaurant": [
+   "restaurant-2",
+   "restaurant-5"
+  ],
+  "Wazwan & Caterers": [
+   "wazwan-caterers-3"
+  ],
+  "Fast Food": [
+   "fast-food-0",
+   "fast-food-1"
+  ],
+  "Grocery & General Store": [
+   "groceries-4",
+   "groceries-3"
+  ],
+  "Fruit, Veg & Meat": [
+   "fruit-veg-meat-1"
+  ],
+  "Clothing": [
+   "fashion-3",
+   "fashion-5"
+  ],
+  "Jewellery & Watches": [
+   "jewellery-watches-0"
+  ],
+  "Salon & Barber": [
+   "beauty-fitness-2"
+  ],
+  "Hardware & Building": [
+   "home-hardware-3"
+  ],
+  "Mechanic & Parts": [
+   "automotive-0"
+  ],
+  "Bank": [
+   "money-4"
+  ],
+  "Mobile Phones": [
+   "electronics-0"
+  ],
+  "Shopping Centre & Market": [
+   "shopping-0"
+  ],
+  "Food & Drink": [
+   "restaurant-2",
+   "restaurant-5"
+  ],
+  "Kashmiri Crafts": [
+   "handicrafts-4"
+  ],
+  "Groceries": [
+   "groceries-4"
+  ],
+  "Fashion": [
+   "fashion-3",
+   "fashion-5"
+  ]
+ }
+}

@@ -19,7 +19,6 @@
     "@capacitor/network": "8.0.1",
     "@capacitor/share": "8.0.2",
     "@capacitor/splash-screen": "8.0.2",
-    "@capacitor/status-bar": "8.0.3",
     "leaflet": "1.9.4",
     "qrcode-generator": "2.0.4"
   },

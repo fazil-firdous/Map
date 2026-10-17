@@ -9,6 +9,7 @@
   const screen = $("#screen");
 
   try { await SB.load(); } catch (e) { $("#boot p").textContent = "Couldn't load city data. Please reinstall the app."; return; }
+  const PH = await fetch("img/photos/credits.json").then(r => r.json()).catch(() => ({ photos: {}, sights: {}, shops: {} }));
   $("#boot").remove();
   SB.signIn().catch(() => {});
 
@@ -21,9 +22,21 @@
   const hasDeal = s => s[22] && s[22] * 1000 > Date.now();
   const gIdx = name => D().groups.indexOf(name);
 
+  // ---------- photos (openly licensed, credited in About) ----------
+  // Sights have their own photo. Shops without an owner photo get one for their kind of shop, marked "representative".
+  const hashOf = str => [...str].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7) >>> 0;
+  const sightPhoto = g => (PH.sights[g[0]] || [])[0] || null;
+  const shopPhoto = s => { const v = PH.shops[C(s[3])] || PH.shops[G(s[2])]; return v ? v[hashOf(s[0]) % v.length] : null; };
+  const pimg = k => k && PH.photos[k] ? "img/photos/" + PH.photos[k].file : null;
+  const bgOf = (k, fallback, shade = ".3") => k ? `linear-gradient(rgb(0 0 0 / 0), rgb(0 0 0 / ${shade})), url('${pimg(k)}') center/cover, ${fallback}` : fallback;
+  const credit = k => { const p = PH.photos[k]; return p ? `Photo: ${p.by}, ${p.license}` : ""; };
+
   // ---------- location ----------
+  const farFromCity = p => KM(p.lat, p.lon, D().areas[0][2], D().areas[0][3]) > 20;
   function here() {
     const L = SB.prefs.loc;
+    // A GPS fix far outside the city (travelling, or a stale fix) would sort everything 40 km away: use the city centre instead.
+    if (L.type === "gps" && farFromCity(L)) return { name: D().areas[0][0], lat: D().areas[0][2], lon: D().areas[0][3] };
     if (L.type === "gps") return { name: "Near you", lat: L.lat, lon: L.lon };
     const a = D().areas[L.idx] || D().areas[0];
     return { name: a[0], lat: a[2], lon: a[3] };
@@ -39,12 +52,15 @@
       const list = SBIntent.rankSights(p, D().sights, at()).slice(0, 20);
       if (list.length || !p.item) return { type: "sights", p, list };
     }
+    // "Mughal gardens", "Dal Lake", "nishat bagh": clearly places, even without the word "visit".
+    const sights = SBIntent.rankSights(p, D().sights, at()).filter(x => x.m >= 4);
+    if (!p.cats.length && sights.length && sights[0].m >= 6) return { type: "sights", p, list: SBIntent.rankSights(p, D().sights, at()).slice(0, 20) };
     const hits = SBIntent.rankShops(p, D().shops, D().categories, at());
     const main = p.cats[0];
     const nMain = hits.filter(h => h.rel >= 3).length;
     const related = (SBIntent.RELATED[main] || p.cats.slice(1, 3)).filter(c => c !== main && SB.catList.includes(c)).slice(0, 3)
       .map(c => ({ c, n: D().shops.filter(s => C(s[3]) === c && dist(s) < 2).length })).filter(x => x.n);
-    return { type: "shops", p, main, list: hits, total: main && nMain ? nMain : hits.length, related };
+    return { type: "shops", p, main, list: hits, total: main && nMain ? nMain : hits.length, related, sights: sights.slice(0, 6) };
   }
 
   // ---------- icons ----------
@@ -91,11 +107,12 @@
     return `<div class="item"><button data-shop="${esc(s[0])}"><span class="mono" style="background:${mcol(s)}">${esc(initials(s[1]))}</span>
       <span style="min-width:0"><div class="t">${esc(s[1])}</div><div class="s">${esc(C(s[3]))} · ${esc(s[4] || "Srinagar")}</div><div class="tags">${tags(s)}</div></span></button>
       <span class="rt"><span class="d">${fmtD(dist(s))}</span><button class="call" ${k.tel ? `data-call="${esc(s[0])}"` : 'aria-disabled="true"'} aria-label="${t("call")} ${esc(s[1])}">${I("phone", "sm")}</button></span></div>`; };
-  const hcard = s => `<button class="hcard" data-shop="${esc(s[0])}"><div class="art" style="background:${mcol(s)}">${esc(initials(s[1]))}<em>${fmtD(dist(s))}</em>${hasDeal(s) ? `<span class="badge">${t("offers")}</span>` : ""}</div>
-    <div class="bd"><div class="t">${esc(s[1])}</div><div class="s">${esc(C(s[3]))}</div></div></button>`;
+  const hcard = s => { const ph = shopPhoto(s);
+    return `<button class="hcard" data-shop="${esc(s[0])}"><div class="art" style="background:${bgOf(ph, mcol(s))}">${ph ? "" : esc(initials(s[1]))}<em>${fmtD(dist(s))}</em>${hasDeal(s) ? `<span class="badge">${t("offers")}</span>` : ""}</div>
+    <div class="bd"><div class="t">${esc(s[1])}</div><div class="s">${esc(C(s[3]))}</div></div></button>`; };
   const sightInitials = g => g[0].split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase();
   const scard = g => { const food = D().shops.filter(s => s[2] === gIdx("Food & Drink") && KM(g[2], g[3], s[12], s[13]) < 0.8).length;
-    return `<button class="hcard" data-sight="${D().sights.indexOf(g)}"><div class="art" style="background:var(--m5)">${esc(sightInitials(g))}<em>${fmtD(KM(here().lat, here().lon, g[2], g[3]))}</em></div>
+    return `<button class="hcard" data-sight="${D().sights.indexOf(g)}"><div class="art" style="background:${bgOf(sightPhoto(g), "var(--m5)")}">${sightPhoto(g) ? "" : esc(sightInitials(g))}<em>${fmtD(KM(here().lat, here().lon, g[2], g[3]))}</em></div>
       <div class="bd"><div class="t">${esc(g[0])}</div><div class="s">${food} places to eat nearby</div></div></button>`; };
   const best = (filter, n, radius = 2.5) => D().shops.filter(filter).map(s => [s, dist(s)]).filter(x => x[1] < radius)
     .sort((a, b) => (b[0][17] + (hasDeal(b[0]) ? 15 : 0) + (b[0][20] ? 10 : 0)) - (a[0][17] + (hasDeal(a[0]) ? 15 : 0) + (a[0][20] ? 10 : 0)) - (a[1] - b[1]) * 12).slice(0, n).map(x => x[0]);
@@ -111,19 +128,29 @@
     <button data-tab="me">${I("user")}<span>${t("me")}</span></button></nav>`);
   const tabs = {}; let curTab = "home"; const stack = [];
   function tabRoot(name) { if (!tabs[name]) { const el = document.createElement("div"); el.className = "layer"; el.hidden = true; screen.insertBefore(el, $(".nav", screen)); tabs[name] = el; } return tabs[name]; }
+  const Bars = SBPlugin("SystemBars");
+  const darkMode = matchMedia("(prefers-color-scheme: dark)");
+  function syncBars() {
+    if (!Bars) return;
+    const top = stack[stack.length - 1];
+    const darkHeader = darkMode.matches || (top ? [shopScreen, sightScreen].includes(top.render) : curTab === "home");
+    Bars.setStyle({ style: darkHeader ? "DARK" : "LIGHT" }).catch(() => {});
+  }
   function showTab(name) {
     while (stack.length) stack.pop().el.remove();
     curTab = name; Object.entries(tabs).forEach(([k, el]) => el.hidden = k !== name);
     const el = tabRoot(name); el.hidden = false; RENDER[name](el);
     document.querySelectorAll(".nav button").forEach(b => b.setAttribute("aria-current", b.dataset.tab === name ? "page" : "false"));
+    syncBars();
   }
   function push(render, ...args) {
     const el = document.createElement("div"); el.className = "layer pushed enter"; screen.insertBefore(el, $(".nav", screen));
     el.style.zIndex = 20 + stack.length; stack.push({ el, render, args }); render(el, ...args);
     el.addEventListener("animationend", () => el.classList.remove("enter"), { once: true });
+    syncBars();
     return el;
   }
-  function pop() { const top = stack.pop(); if (!top) return false; top.el.classList.add("leave");
+  function pop() { const top = stack.pop(); if (!top) return false; top.el.classList.add("leave"); syncBars();
     const done = () => top.el.remove(); if (matchMedia("(prefers-reduced-motion: reduce)").matches) done(); else { top.el.addEventListener("animationend", done, { once: true }); setTimeout(done, 400); } return true; }
   const redrawTop = () => { const top = stack[stack.length - 1]; if (top) { const sc = $(".scroll", top.el)?.scrollTop; top.render(top.el, ...top.args); if ($(".scroll", top.el)) $(".scroll", top.el).scrollTop = sc || 0; } else RENDER[curTab](tabs[curTab]); };
   const rerenderAll = () => { RENDER[curTab](tabs[curTab]); stack.forEach(f => { f.el._detail = null; f.render(f.el, ...f.args); }); };
@@ -138,11 +165,12 @@
     sheet(`<h3>${t("yourArea")}</h3><div class="pad" style="padding-bottom:10px"><button class="btn ghost" id="gps">${I("pin", "sm")}${t("useGps")}</button></div>
       <div class="pad" style="padding-bottom:10px"><div class="field" style="border-width:1px;border-color:var(--line)">${I("search", "sm")}<input id="areaq" placeholder="${t("searchArea")}" autocomplete="off"></div></div>
       <div class="scroll arealist" id="arealist"></div>`, el => {
-      const draw = q => $("#arealist", el).innerHTML = D().areas.map((a, i) => [a, i]).filter(([a]) => a[0].toLowerCase().includes(q.toLowerCase()))
+      const draw = q => $("#arealist", el).innerHTML = D().areas.map((a, i) => [a, i]).filter(([a]) => a[0].toLowerCase().replace(/\s+/g, "").includes(q.toLowerCase().replace(/\s+/g, "")))
         .map(([a, i]) => `<button data-area="${i}" aria-current="${SB.prefs.loc.type === "area" && i === SB.prefs.loc.idx}"><span>${esc(a[0])}</span><small>${a[1].toLocaleString("en-IN")} shops</small></button>`).join("");
       draw(""); $("#areaq", el).addEventListener("input", e => draw(e.target.value));
       $("#gps", el).onclick = async () => { const b = $("#gps", el); busy(b, true);
-        try { const p = await SB.position(); SB.prefs.loc = { type: "gps", lat: p.lat, lon: p.lon }; SB.savePrefs(); el.remove(); toast("Showing places near you"); rerenderAll(); }
+        try { const p = await SB.position(); SB.prefs.loc = { type: "gps", lat: p.lat, lon: p.lon }; SB.savePrefs(); el.remove();
+          toast(farFromCity(p) ? `You seem to be outside Srinagar, so we're showing places from ${here().name}` : "Showing places near you"); rerenderAll(); }
         catch (e) { busy(b, false); toast(e.message || "Couldn't get your location"); } };
       el.addEventListener("click", e => { const b = e.target.closest("[data-area]"); if (!b) return; SB.prefs.loc = { type: "area", idx: +b.dataset.area }; SB.savePrefs(); el.remove(); toast(`Showing places near ${here().name}`); rerenderAll(); });
     });
@@ -175,7 +203,7 @@
     const SHOPPY = ["Food & Drink", "Fashion", "Kashmiri Crafts", "Groceries", "Shopping", "Beauty & Fitness", "Electronics"].map(gIdx);
     const near = best(s => SHOPPY.includes(s[2]) && s[14] && (nSrc(s[16]) >= 2 || (s[6] && !s[18]) || s[20]), 10);
     const deals = best(s => hasDeal(s), 10, 5);
-    const famous = D().sights.filter(g => g[4] >= 2).map(g => [g, KM(here().lat, here().lon, g[2], g[3])]).sort((a, b) => a[1] - b[1]).slice(0, 8).map(x => x[0]);
+    const famous = D().sights.filter(g => g[4] >= 2).map(g => [g, KM(here().lat, here().lon, g[2], g[3]) + (sightPhoto(g) ? 0 : 6)]).sort((a, b) => a[1] - b[1]).slice(0, 8).map(x => x[0]);
     const counts = {}; D().shops.forEach(s => { if (dist(s) < 3) counts[s[3]] = (counts[s[3]] || 0) + 1; });
     const topCats = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8);
     const h = new Date().getHours(); const hi = h < 12 ? t("morning") : h < 17 ? t("afternoon") : t("evening");
@@ -219,6 +247,7 @@
       }
       const r = ask(q); const out = [];
       if (r.type === "shops" && r.main) out.push(`<li><button data-q="${esc(q)}"><span class="g b">${I("spark", "sm")}</span><span><div class="t">${esc(r.main)}</div><div class="s">Nearest to ${esc(here().name)} first</div></span><span class="n">${r.total}</span></button></li>`);
+      if (r.type === "shops" && r.sights?.length) out.push(`<li><button data-sight="${D().sights.indexOf(r.sights[0].g)}"><span class="g b">${I("camera", "sm")}</span><span><div class="t">${esc(r.sights[0].g[0])}</div><div class="s">Place to visit</div></span><span class="n">${fmtD(r.sights[0].d)}</span></button></li>`);
       if (r.type === "sights" && r.list.length) out.push(`<li><button data-q="${esc(q)}"><span class="g b">${I("camera", "sm")}</span><span><div class="t">Places to visit</div><div class="s">${esc(r.list.slice(0, 3).map(x => x.g[0]).join(", "))}</div></span><span class="n">${r.list.length}</span></button></li>`);
       const ql = q.toLowerCase();
       SB.catList.filter(c => c.toLowerCase().includes(ql) && c !== r.main).slice(0, 3).forEach(c => out.push(`<li><button data-q="${esc(c)}"><span class="g">${I("list", "sm")}</span><span><div class="t">${hl(c, q)}</div><div class="s">Category</div></span><span></span></button></li>`));
@@ -252,6 +281,7 @@
       <div class="scroll">${offlineBar()}
       <div class="count"><span><b>${list.length.toLocaleString("en-IN")}</b> ${r.main ? esc(SBIntent.plural(r.main)) : "results"} · ${esc(here().name)}</span>
         <select data-sort aria-label="Sort"><option value="near"${f.sort === "near" ? " selected" : ""}>${t("nearest")}</option><option value="best"${f.sort === "best" ? " selected" : ""}>${t("complete")}</option></select></div>
+      ${r.sights?.length && !opts.limit ? `<div class="pad"><div class="sec"><h2>${t("placesToVisit")}</h2></div><div class="hrow">${r.sights.map(x => scard(x.g)).join("")}</div></div>` : ""}
       <div id="stock"></div>
       ${list.length ? `<div class="rows">${list.slice(0, limit).map(row).join("")}</div>
         ${list.length > limit ? `<div class="more"><button class="btn ghost" data-more>Show more</button></div>` : ""}
@@ -277,7 +307,7 @@
     el.innerHTML = `<div class="bar safe-top"><button class="iconbtn" data-back aria-label="Back">${I("back", "flip")}</button><h1>${t("placesToVisit")}</h1></div>
       <div class="scroll"><div class="count"><span><b>${r.list.length}</b> ${r.p.item ? "matching “" + esc(r.p.item) + "”" : "best-known sights"} · ${esc(here().name)}</span></div>
       <div class="rows">${r.list.map(x => { const food = D().shops.filter(s => s[2] === gIdx("Food & Drink") && KM(x.g[2], x.g[3], s[12], s[13]) < 0.8).length;
-        return `<div class="item"><button data-sight="${D().sights.indexOf(x.g)}"><span class="mono" style="background:var(--m5)">${esc(sightInitials(x.g))}</span>
+        return `<div class="item"><button data-sight="${D().sights.indexOf(x.g)}"><span class="mono" style="background:${bgOf(sightPhoto(x.g), "var(--m5)", "0")}">${sightPhoto(x.g) ? "" : esc(sightInitials(x.g))}</span>
         <span style="min-width:0"><div class="t">${esc(x.g[0])}</div><div class="s">${esc(x.g[1][0].toUpperCase() + x.g[1].slice(1))} · ${food} places to eat nearby</div></span></button>
         <span class="rt"><span class="d">${fmtD(x.d)}</span></span></div>`; }).join("")}</div><div style="height:30px"></div></div>`;
   }
@@ -288,12 +318,12 @@
     const similar = D().shops.filter(o => o !== s && o[3] === s[3]).map(o => [o, KM(s[12], s[13], o[12], o[13])]).filter(x => x[1] < 1.2).sort((a, b) => a[1] - b[1]).slice(0, 4).map(x => x[0]);
     const isMine = (SB.myShops || []).some(m => m.id === id);
     const act = (attr, icon, label, on, primary) => `<button class="act${primary ? " primary" : ""}" ${on ? attr : 'aria-disabled="true"'}><span class="c">${I(icon)}</span>${label}</button>`;
-    const det = el._detail;
+    const det = el._detail, own = det?.photos?.length, ph = own ? null : shopPhoto(s);
     el.innerHTML = `<div class="scroll">
-      <div class="hero" style="background:${det?.photos?.length ? `linear-gradient(rgb(0 0 0 / .15), rgb(0 0 0 / .35)), url('${esc((window.SB_CONFIG?.api || "") + det.photos[0].url)}') center/cover` : mcol(s)}">${det?.photos?.length ? "" : esc(initials(s[1]))}
+      <div class="hero" style="background:${own ? `linear-gradient(rgb(0 0 0 / .15), rgb(0 0 0 / .35)), url('${esc((window.SB_CONFIG?.api || "") + det.photos[0].url)}') center/cover` : bgOf(ph, mcol(s), ".45")}">${own || ph ? "" : esc(initials(s[1]))}
         <div class="hb"><button class="iconbtn" data-back aria-label="Back">${I("back", "flip")}</button>
         <button class="iconbtn" data-save="${esc(id)}" aria-label="${saved ? "Remove from saved" : t("save")}" aria-pressed="${saved}">${I("save")}</button></div>
-        ${det?.photos?.length ? "" : `<small>${s[23] ? "" : "Owner can add photos"}</small>`}</div>
+        ${own ? "" : `<small>${ph ? "Representative photo" + (s[23] ? "" : " · owner can add real ones") : s[23] ? "" : "Owner can add photos"}</small>`}</div>
       ${offlineBar()}
       <div class="dhead"><h1>${esc(s[1])}</h1><div class="s">${esc(C(s[3]))} · ${esc(s[4] || "Srinagar")} · ${fmtD(dist(s))}</div>
         ${s[21] ? `<div class="live ${s[21]}"><i></i>${esc(liveLabel[s[21]])}${det?.live_note ? " · " + esc(det.live_note) : ""}</div>` : ""}
@@ -328,8 +358,9 @@
     const g = D().sights[idx];
     const near = D().shops.map(s => ({ s, d: KM(g[2], g[3], s[12], s[13]) })).filter(x => x.d < 0.8 && [gIdx("Food & Drink"), gIdx("Kashmiri Crafts")].includes(x.s[2])).sort((a, b) => a.d - b.d);
     const others = D().sights.filter(o => o !== g && o[4] >= 1).map(o => [o, KM(g[2], g[3], o[2], o[3])]).sort((a, b) => a[1] - b[1]).slice(0, 6).map(x => x[0]);
-    el.innerHTML = `<div class="scroll"><div class="hero" style="background:var(--m5)">${esc(sightInitials(g))}
-      <div class="hb"><button class="iconbtn" data-back aria-label="Back">${I("back", "flip")}</button><span></span></div></div>
+    const ph = sightPhoto(g);
+    el.innerHTML = `<div class="scroll"><div class="hero${ph ? " tall" : ""}" style="background:${bgOf(ph, "var(--m5)", ".4")}">${ph ? "" : esc(sightInitials(g))}
+      <div class="hb"><button class="iconbtn" data-back aria-label="Back">${I("back", "flip")}</button><span></span></div>${ph ? `<small>${esc(credit(ph))}</small>` : ""}</div>
       <div class="dhead"><h1>${esc(g[0])}</h1><div class="s">${esc(g[1][0].toUpperCase() + g[1].slice(1))} · ${fmtD(KM(here().lat, here().lon, g[2], g[3]))} from ${esc(here().name)}</div></div>
       <div class="pad" style="margin-top:16px"><button class="btn" data-ext="https://www.google.com/maps/dir/?api=1&destination=${g[2]},${g[3]}">${I("route", "sm")}Get directions</button></div>
       <div class="label" style="margin-top:8px">Eat and shop within 800 m</div>
@@ -485,7 +516,8 @@
     const chips = names => names.map(n => [n, S_(n.toLowerCase())]).filter(x => x[1] >= 0).map(([n, i]) => `<button class="chip" data-sight="${i}">${esc(n)}</button>`).join("");
     const hb = D().shops.filter(s => C(s[3]) === "Houseboat" && (s[20] || nSrc(s[16]) >= 2)).sort((a, b) => b[17] - a[17]).slice(0, 8);
     el.innerHTML = `<div class="bar safe-top"><button class="iconbtn" data-back aria-label="Back">${I("back", "flip")}</button><h1>${t("tourist")}</h1></div>
-      <div class="scroll"><p class="pad note" style="font-size:14px;margin-bottom:16px">A simple day in Srinagar. Every stop opens directions and what's nearby. The app works offline if mobile data is slow.</p>
+      <div class="scroll"><div class="banner" style="background:${bgOf("dal-lake-4", "var(--m5)", ".6")}"><b>Welcome to Srinagar</b><small>${esc(credit("dal-lake-4"))}</small></div>
+      <p class="pad note" style="font-size:14px;margin-bottom:16px">A simple day in Srinagar. Every stop opens directions and what's nearby. The app works offline if mobile data is slow.</p>
       <div class="timeline">
         <div class="step"><div class="rail"><i></i><s></s></div><div class="body"><div class="when">Morning</div><h4>Mughal gardens</h4><p>Start with the terraced gardens on the Dal's east shore while it's quiet.</p><div class="chips">${chips(["Nishat Bagh", "Shalimar Bagh", "Cheshme Shahi", "Parimahal"])}</div></div></div>
         <div class="step"><div class="rail"><i></i><s></s></div><div class="body"><div class="when">Midday</div><h4>Shikara on Dal Lake</h4><p>Boats leave from the Boulevard ghats. Rates are displayed at the ghats; agree on the price and time before you board.</p><button class="btn sm ghost" data-q="shikara">Find shikara and houseboats</button></div></div>
@@ -515,8 +547,17 @@
       <p><b style="color:var(--ink)">Your choices.</b> Ask us to delete your data any time from the privacy page. Full policy: <button class="link" data-ext="https://api.45-92-1-150.sslip.io/privacy.html">api.45-92-1-150.sslip.io/privacy.html</button></p>
       <p><b style="color:var(--ink)">Contact.</b> <span class="selectable">fazil.mastu@gmail.com</span></p>
       <p><b style="color:var(--ink)">Data sources.</b> Map data © OpenStreetMap contributors (ODbL). Places from Overture Maps Foundation and AllThePlaces, plus shops added by people of Srinagar.</p>
+      <p><b style="color:var(--ink)">Photos.</b> Openly licensed photos from Flickr and Wikimedia Commons photographers. Shop photos are representative unless the owner added their own. <button class="link" data-go="credits">See photo credits</button></p>
       <button class="btn ghost" data-delme style="color:var(--bad);margin-top:6px">Delete my data</button>
-      <p class="note" style="margin-top:12px">Version 1.0.0</p><div style="height:30px"></div></div>`;
+      <p class="note" style="margin-top:12px">Version 1.0.1</p><div style="height:30px"></div></div>`;
+  }
+
+  function creditsScreen(el) {
+    el.innerHTML = `<div class="bar safe-top"><button class="iconbtn" data-back aria-label="Back">${I("back", "flip")}</button><h1>Photo credits</h1></div>
+      <div class="scroll"><p class="pad note" style="margin:12px 0">Thank you to these photographers. Tap a photo to see the original and its licence.</p>
+      <div class="rows">${Object.entries(PH.photos).map(([k, p]) => `<div class="item"><button data-ext="${esc(p.source)}"><span class="mono" style="background:${bgOf(k, "var(--m5)", "0")}"></span>
+        <span style="min-width:0"><div class="t">${esc(p.title)}</div><div class="s">${esc(p.by)} · ${esc(p.license)}</div></span></button></div>`).join("")}</div>
+      <p class="pad note" style="margin:14px 0 30px">Photos are resized and cropped. Licences: <button class="link" data-ext="https://creativecommons.org/licenses/">creativecommons.org/licenses</button></p></div>`;
   }
 
   // ---------- Add a shop ----------
@@ -670,7 +711,7 @@
     if (d.shop) { SB.track(d.shop, "view"); return push(shopScreen, d.shop); }
     if (d.sight) return push(sightScreen, +d.sight);
     if (d.add !== undefined) return push(addScreen);
-    if (d.go) return push({ tourist: touristScreen, champions: championsScreen, sos: sosScreen, about: aboutScreen }[d.go]);
+    if (d.go) return push({ tourist: touristScreen, champions: championsScreen, sos: sosScreen, about: aboutScreen, credits: creditsScreen }[d.go]);
     if (d.dash) return push(dashScreen, d.dash);
     if (d.call) { const s = SB.byId.get(d.call); SB.track(d.call, "call"); return SB.openExternal("tel:" + contact(s).tel); }
     if (d.wa) { const s = SB.byId.get(d.wa); SB.track(d.wa, "whatsapp"); return SB.openExternal(`https://wa.me/${contact(s).wa.replace(/\D/g, "")}?text=${encodeURIComponent("Hi, I found your shop on Srinagar Bazaar.")}`); }

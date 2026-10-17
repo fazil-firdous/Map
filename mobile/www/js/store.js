@@ -29,7 +29,9 @@
 
     async load() {
       const [cached, packaged] = await Promise.all([idb.get("bundle"), fetch("data/bundle.json").then(r => r.json())]);
-      this.data = cached && cached.version >= packaged.version ? cached : packaged;
+      // A copy downloaded after a server reset can have a lower version than the packaged one but is still newer.
+      this.packagedVersion = packaged.version;
+      this.data = cached && (cached.version >= packaged.version || cached.resetFrom === packaged.version) ? cached : packaged;
       this.index();
       this.sync();
       return this.data;
@@ -49,7 +51,7 @@
           if (r.latest !== undefined && r.latest < this.data.version) {
             // Server was reset or restored: take its full copy of the city.
             const full = await this.api("GET", "/v1/bundle");
-            this.data = full; changed += full.shops.length; break;
+            full.resetFrom = this.packagedVersion; this.data = full; changed += full.shops.length; break;
           }
           const d = this.data;
           d.groups = r.groups; d.categories = r.categories;

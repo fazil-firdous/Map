@@ -14,6 +14,11 @@
   --land: #edf1ee; --water: #a7cdd6; --road: #ffffff; --road-major: #f6dc9f; --road-edge: #d6dcd6;
   --font: "PJS", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --nav-h: 66px;
+  /* Safe areas: Capacitor injects --safe-area-inset-* on Android; env() covers browsers and newer WebViews. */
+  --sat: max(var(--safe-area-inset-top, 0px), env(safe-area-inset-top, 0px));
+  --sab: max(var(--safe-area-inset-bottom, 0px), env(safe-area-inset-bottom, 0px));
+  --sal: max(var(--safe-area-inset-left, 0px), env(safe-area-inset-left, 0px));
+  --sar: max(var(--safe-area-inset-right, 0px), env(safe-area-inset-right, 0px));
 }
 @media (prefers-color-scheme: dark) { :root {
   --app: #0b1416; --surface: #121e21; --surface-2: #19282b; --ink: #edf3f3; --ink-2: #b4c4c6; --ink-3: #7c8f92;
@@ -36,7 +41,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .boot img { border-radius: 18px; }
 
 /* ---------- shell ---------- */
-.layer { position: absolute; inset: 0 0 var(--nav-h) 0; display: flex; flex-direction: column; background: var(--app); }
+.layer { position: absolute; inset: 0 0 calc(var(--nav-h) + var(--sab)) 0; display: flex; flex-direction: column; background: var(--app); }
 .pushed { z-index: 20; box-shadow: -8px 0 24px var(--shadow); }
 @media (prefers-reduced-motion: no-preference) {
   .pushed.enter { animation: slideIn .26s cubic-bezier(.2,.8,.2,1); }
@@ -52,8 +57,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
 .scroll::-webkit-scrollbar { display: none; }
 .pad { padding: 0 18px; }
-.safe-top { padding-top: max(10px, env(safe-area-inset-top, 0px)); }
-.nav { position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); z-index: 30;
+.safe-top { padding-top: max(10px, var(--sat)); }
+.nav { position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--nav-h) + var(--sab)); padding-bottom: var(--sab); z-index: 30;
   background: var(--surface); border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(5, 1fr); }
 .nav button { font: inherit; font-size: 11px; font-weight: 600; color: var(--ink-3); background: none; border: 0; display: grid; justify-items: center; align-content: center; gap: 3px; cursor: pointer; position: relative; }
 .nav button[aria-current="page"] { color: var(--brand); }
@@ -88,7 +93,7 @@ html[dir="rtl"] .band .leaf { right: auto; left: -40px; }
 .hrow { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 18px 6px; margin: 0 -18px; scrollbar-width: none; }
 .hrow::-webkit-scrollbar { display: none; }
 .hcard { flex: none; width: 160px; scroll-snap-align: start; font: inherit; text-align: start; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 0; overflow: hidden; cursor: pointer; color: var(--ink); }
-.hcard .art { height: 84px; display: grid; place-items: center; color: #fff; font-size: 27px; font-weight: 800; letter-spacing: -.02em; position: relative; background-size: cover; background-position: center; }
+.hcard .art { height: 100px; display: grid; place-items: center; color: #fff; font-size: 27px; font-weight: 800; letter-spacing: -.02em; position: relative; background-size: cover; background-position: center; }
 .hcard .art em { position: absolute; inset-inline-start: 8px; bottom: 8px; font-style: normal; font-size: 11px; font-weight: 700; background: rgb(0 0 0 / .3); color: #fff; padding: 3px 7px; border-radius: 99px; letter-spacing: 0; }
 .hcard .art .badge { position: absolute; inset-inline-end: 8px; top: 8px; font-size: 10.5px; font-weight: 800; background: var(--saffron); color: #2a1a00; padding: 3px 7px; border-radius: 6px; letter-spacing: 0; }
 .hcard .bd { padding: 10px 12px 12px; }
@@ -159,7 +164,7 @@ html[dir="rtl"] .label { letter-spacing: 0; }
 
 /* ---------- detail ---------- */
 .hero { height: 184px; position: relative; display: grid; place-items: center; color: #fff; font-size: 54px; font-weight: 800; letter-spacing: -.03em; flex: none; background-size: cover; background-position: center; }
-.hero .hb { position: absolute; top: max(10px, env(safe-area-inset-top, 0px)); left: 10px; right: 10px; display: flex; justify-content: space-between; }
+.hero .hb { position: absolute; top: max(10px, var(--sat)); left: 10px; right: 10px; display: flex; justify-content: space-between; }
 .hero .hb button { background: rgb(0 0 0 / .3); color: #fff; border: 0; }
 .hero small { position: absolute; bottom: 12px; inset-inline-end: 14px; font-size: 11px; font-weight: 600; opacity: .85; letter-spacing: 0; }
 .dhead { padding: 16px 18px 0; }
@@ -198,7 +203,7 @@ html[dir="rtl"] .label { letter-spacing: 0; }
 /* ---------- map ---------- */
 .mapwrap { position: absolute; inset: 0; }
 .mapel { position: absolute; inset: 0; background: var(--land); }
-.mapTop { position: absolute; top: max(10px, env(safe-area-inset-top, 0px)); left: 12px; right: 12px; z-index: 600; display: grid; gap: 10px; }
+.mapTop { position: absolute; top: max(10px, var(--sat)); left: 12px; right: 12px; z-index: 600; display: grid; gap: 10px; }
 .mapTop .chip { box-shadow: 0 2px 6px var(--shadow); }
 .carousel { position: absolute; left: 0; right: 0; bottom: 12px; z-index: 600; display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 16px; scrollbar-width: none; }
 .carousel::-webkit-scrollbar { display: none; }
@@ -219,10 +224,11 @@ html[dir="rtl"] .label { letter-spacing: 0; }
 /* ---------- sheets, forms, toast ---------- */
 .sheet { position: absolute; inset: 0; z-index: 50; }
 .sheet .dim { position: absolute; inset: 0; background: var(--scrim); }
-.sheet .panel { position: absolute; left: 0; right: 0; bottom: 0; max-height: 86%; background: var(--surface); border-radius: 22px 22px 0 0; display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom, 0px); }
+.sheet .panel { position: absolute; left: 0; right: 0; bottom: 0; max-height: 86%; background: var(--surface); border-radius: 22px 22px 0 0; display: flex; flex-direction: column; padding-bottom: var(--sab); }
 .sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 10px auto 6px; flex: none; }
 .sheet h3 { margin: 6px 18px 8px; font-size: 18px; font-weight: 800; }
 .sheet .sub { margin: 0 18px 12px; color: var(--ink-2); font-size: 13.5px; line-height: 1.5; }
+.arealist { flex: 1 1 auto; min-height: 180px; overflow-y: auto; }
 .arealist button { font: inherit; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 13px 18px; border: 0; border-top: 1px solid var(--line); background: none; color: var(--ink); cursor: pointer; font-size: 15px; text-align: start; }
 .arealist button[aria-current="true"] { color: var(--brand); font-weight: 700; }
 .arealist small { color: var(--ink-3); font-variant-numeric: tabular-nums; }
@@ -238,7 +244,7 @@ html[dir="rtl"] .label { letter-spacing: 0; }
 .errcard { margin: 8px 18px; padding: 14px 16px; border-radius: 14px; background: var(--bad-soft); color: var(--bad); font-weight: 600; font-size: 13.5px; }
 .reply { margin: 10px 18px 0; padding: 12px 14px; border-radius: 14px 14px 14px 4px; background: var(--surface); border: 1px solid var(--line); font-size: 14px; line-height: 1.45; }
 .reply small { display: block; color: var(--ink-3); font-size: 12px; margin-bottom: 4px; font-weight: 600; }
-.toast { position: absolute; left: 16px; right: 16px; bottom: calc(var(--nav-h) + 14px + env(safe-area-inset-bottom, 0px)); z-index: 70; background: var(--ink); color: var(--app); padding: 12px 14px; border-radius: 12px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 24px var(--shadow); }
+.toast { position: absolute; left: 16px; right: 16px; bottom: calc(var(--nav-h) + 14px + var(--sab)); z-index: 70; background: var(--ink); color: var(--app); padding: 12px 14px; border-radius: 12px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 24px var(--shadow); }
 .seg { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 .seg button { font: inherit; font-size: 14px; font-weight: 700; padding: 12px 8px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
 .seg button[aria-pressed="true"] { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); }
@@ -280,3 +286,10 @@ html[dir="rtl"] .label { letter-spacing: 0; }
 .menu button { font: inherit; width: 100%; display: grid; grid-template-columns: 22px 1fr auto; gap: 12px; align-items: center; padding: 14px; background: none; border: 0; border-top: 1px solid var(--line); color: var(--ink); cursor: pointer; text-align: start; font-size: 14.5px; font-weight: 600; }
 .menu button:first-child { border-top: 0; }
 .menu button .ico { color: var(--brand); } .menu button small { color: var(--ink-3); font-weight: 500; font-size: 12.5px; }
+
+/* Photos */
+.hero.tall { height: 236px; }
+.hero small, .banner small { text-shadow: 0 1px 3px rgb(0 0 0 / .6); }
+.banner { margin: 12px 16px 14px; height: 150px; border-radius: 18px; position: relative; display: flex; flex-direction: column; justify-content: flex-end; padding: 14px 16px; color: #fff; overflow: hidden; }
+.banner b { font-size: 22px; font-weight: 800; letter-spacing: -.02em; text-shadow: 0 1px 6px rgb(0 0 0 / .5); }
+.banner small { font-size: 10.5px; opacity: .85; margin-top: 2px; }

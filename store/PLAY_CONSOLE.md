@@ -131,7 +131,7 @@ Data types collected (none of them are shared or sold):
    app signing, choose **"Let Google manage and protect your app signing key"** (Play App Signing).
    Your `.jks` file is then only the *upload* key, and Google can reset it if it's ever lost.
 2. Add 5–10 testers (Gmail addresses), install from the test link, and check on 2–3 real phones.
-3. **Production → Create release.** Promote the same build. Release name: `1.0.0 (1)`.
+3. **Production → Create release.** Promote the same build. Release name: `1.0.1 (2)`.
    Release notes:
    ```
    First release: every shop in Srinagar, nearest first. Works offline.
