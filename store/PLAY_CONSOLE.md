@@ -9,10 +9,10 @@ Files referenced here are in this repository.
 |---|---|
 | The release bundle `app-release.aab` | `mobile/android/app/build/outputs/bundle/release/` (sent to you separately) |
 | The upload key `srinagar-bazaar-upload.jks` and its password | Sent to you separately. **Keep both safe and private. Never put them in git.** |
-| A working API address (domain or `sslip.io`, see `docs/DEPLOY.md`) | The app has `https://api.srinagarbazaar.in` built in. If you use a different address, tell me and I'll rebuild in a few minutes. |
-| Privacy policy URL | `https://api.srinagarbazaar.in/privacy.html` (the server hosts it) |
-| Account deletion URL | `https://api.srinagarbazaar.in/privacy.html#delete` |
-| Support email | e.g. `support@srinagarbazaar.in` (any working inbox is fine) |
+| A working API address (domain or `sslip.io`, see `docs/DEPLOY.md`) | The app has `https://api.45-92-1-150.sslip.io` built in. If you use a different address, tell me and I'll rebuild in a few minutes. |
+| Privacy policy URL | `https://api.45-92-1-150.sslip.io/privacy.html` (the server hosts it) |
+| Account deletion URL | `https://api.45-92-1-150.sslip.io/privacy.html#delete` |
+| Support email | `fazil.mastu@gmail.com` |
 
 **Using your friend's account, then transferring.** The app is first created in your friend's
 Play Console, and Play then lists your friend as the developer. After it's live, start a transfer
@@ -70,11 +70,11 @@ Map data © OpenStreetMap contributors. Places from Overture Maps Foundation and
 **Category and contact**
 - App category: **Travel & Local**
 - Tags: Local, Shopping, Travel guide
-- Email: your support email · Website: `https://srinagarbazaar.in` (optional)
+- Email: `fazil.mastu@gmail.com` · Website: leave empty for now
 
 ## 3. App content (Policy → App content)
 
-**Privacy policy:** `https://api.srinagarbazaar.in/privacy.html`
+**Privacy policy:** `https://api.45-92-1-150.sslip.io/privacy.html`
 
 **Ads:** No, the app doesn't contain ads.
 
@@ -107,7 +107,7 @@ demo shop that the public never sees, and no SMS is sent to it.
 |---|---|
 | Does the app collect or share user data? | Yes, it collects data |
 | Is all collected data encrypted in transit? | Yes (HTTPS) |
-| Can users ask for their data to be deleted? | Yes. URL: `https://api.srinagarbazaar.in/privacy.html#delete` |
+| Can users ask for their data to be deleted? | Yes. URL: `https://api.45-92-1-150.sslip.io/privacy.html#delete` |
 | Is data shared with third parties? | No (the SMS provider only delivers codes for us, which counts as a service provider, not sharing) |
 
 Data types collected (none of them are shared or sold):
@@ -145,7 +145,7 @@ first run a closed test with 12 testers for 14 days, so using your friend's olde
 ## 5. Every later update
 
 1. Raise `versionCode` (1 → 2 → 3 …) and `versionName` in `mobile/android/app/build.gradle`.
-2. `cd mobile && SB_API=https://api.srinagarbazaar.in SB_PUBLIC_API=https://api.srinagarbazaar.in npm run sync`
+2. `cd mobile && SB_API=https://api.45-92-1-150.sslip.io SB_PUBLIC_API=https://api.45-92-1-150.sslip.io npm run sync`
 3. `cd android && ./gradlew bundleRelease` (needs `android/keystore.properties` pointing to your `.jks`)
 4. Upload the new `.aab` in Play Console.
 

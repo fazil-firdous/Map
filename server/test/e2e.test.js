@@ -105,3 +105,8 @@ test("play reviewer gets the hidden demo shop only", async () => {
   const b = await (await fetch(API + "/v1/bundle")).json();
   assert.ok(!b.shops.some(s => s[0] === "SXR-REVIEW01"), "demo shop hidden from public");
 });
+
+test("sync reports the server's latest version", async () => {
+  const r = await call("GET", "/v1/sync?since=999999999");
+  assert.ok(typeof r.latest === "number" && r.latest < 999999999 && r.shops.length === 0);
+});

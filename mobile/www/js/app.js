@@ -512,7 +512,8 @@
       <p>Srinagar Bazaar helps you find any shop in Srinagar, nearest first, even without internet.</p>
       <p><b style="color:var(--ink)">What we store.</b> A random ID for this phone. Your phone number only if you verify it (to claim a shop or win prizes). Requests you send with Ask the bazaar. Anonymous counts of shop views and calls, which only the shop's owner sees. Your saved shops stay on this phone.</p>
       <p><b style="color:var(--ink)">Location.</b> Used only on this phone to sort shops by distance, and sent only when you add a shop, confirm one, or send a request.</p>
-      <p><b style="color:var(--ink)">Your choices.</b> Ask us to delete your data any time from the privacy page. Full policy: srinagarbazaar.in/privacy</p>
+      <p><b style="color:var(--ink)">Your choices.</b> Ask us to delete your data any time from the privacy page. Full policy: <button class="link" data-ext="https://api.45-92-1-150.sslip.io/privacy.html">api.45-92-1-150.sslip.io/privacy.html</button></p>
+      <p><b style="color:var(--ink)">Contact.</b> <span class="selectable">fazil.mastu@gmail.com</span></p>
       <p><b style="color:var(--ink)">Data sources.</b> Map data © OpenStreetMap contributors (ODbL). Places from Overture Maps Foundation and AllThePlaces, plus shops added by people of Srinagar.</p>
       <button class="btn ghost" data-delme style="color:var(--bad);margin-top:6px">Delete my data</button>
       <p class="note" style="margin-top:12px">Version 1.0.0</p><div style="height:30px"></div></div>`;

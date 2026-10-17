@@ -69,8 +69,11 @@ function routes(app) {
     const rows = await db.many(ROW_SQL + " WHERE s.version > $1 ORDER BY s.version LIMIT 5000", [since]);
     const { categories, groups } = await taxonomy();
     const v = rows.length ? Number(rows[rows.length - 1].version) : since;
+    // "latest" lets a phone notice when the server's counter is behind its copy (fresh or restored
+    // server) and download the whole bundle again instead of waiting for versions that never come.
+    const latest = Number((await db.one("SELECT last_value FROM sync_seq")).last_value);
     return {
-      version: v, more: rows.length === 5000, groups, categories,
+      version: v, latest, more: rows.length === 5000, groups, categories,
       shops: rows.filter(r => r.status === "active").map(toRow),
       removed: rows.filter(r => r.status !== "active").map(r => r.id),
     };

@@ -46,6 +46,11 @@
         let more = true, changed = 0;
         while (more) {
           const r = await this.api("GET", `/v1/sync?since=${this.data.version}`);
+          if (r.latest !== undefined && r.latest < this.data.version) {
+            // Server was reset or restored: take its full copy of the city.
+            const full = await this.api("GET", "/v1/bundle");
+            this.data = full; changed += full.shops.length; break;
+          }
           const d = this.data;
           d.groups = r.groups; d.categories = r.categories;
           const pos = new Map(d.shops.map((s, i) => [s[0], i]));
