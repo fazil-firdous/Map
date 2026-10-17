@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07080d">
+<title>Kulgam Eats</title>
+<!--INLINE-CSS:../../mobile/www/vendor/leaflet/leaflet.css-->
+<style>
+/* Kulgam Eats prototype. Dark, glowing UI: neon gradients on a near-black base. */
+@font-face { font-family: "PJS"; src: url(data:font/woff2;base64,__PJS600__) format("woff2"); font-weight: 600; }
+@font-face { font-family: "PJS"; src: url(data:font/woff2;base64,__PJS800__) format("woff2"); font-weight: 800; }
+:root {
+  --bg: #07080d; --bg-2: #0d0f17; --card: #12141e; --card-2: #181b28; --line: rgb(255 255 255 / .08); --line-2: rgb(255 255 255 / .14);
+  --ink: #f5f6fb; --ink-2: #b7bccb; --ink-3: #7c8296;
+  --hot: #ff5a36; --pink: #ff2e83; --violet: #8b5cff; --lime: #3ef2a0; --amber: #ffb547; --red: #ff4d5e;
+  --grad: linear-gradient(120deg, #ff6a3d 0%, #ff2e83 55%, #a24bff 100%);
+  --glow: 0 0 0 1px rgb(255 90 54 / .35), 0 8px 30px -6px rgb(255 46 131 / .55), 0 0 60px -10px rgb(255 90 54 / .45);
+  --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px);
+  --font: "PJS", system-ui, -apple-system, Roboto, sans-serif;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: #030306; color: var(--ink); font-family: var(--font); }
+button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; padding: 0; }
+.ico { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.ico.sm { width: 16px; height: 16px; } .ico.lg { width: 26px; height: 26px; }
+
+/* Phone frame on desktop, full screen on phones */
+.stage { min-height: 100%; display: grid; place-items: center; padding: 24px; background: radial-gradient(800px 500px at 20% 10%, #241018, transparent), radial-gradient(700px 500px at 90% 90%, #140f2a, transparent), #030306; }
+.phone { width: 390px; height: 844px; border-radius: 46px; position: relative; overflow: hidden; background: var(--bg); box-shadow: 0 0 0 10px #15161c, 0 0 0 11px #2a2c35, 0 40px 120px -20px rgb(255 46 131 / .25); }
+@media (max-width: 520px) { .stage { padding: 0; display: block; } .phone { width: 100%; height: 100vh; height: 100dvh; border-radius: 0; box-shadow: none; } }
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--bg); }
+.screen::before { content: ""; position: absolute; inset: -20% -30% auto; height: 420px; background: radial-gradient(closest-side, rgb(255 70 60 / .22), transparent), radial-gradient(closest-side at 80% 40%, rgb(139 92 255 / .18), transparent); pointer-events: none; filter: blur(10px); }
+.scroll { flex: 1; overflow-y: auto; scrollbar-width: none; position: relative; }
+.scroll::-webkit-scrollbar { display: none; }
+.enter { animation: enter .35s cubic-bezier(.2,.8,.2,1); } @keyframes enter { from { opacity: 0; transform: translateY(14px) scale(.985); } }
+.pad { padding: 0 18px; }
+.top { padding: calc(var(--sat) + 16px) 18px 10px; position: relative; z-index: 2; }
+.row { display: flex; align-items: center; gap: 10px; }
+.between { justify-content: space-between; }
+.muted { color: var(--ink-3); } .small { font-size: 12.5px; }
+.gradtext { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* Header */
+.loc { display: flex; align-items: center; gap: 8px; text-align: left; }
+.loc .pin { width: 34px; height: 34px; border-radius: 12px; display: grid; place-items: center; background: rgb(255 90 54 / .14); color: var(--hot); box-shadow: inset 0 0 0 1px rgb(255 90 54 / .3); }
+.loc b { display: block; font-size: 16px; font-weight: 800; } .loc span { font-size: 12px; color: var(--ink-3); }
+.avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--grad); display: grid; place-items: center; font-weight: 800; box-shadow: var(--glow); }
+.search { margin-top: 16px; height: 50px; border-radius: 16px; display: flex; align-items: center; gap: 10px; padding: 0 16px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line-2); color: var(--ink-3); font-size: 15px; width: 100%; text-align: left; }
+.search .ico { color: var(--hot); }
+h2 { font-size: 19px; font-weight: 800; margin: 26px 0 12px; letter-spacing: -.02em; }
+h2 small { display: block; font-size: 12.5px; color: var(--ink-3); font-weight: 600; letter-spacing: 0; margin-top: 2px; }
+
+/* Hero offer */
+.hero { margin-top: 18px; border-radius: 24px; padding: 18px; position: relative; overflow: hidden; background: linear-gradient(135deg, #2a0f14, #1a0c26); box-shadow: inset 0 0 0 1px rgb(255 90 54 / .25), 0 20px 50px -20px rgb(255 46 131 / .5); }
+.hero::after { content: ""; position: absolute; right: -40px; top: -40px; width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(closest-side, rgb(255 90 54 / .55), transparent); filter: blur(4px); animation: breathe 4s ease-in-out infinite; }
+@keyframes breathe { 50% { transform: scale(1.15); opacity: .7; } }
+.hero b { font-size: 22px; font-weight: 800; letter-spacing: -.02em; display: block; position: relative; z-index: 1; }
+.hero p { margin: 6px 0 0; color: var(--ink-2); font-size: 13.5px; position: relative; z-index: 1; max-width: 250px; line-height: 1.45; }
+.hero .tag { display: inline-flex; gap: 6px; align-items: center; margin-top: 12px; padding: 6px 10px; border-radius: 99px; background: rgb(62 242 160 / .12); color: var(--lime); font-size: 12px; font-weight: 800; position: relative; z-index: 1; }
+
+/* Cuisine chips */
+.cuis { display: flex; gap: 12px; overflow-x: auto; padding: 4px 18px 6px; margin: 0 -18px; scrollbar-width: none; }
+.cuis::-webkit-scrollbar { display: none; }
+.cu { flex: none; display: grid; justify-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
+.cu i { width: 62px; height: 62px; border-radius: 20px; display: grid; place-items: center; background: var(--card); box-shadow: inset 0 0 0 1px var(--line-2); color: var(--ink); transition: box-shadow .2s, transform .2s; }
+.cu[aria-pressed="true"] { color: var(--ink); } .cu[aria-pressed="true"] i { background: linear-gradient(160deg, rgb(255 90 54 / .25), rgb(255 46 131 / .15)); box-shadow: inset 0 0 0 1.5px var(--hot), 0 0 24px -4px rgb(255 90 54 / .7); color: #fff; }
+
+/* Restaurant cards */
+.rcard { display: block; width: 100%; text-align: left; margin-bottom: 16px; border-radius: 24px; overflow: hidden; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); position: relative; transition: transform .15s; }
+.rcard:active { transform: scale(.985); }
+.rcard .img { height: 150px; background-size: cover; background-position: center; position: relative; }
+.rcard .img::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgb(7 8 13 / .9)); }
+.rcard .img .ph { position: absolute; inset: 0; display: grid; place-items: center; color: rgb(255 255 255 / .9); }
+.rcard .img .ph .ico { width: 54px; height: 54px; stroke-width: 1.4; filter: drop-shadow(0 0 18px rgb(255 255 255 / .5)); }
+.rcard .badges { position: absolute; left: 12px; top: 12px; display: flex; gap: 6px; z-index: 1; }
+.pill { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: 99px; font-size: 11.5px; font-weight: 800; background: rgb(7 8 13 / .65); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: inset 0 0 0 1px var(--line-2); }
+.pill.hot { background: var(--grad); box-shadow: 0 0 18px -2px rgb(255 46 131 / .7); }
+.pill.lime { color: var(--lime); } .pill.red { color: var(--red); }
+.rcard .eta { position: absolute; right: 12px; bottom: 12px; z-index: 1; }
+.rcard .bd { padding: 12px 16px 16px; }
+.rcard .nm { font-size: 18px; font-weight: 800; letter-spacing: -.02em; }
+.rcard .meta { margin-top: 4px; color: var(--ink-3); font-size: 13px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.dot { width: 3px; height: 3px; border-radius: 50%; background: var(--ink-3); }
+.rcard .fee { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line-2); font-size: 12.5px; color: var(--ink-2); display: flex; gap: 6px; align-items: center; }
+.rcard .fee .ico { color: var(--hot); }
+.rcard.off { opacity: .55; }
+.rcard.glow { box-shadow: inset 0 0 0 1px rgb(255 90 54 / .35), 0 18px 40px -18px rgb(255 46 131 / .55); }
+
+/* Bottom nav */
+.nav { position: relative; z-index: 5; display: grid; grid-template-columns: repeat(3, 1fr); padding: 8px 10px calc(var(--sab) + 10px); background: rgb(7 8 13 / .85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--line); }
+.nav button { display: grid; justify-items: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--ink-3); padding: 6px 0; }
+.nav button[aria-current="true"] { color: #fff; } .nav button[aria-current="true"] .ico { color: var(--hot); filter: drop-shadow(0 0 8px rgb(255 90 54 / .9)); }
+
+/* Restaurant page */
+.rhead { height: 230px; background-size: cover; background-position: center; position: relative; flex: none; }
+.rhead::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgb(7 8 13 / .5), transparent 30%, rgb(7 8 13 / .2) 60%, var(--bg)); }
+.back { position: absolute; z-index: 700; top: calc(var(--sat) + 14px); left: 14px; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: rgb(7 8 13 / .6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: inset 0 0 0 1px var(--line-2); }
+.rinfo { margin: -60px 16px 0; position: relative; z-index: 2; padding: 16px; border-radius: 24px; background: rgb(18 20 30 / .88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: inset 0 0 0 1px var(--line-2), 0 20px 50px -20px #000; }
+.rinfo h1 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -.025em; }
+.rinfo .meta { color: var(--ink-3); font-size: 13px; margin-top: 4px; }
+.rules { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+.rules div { padding: 10px; border-radius: 14px; background: var(--card-2); box-shadow: inset 0 0 0 1px var(--line); }
+.rules b { display: block; font-size: 14px; } .rules span { font-size: 11px; color: var(--ink-3); }
+.own { margin-top: 12px; display: flex; gap: 8px; align-items: center; font-size: 12.5px; color: var(--lime); }
+.sample { margin: 14px 16px 0; padding: 10px 12px; border-radius: 14px; background: rgb(255 181 71 / .1); color: var(--amber); font-size: 12px; line-height: 1.45; box-shadow: inset 0 0 0 1px rgb(255 181 71 / .25); }
+.msec { padding: 0 16px; }
+.msec h3 { font-size: 17px; font-weight: 800; margin: 24px 0 6px; }
+.item { display: grid; grid-template-columns: 1fr 108px; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.veg { width: 14px; height: 14px; border-radius: 3px; display: inline-grid; place-items: center; border: 1.5px solid var(--lime); margin-right: 6px; vertical-align: -2px; }
+.veg::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--lime); }
+.veg.nv { border-color: var(--red); } .veg.nv::after { background: var(--red); border-radius: 0; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 7px solid var(--red); background: none; }
+.item b { font-size: 15.5px; font-weight: 800; } .item .p { margin-top: 4px; font-weight: 800; }
+.item .d { margin-top: 6px; font-size: 12.5px; color: var(--ink-3); line-height: 1.4; }
+.item .pic { height: 96px; border-radius: 16px; background: var(--card-2); position: relative; display: grid; place-items: center; color: var(--ink-3); box-shadow: inset 0 0 0 1px var(--line); }
+.add { position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); min-width: 88px; height: 36px; border-radius: 12px; background: #fff; color: #e5352c; font-weight: 800; font-size: 14px; box-shadow: 0 6px 18px -4px rgb(255 90 54 / .6); display: flex; align-items: center; justify-content: center; gap: 0; }
+.add.on { background: var(--grad); color: #fff; justify-content: space-between; padding: 0 4px; box-shadow: 0 0 22px -2px rgb(255 46 131 / .8); }
+.add.on button { width: 28px; height: 28px; display: grid; place-items: center; font-size: 18px; font-weight: 800; }
+
+/* Sticky cart bar */
+.cartbar { position: absolute; left: 14px; right: 14px; bottom: calc(var(--sab) + 14px); z-index: 6; height: 62px; border-radius: 20px; background: var(--grad); display: flex; align-items: center; justify-content: space-between; padding: 0 18px; box-shadow: 0 0 40px -6px rgb(255 46 131 / .8), 0 14px 30px -10px #000; overflow: hidden; animation: pop .35s cubic-bezier(.2,1.4,.4,1); }
+.cartbar::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / .35) 50%, transparent 70%); transform: translateX(-100%); animation: shine 2.6s ease-in-out infinite; }
+@keyframes shine { 60%, 100% { transform: translateX(100%); } }
+@keyframes pop { from { transform: translateY(30px) scale(.9); opacity: 0; } }
+.cartbar b { font-size: 15px; } .cartbar span { font-size: 12px; opacity: .9; display: block; }
+
+/* Buttons */
+.cta { width: 100%; height: 56px; border-radius: 18px; background: var(--grad); font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 0 34px -6px rgb(255 46 131 / .8); position: relative; overflow: hidden; }
+.cta::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / .3) 50%, transparent 70%); transform: translateX(-100%); animation: shine 2.8s ease-in-out infinite; }
+.cta:disabled { background: var(--card-2); color: var(--ink-3); box-shadow: none; } .cta:disabled::after { display: none; }
+.ghost { width: 100%; height: 50px; border-radius: 16px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line-2); font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.ghost.red { color: var(--red); }
+.foot { padding: 12px 16px calc(var(--sab) + 14px); background: linear-gradient(transparent, var(--bg) 30%); position: relative; z-index: 5; }
+
+/* Cards & lists */
+.card { margin: 0 16px 14px; padding: 16px; border-radius: 22px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); }
+.card h4 { margin: 0 0 12px; font-size: 14px; color: var(--ink-2); font-weight: 800; }
+.line { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; font-size: 14px; color: var(--ink-2); }
+.line b { color: var(--ink); } .line.total { border-top: 1px dashed var(--line-2); margin-top: 6px; padding-top: 12px; font-size: 16px; color: var(--ink); font-weight: 800; }
+.line small { display: block; color: var(--ink-3); font-size: 11.5px; }
+.ci { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; padding: 8px 0; }
+.qty { height: 32px; border-radius: 10px; display: flex; align-items: center; gap: 2px; box-shadow: inset 0 0 0 1px var(--hot); color: var(--hot); font-weight: 800; }
+.qty button { width: 28px; height: 32px; font-size: 17px; font-weight: 800; color: var(--hot); }
+.paym { display: grid; gap: 10px; }
+.opt { display: grid; grid-template-columns: 40px 1fr 22px; gap: 12px; align-items: center; padding: 14px; border-radius: 18px; background: var(--card-2); box-shadow: inset 0 0 0 1px var(--line); text-align: left; }
+.opt i { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: rgb(255 255 255 / .06); }
+.opt b { font-size: 15px; } .opt span { display: block; font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+.opt .radio { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--line-2); }
+.opt[aria-checked="true"] { box-shadow: inset 0 0 0 1.5px var(--hot), 0 0 26px -8px rgb(255 90 54 / .8); }
+.opt[aria-checked="true"] .radio { box-shadow: inset 0 0 0 6px var(--hot); }
+.opt[aria-disabled="true"] { opacity: .45; }
+.addr { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center; }
+.addr i { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: rgb(255 90 54 / .14); color: var(--hot); }
+.warn { margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: rgb(255 181 71 / .1); color: var(--amber); font-size: 12.5px; display: flex; gap: 8px; align-items: center; }
+.mini { font-size: 12px; color: var(--ink-3); line-height: 1.5; }
+.seg { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.seg button { height: 34px; padding: 0 12px; border-radius: 99px; font-size: 12.5px; font-weight: 700; background: var(--card-2); box-shadow: inset 0 0 0 1px var(--line-2); color: var(--ink-2); }
+.seg button[aria-pressed="true"] { background: rgb(255 90 54 / .16); box-shadow: inset 0 0 0 1.5px var(--hot); color: #fff; }
+
+/* Waiting / radar */
+.center { flex: 1; display: grid; place-items: center; text-align: center; padding: 0 28px; position: relative; z-index: 1; }
+.radar { width: 220px; height: 220px; position: relative; margin: 0 auto 28px; display: grid; place-items: center; }
+.radar i { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgb(255 90 54 / .6); animation: ring 2.4s ease-out infinite; }
+.radar i:nth-child(2) { animation-delay: .8s; } .radar i:nth-child(3) { animation-delay: 1.6s; }
+@keyframes ring { from { transform: scale(.35); opacity: 1; } to { transform: scale(1.1); opacity: 0; } }
+.radar .core { width: 96px; height: 96px; border-radius: 50%; background: var(--grad); display: grid; place-items: center; box-shadow: 0 0 60px rgb(255 46 131 / .8); position: relative; }
+.radar .core::before { content: ""; position: absolute; inset: -10px; border-radius: 50%; background: conic-gradient(from 0deg, transparent, rgb(255 255 255 / .8), transparent 30%); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 0); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 0); animation: spin 1.4s linear infinite; }
+@keyframes spin { to { transform: rotate(1turn); } }
+.radar .core .ico { width: 40px; height: 40px; }
+.center h1 { font-size: 24px; margin: 0 0 8px; letter-spacing: -.02em; }
+.center p { color: var(--ink-2); margin: 0; line-height: 1.5; font-size: 14px; }
+.timer { font-variant-numeric: tabular-nums; font-weight: 800; }
+.tbar { height: 6px; border-radius: 99px; background: var(--card-2); overflow: hidden; margin: 18px auto 0; width: 220px; }
+.tbar i { display: block; height: 100%; background: var(--grad); box-shadow: 0 0 14px rgb(255 46 131 / .9); transition: width 1s linear; }
+
+/* Payment */
+.payamt { text-align: center; padding: 6px 16px 16px; position: relative; z-index: 1; }
+.payamt span { font-size: 13px; color: var(--ink-3); } .payamt b { display: block; font-size: 44px; font-weight: 800; letter-spacing: -.03em; margin-top: 2px; }
+.qrwrap { width: 236px; height: 236px; margin: 0 auto; border-radius: 28px; padding: 14px; background: #fff; position: relative; box-shadow: 0 0 0 2px rgb(255 90 54 / .7), 0 0 50px -4px rgb(255 46 131 / .8); animation: qrglow 2.6s ease-in-out infinite; }
+@keyframes qrglow { 50% { box-shadow: 0 0 0 2px rgb(139 92 255 / .8), 0 0 70px -2px rgb(139 92 255 / .7); } }
+.qrwrap img, .qrwrap svg { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.qrwrap .scan { position: absolute; left: 14px; right: 14px; height: 3px; top: 14px; background: linear-gradient(90deg, transparent, var(--hot), transparent); box-shadow: 0 0 14px var(--hot); animation: scan 2.4s ease-in-out infinite; border-radius: 2px; }
+@keyframes scan { 50% { top: calc(100% - 17px); } }
+.upiid { display: flex; justify-content: center; gap: 8px; align-items: center; margin-top: 14px; font-size: 13.5px; color: var(--ink-2); }
+.upiid code { font-family: inherit; font-weight: 800; color: #fff; }
+.apps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+.apps button { height: 64px; border-radius: 16px; background: var(--card-2); box-shadow: inset 0 0 0 1px var(--line-2); display: grid; place-items: center; align-content: center; gap: 4px; font-size: 11px; font-weight: 700; color: var(--ink-2); }
+.apps .lg { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; font-weight: 800; font-size: 12px; color: #fff; }
+.steps { display: grid; gap: 12px; }
+.steps div { display: grid; grid-template-columns: 28px 1fr; gap: 10px; font-size: 13.5px; color: var(--ink-2); line-height: 1.45; }
+.steps i { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-weight: 800; font-size: 13px; background: rgb(255 90 54 / .16); color: var(--hot); }
+.utr { width: 100%; height: 50px; border-radius: 14px; border: 0; background: var(--card-2); box-shadow: inset 0 0 0 1px var(--line-2); color: #fff; font: inherit; font-size: 16px; padding: 0 14px; letter-spacing: .08em; outline: none; margin-top: 10px; }
+.utr:focus { box-shadow: inset 0 0 0 1.5px var(--hot), 0 0 20px -6px rgb(255 90 54 / .8); }
+.safe { display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: var(--ink-2); line-height: 1.45; }
+.safe .ico { color: var(--lime); margin-top: 1px; }
+.countdown { display: inline-flex; gap: 6px; align-items: center; padding: 6px 12px; border-radius: 99px; background: rgb(255 77 94 / .12); color: #ff8a95; font-weight: 800; font-size: 13px; }
+
+/* Tracking */
+.map { height: 340px; position: relative; flex: none; }
+.map .leaflet-container { position: absolute; inset: 0; background: #0b0c12; }
+.map::after { content: ""; position: absolute; inset: auto 0 0; height: 90px; background: linear-gradient(transparent, var(--bg)); z-index: 500; pointer-events: none; }
+.leaflet-control-attribution { background: rgb(0 0 0 / .5) !important; color: #999 !important; font-size: 9px; } .leaflet-control-attribution a { color: #aaa !important; }
+.route { filter: drop-shadow(0 0 6px #ff2e83) drop-shadow(0 0 14px #ff5a36); }
+.mk { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; color: #fff; }
+.mk.rider { background: var(--grad); box-shadow: 0 0 0 4px rgb(255 46 131 / .3), 0 0 30px rgb(255 46 131 / .9); animation: riderpulse 1.6s ease-in-out infinite; }
+@keyframes riderpulse { 50% { box-shadow: 0 0 0 10px rgb(255 46 131 / .12), 0 0 40px rgb(255 46 131 / 1); } }
+.mk.home { background: #1d2030; box-shadow: inset 0 0 0 2px var(--lime), 0 0 20px rgb(62 242 160 / .6); color: var(--lime); width: 36px; height: 36px; }
+.mk.rest { background: #1d2030; box-shadow: inset 0 0 0 2px var(--amber), 0 0 20px rgb(255 181 71 / .6); color: var(--amber); width: 36px; height: 36px; }
+.status { margin: -44px 16px 14px; position: relative; z-index: 600; padding: 18px; border-radius: 24px; background: rgb(18 20 30 / .92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: inset 0 0 0 1px var(--line-2), 0 20px 50px -20px #000; }
+.status .big { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+.status .eta2 { font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+.prog { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 16px; }
+.prog i { height: 5px; border-radius: 99px; background: var(--card-2); position: relative; overflow: hidden; }
+.prog i.done { background: var(--grad); box-shadow: 0 0 10px rgb(255 46 131 / .8); }
+.prog i.now { background: var(--card-2); }
+.prog i.now::after { content: ""; position: absolute; inset: 0; width: 40%; background: var(--grad); border-radius: 99px; box-shadow: 0 0 10px rgb(255 46 131 / .9); animation: slide 1.3s ease-in-out infinite; }
+@keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+.tl { display: grid; gap: 0; }
+.tl div { display: grid; grid-template-columns: 26px 1fr auto; gap: 10px; padding: 8px 0; font-size: 14px; color: var(--ink-3); align-items: center; }
+.tl div b { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--card-2); }
+.tl div.done { color: var(--ink); } .tl div.done b { background: rgb(62 242 160 / .15); color: var(--lime); }
+.tl div.now { color: #fff; font-weight: 800; } .tl div.now b { background: var(--grad); box-shadow: 0 0 16px rgb(255 46 131 / .8); }
+.tl small { font-size: 12px; color: var(--ink-3); font-weight: 600; }
+
+/* Celebration */
+.burst { width: 140px; height: 140px; margin: 0 auto 22px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle, rgb(62 242 160 / .35), transparent 70%); position: relative; }
+.burst .ok { width: 92px; height: 92px; border-radius: 50%; background: linear-gradient(135deg, #3ef2a0, #19b97a); display: grid; place-items: center; box-shadow: 0 0 50px rgb(62 242 160 / .8); animation: okpop .5s cubic-bezier(.2,1.6,.4,1); }
+.burst .ok .ico { width: 46px; height: 46px; stroke-width: 3; color: #06261a; }
+@keyframes okpop { from { transform: scale(.2); } }
+.burst i { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--c); left: 50%; top: 50%; animation: fly 1s ease-out forwards; }
+@keyframes fly { to { transform: translate(var(--x), var(--y)); opacity: 0; } }
+
+/* Restaurant mode */
+.modebar { display: flex; gap: 8px; margin-top: 12px; padding: 4px; border-radius: 16px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); }
+.modebar button { flex: 1; height: 40px; border-radius: 12px; font-weight: 800; font-size: 13.5px; color: var(--ink-3); }
+.modebar button[aria-pressed="true"] { background: var(--grad); color: #fff; box-shadow: 0 0 20px -4px rgb(255 46 131 / .8); }
+.neworder { margin: 0 16px 14px; padding: 16px; border-radius: 22px; background: linear-gradient(160deg, #2b0f15, #18101f); box-shadow: inset 0 0 0 1.5px var(--hot), 0 0 40px -8px rgb(255 90 54 / .8); animation: ringcard 1.2s ease-in-out infinite; }
+@keyframes ringcard { 50% { box-shadow: inset 0 0 0 1.5px var(--pink), 0 0 60px -6px rgb(255 46 131 / 1); } }
+.neworder .bell { display: inline-flex; gap: 6px; align-items: center; color: var(--hot); font-weight: 800; font-size: 13px; }
+.neworder .bell .ico { animation: shake .6s ease-in-out infinite; }
+@keyframes shake { 25% { transform: rotate(-14deg); } 75% { transform: rotate(14deg); } }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.btn2 { height: 48px; border-radius: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.btn2.yes { background: linear-gradient(135deg, #3ef2a0, #16b877); color: #06261a; box-shadow: 0 0 24px -4px rgb(62 242 160 / .8); }
+.btn2.no { background: var(--card-2); box-shadow: inset 0 0 0 1px var(--line-2); color: var(--red); }
+.btn2.go { background: var(--grad); box-shadow: 0 0 24px -4px rgb(255 46 131 / .8); grid-column: 1 / -1; }
+.field { display: grid; grid-template-columns: 1fr 110px; gap: 10px; align-items: center; padding: 9px 0; font-size: 14px; color: var(--ink-2); border-bottom: 1px solid var(--line); }
+.field input { width: 100%; height: 40px; border-radius: 12px; border: 0; background: var(--card-2); box-shadow: inset 0 0 0 1px var(--line-2); color: #fff; font: inherit; font-weight: 800; padding: 0 10px; text-align: right; outline: none; }
+.field input:focus { box-shadow: inset 0 0 0 1.5px var(--hot); }
+.switch { width: 50px; height: 30px; border-radius: 99px; background: var(--card-2); box-shadow: inset 0 0 0 1px var(--line-2); position: relative; justify-self: end; }
+.switch::after { content: ""; position: absolute; left: 4px; top: 4px; width: 22px; height: 22px; border-radius: 50%; background: var(--ink-3); transition: transform .2s, background .2s; }
+.switch[aria-checked="true"] { background: rgb(62 242 160 / .2); box-shadow: inset 0 0 0 1.5px var(--lime); } .switch[aria-checked="true"]::after { transform: translateX(20px); background: var(--lime); box-shadow: 0 0 12px var(--lime); }
+.example { margin-top: 12px; padding: 12px; border-radius: 14px; background: rgb(139 92 255 / .1); box-shadow: inset 0 0 0 1px rgb(139 92 255 / .3); font-size: 12.5px; color: #cdbdff; line-height: 1.55; }
+.toast { position: absolute; left: 50%; bottom: 100px; transform: translateX(-50%); z-index: 900; background: #fff; color: #111; padding: 12px 16px; border-radius: 14px; font-weight: 700; font-size: 13.5px; box-shadow: 0 10px 30px #000; width: max-content; max-width: 86%; animation: pop .3s; }
+.demo { position: absolute; z-index: 800; right: 12px; top: calc(var(--sat) + 70px); padding: 8px 12px; border-radius: 12px; background: rgb(139 92 255 / .2); box-shadow: inset 0 0 0 1px rgb(139 92 255 / .5); color: #d9ccff; font-size: 11.5px; font-weight: 800; }
+.sheetdim { position: absolute; inset: 0; background: rgb(0 0 0 / .6); z-index: 950; animation: enter .2s; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 960; max-height: 86%; overflow-y: auto; border-radius: 28px 28px 0 0; background: var(--bg-2); padding: 18px 18px calc(var(--sab) + 18px); box-shadow: 0 -10px 60px -10px rgb(255 46 131 / .35), inset 0 1px 0 var(--line-2); animation: up .3s cubic-bezier(.2,.8,.2,1); }
+@keyframes up { from { transform: translateY(100%); } }
+.sheet h3 { margin: 0 0 10px; font-size: 20px; }
+.sheet ol { padding-left: 18px; margin: 0; color: var(--ink-2); font-size: 13.5px; line-height: 1.55; } .sheet li { margin-bottom: 8px; } .sheet li b { color: #fff; }
+</style>
+</head>
+<body>
+<div class="stage"><div class="phone" id="app"></div></div>
+<!--INLINE-JS:../../mobile/www/js/icons.js-->
+<!--INLINE-JS:../../mobile/www/vendor/leaflet/leaflet.js-->
+<!--INLINE-JS:../../mobile/www/vendor/qrcode.js-->
+<script>
+/* ---------- data ---------- */
+// Real Kulgam-area restaurants (names, areas, map positions from open map data). Menus and prices are SAMPLES
+// until each restaurant gives its real menu card; UPI IDs are demo values.
+const PHOTO = { pizza: "__IMG_fast-food-1__", wazwan: "__IMG_wazwan-caterers-3__", cafe: "__IMG_cafe-tea-3__", bakery: "__IMG_bakery-sweets-0__", grill: "__IMG_fast-food-0__", chinese: "__IMG_restaurant-5__" };
+const MENUS = {
+  fast: [["Pizza", [["Margherita Pizza (8 inch)", 199, 1, "Cheese, tomato, oregano"], ["Chicken Tikka Pizza (8 inch)", 269, 0, "Tandoori chicken, onion, capsicum"], ["Chicken BBQ Pizza (10 inch)", 349, 0, "Smoky BBQ sauce, double cheese"]]],
+         ["Burgers & wraps", [["Zinger Burger", 169, 0, "Crispy chicken, lettuce, mayo"], ["Chicken Shawarma Roll", 139, 0, "Garlic sauce, pickles"], ["Veg Burger", 109, 1, "Aloo tikki, cheese"]]],
+         ["Sides & shakes", [["Peri Peri Fries", 119, 1, "Large"], ["Chicken Momos (8 pcs)", 159, 0, "Steamed, red chutney"], ["Oreo Shake", 139, 1, "Thick shake"]]]],
+  wazwan: [["Wazwan (per plate)", [["Rista (2 pcs)", 260, 0, "Meatballs in red gravy"], ["Rogan Josh", 290, 0, "Mutton, Kashmiri chilli gravy"], ["Gushtaba (2 pcs)", 310, 0, "In yoghurt gravy"], ["Tabak Maaz", 340, 0, "Fried mutton ribs"]]],
+           ["Trami & rice", [["Wazwan Trami for 2", 1199, 0, "Rista, rogan josh, tabak maaz, kebab, gushtaba, rice"], ["Steamed Rice", 70, 1, ""], ["Haak", 90, 1, "Kashmiri collard greens"]]]],
+  cafe: [["Coffee & tea", [["Cappuccino", 119, 1, ""], ["Cold Coffee", 129, 1, "With ice cream"], ["Kashmiri Kahwa", 59, 1, "Saffron, almonds"]]],
+         ["Bites", [["Club Sandwich", 169, 0, "Chicken, egg, cheese"], ["Chicken Wings (6)", 219, 0, "Hot & spicy"], ["Chocolate Brownie", 109, 1, "With ice cream +40"]]]],
+  bakery: [["Fresh from the oven", [["Chicken Patty", 40, 0, ""], ["Bakarkhani (4)", 60, 1, ""], ["Kulcha (6)", 60, 1, "Sweet / salted"], ["Pastry", 55, 1, "Pineapple / chocolate"]]],
+           ["Cakes", [["Black Forest 1 lb", 450, 1, "Order 2 hours ahead"], ["Butterscotch 1 lb", 450, 1, ""]]]],
+  chinese: [["Chinese", [["Chilli Chicken (Dry)", 249, 0, "Half"], ["Chicken Fried Rice", 189, 0, ""], ["Veg Hakka Noodles", 149, 1, ""], ["Chicken Manchurian", 249, 0, "Gravy"]]],
+            ["Indian", [["Butter Chicken (Half)", 299, 0, ""], ["Butter Naan", 35, 1, ""], ["Dal Makhani", 179, 1, ""]]]],
+};
+const R = [
+  { id: "chunk", name: "Chunk City", area: "Near Ghanta Ghar, Kulgam", cuisine: "Pizza · Fast food · Shakes", tag: "pizza", menu: "fast", lat: 33.64715, lon: 75.02186, rating: 4.1, prep: 25, top: true },
+  { id: "80deg", name: "80 Degrees", area: "College Road, Kulgam", cuisine: "Pizza · Burgers · Chinese", tag: "pizza", menu: "fast", lat: 33.64593, lon: 75.01231, rating: 4.0, prep: 25, top: true },
+  { id: "koshur", name: "Koshur Darbar", area: "Town Plaza, Kulgam", cuisine: "Kashmiri · Wazwan", tag: "wazwan", menu: "wazwan", lat: 33.64703, lon: 75.01486, rating: 4.2, prep: 35, top: true },
+  { id: "brew", name: "Brew & Bites", area: "Hospital Road, Kulgam", cuisine: "Cafe · Sandwiches · Coffee", tag: "cafe", menu: "cafe", lat: 33.6464, lon: 75.02194, rating: 4.3, prep: 15 },
+  { id: "spicy", name: "Spicy Ocean", area: "Qaimoh, Kulgam", cuisine: "Chinese · North Indian", tag: "chinese", menu: "chinese", lat: 33.64674, lon: 75.01971, rating: 3.9, prep: 30 },
+  { id: "c360", name: "Cafe 360", area: "Near Degree College, Kulgam", cuisine: "Cafe · Shakes", tag: "cafe", menu: "cafe", lat: 33.64661, lon: 75.00833, rating: 4.0, prep: 15 },
+  { id: "citycafe", name: "City Cafe & Bakers", area: "College Road, Kulgam", cuisine: "Bakery · Cakes", tag: "bakery", menu: "bakery", lat: 33.64648, lon: 75.00908, rating: 4.1, prep: 10 },
+  { id: "bluestar", name: "Blue Star Fast Food", area: "Near Town Hall, Kulgam", cuisine: "Fast food · Rolls", tag: "grill", menu: "fast", lat: 33.64576, lon: 75.01437, rating: 3.8, prep: 20 },
+  { id: "kingdom", name: "The Kingdom", area: "Shampora, Qazigund", cuisine: "Cafe · Continental", tag: "cafe", menu: "cafe", lat: 33.58865, lon: 75.158, rating: 4.5, prep: 25 },
+];
+const CUISINES = [["all", "All", "sparkles"], ["pizza", "Pizza", "pizza"], ["wazwan", "Wazwan", "chef-hat"], ["chinese", "Chinese", "soup"], ["cafe", "Cafe", "coffee"], ["bakery", "Bakery", "croissant"], ["grill", "Rolls", "sandwich"]];
+const PLACES = [["Kulgam town", 33.6431, 75.0172], ["Qaimoh", 33.6465, 75.0205], ["Devsar", 33.6218, 75.0805], ["Qazigund", 33.5915, 75.1655]];
+// Delivery rules are set by each restaurant (defaults shown). The restaurant delivers with its own person.
+const RULES = { baseKm: 2, baseFee: 30, perKm: 10, maxKm: 6, minOrder: 150, freeAbove: 0, packing: 10, cod: true, acceptMin: 3, payMin: 10, cancelMin: 2 };
+
+/* ---------- state ---------- */
+const S = { view: "home", tab: "home", cuisine: "all", place: 0, rest: null, cart: {}, pay: "upi", order: null, mode: "customer", rules: { ...RULES } };
+const app = document.getElementById("app");
+const I = (n, c = "") => `<svg class="ico ${c}" viewBox="0 0 24 24">${SBIcons[n] || SBIcons.store}</svg>`;
+const esc = v => String(v).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const rs = n => "₹" + Math.round(n).toLocaleString("en-IN");
+const KM = (a, b, c, d) => { const r = Math.PI / 180, x = Math.sin((c - a) * r / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin((d - b) * r / 2) ** 2; return 12742 * Math.asin(Math.sqrt(x)); };
+const me = () => ({ name: PLACES[S.place][0], lat: PLACES[S.place][1], lon: PLACES[S.place][2] });
+/* ---------- our own map and routing (OpenStreetMap roads, no API key, works offline) ---------- */
+const BASE = __BASEMAP__;
+let G = null;
+function graph() {
+  if (G) return G;
+  const id = new Map(), xy = [], adj = [];
+  const node = ([x, y]) => { const k = x + "," + y; let i = id.get(k); if (i === undefined) { i = xy.length; id.set(k, i); xy.push([y, x]); adj.push([]); } return i; };
+  for (const [k, c] of BASE.roads) { if (k > 2 && c.length < 2) continue; let prev = node(c[0]);
+    for (let j = 1; j < c.length; j++) { const cur = node(c[j]), d = KM(xy[prev][0], xy[prev][1], xy[cur][0], xy[cur][1]); adj[prev].push([cur, d]); adj[cur].push([prev, d]); prev = cur; } }
+  return G = { xy, adj };
+}
+function nearest(lat, lon) { const { xy, adj } = graph(); let best = -1, bd = 1e9; for (let i = 0; i < xy.length; i++) { if (!adj[i].length) continue; const d = (xy[i][0] - lat) ** 2 + ((xy[i][1] - lon) * .83) ** 2; if (d < bd) { bd = d; best = i; } } return best; }
+// Dijkstra from one point to every road node (small binary heap).
+function dijkstra(src) {
+  const { xy, adj } = graph(), dist = new Float64Array(xy.length).fill(Infinity), prev = new Int32Array(xy.length).fill(-1), h = [[0, src]]; dist[src] = 0;
+  const push = it => { h.push(it); let i = h.length - 1; while (i) { const p = (i - 1) >> 1; if (h[p][0] <= h[i][0]) break; [h[p], h[i]] = [h[i], h[p]]; i = p; } };
+  const pop = () => { const top = h[0], last = h.pop(); if (h.length) { h[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < h.length && h[l][0] < h[m][0]) m = l; if (r < h.length && h[r][0] < h[m][0]) m = r; if (m === i) break; [h[m], h[i]] = [h[i], h[m]]; i = m; } } return top; };
+  while (h.length) { const [d, u] = pop(); if (d > dist[u]) continue; for (const [v, w] of adj[u]) if (d + w < dist[v]) { dist[v] = d + w; prev[v] = u; push([dist[v], v]); } }
+  return { dist, prev };
+}
+let RT = { key: null };
+function routes() { const k = S.place; if (RT.key !== k) { const src = nearest(me().lat, me().lon); RT = { key: k, src, ...dijkstra(src) }; } return RT; }
+// Delivery distance = real road distance from the customer to the restaurant (+ the short walk to the nearest road).
+const roadKm = r => { const t = routes(), n = r._n ?? (r._n = nearest(r.lat, r.lon)), d = t.dist[n];
+  return Math.max(.3, isFinite(d) ? d + KM(r.lat, r.lon, graph().xy[n][0], graph().xy[n][1]) : KM(me().lat, me().lon, r.lat, r.lon) * 1.35); };
+const roadPath = r => { const t = routes(), out = []; let n = r._n ?? nearest(r.lat, r.lon); while (n !== -1) { out.push(graph().xy[n]); n = t.prev[n]; } return [[r.lat, r.lon], ...out, [me().lat, me().lon]]; };
+function drawBase(map) {
+  const rr = L.canvas({ padding: .3 });
+  for (const [a, c] of BASE.water) { const ll = c.map(([x, y]) => [y, x]); (a ? L.polygon(ll, { renderer: rr, stroke: false, fillColor: "#0d2333", fillOpacity: 1, interactive: false }) : L.polyline(ll, { renderer: rr, color: "#0f2b3e", weight: 5, interactive: false })).addTo(map); }
+  const W = [5, 3.6, 2.2, 1.2], C = ["#3b3552", "#2d2b42", "#22212f", "#1a1924"];
+  for (const k of [3, 2, 1, 0]) for (const [kk, c] of BASE.roads) if (kk === k) L.polyline(c.map(([x, y]) => [y, x]), { renderer: rr, color: C[k], weight: W[k], interactive: false }).addTo(map);
+}
+const fee = (km, rules = S.rules) => km > rules.maxKm ? null : rules.baseFee + Math.max(0, Math.ceil(km - rules.baseKm)) * rules.perKm;
+const eta = r => Math.round(r.prep + roadKm(r) * 4 + 5);
+const items = r => MENUS[r.menu].flatMap(([, list]) => list);
+const cartLines = () => S.rest ? items(S.rest).filter(i => S.cart[i[0]]).map(i => ({ name: i[0], price: i[1], veg: i[2], qty: S.cart[i[0]] })) : [];
+const itemTotal = () => cartLines().reduce((s, l) => s + l.price * l.qty, 0);
+const cartCount = () => cartLines().reduce((s, l) => s + l.qty, 0);
+let timers = [];
+const clearTimers = () => { timers.forEach(t => { clearInterval(t); clearTimeout(t); }); timers = []; };
+function toast(m) { const t = document.createElement("div"); t.className = "toast"; t.textContent = m; app.appendChild(t); setTimeout(() => t.remove(), 2400); }
+function go(view, patch = {}) { clearTimers(); Object.assign(S, patch, { view }); render(); }
+
+/* ---------- screens ---------- */
+function render() {
+  const V = { home, restaurant, cart, waiting, payment, verifying, tracking, delivered, owner, ownerSettings, cancelled }[S.view];
+  app.innerHTML = `<div class="screen enter">${V()}</div>`;
+  after[S.view]?.();
+}
+const after = {};
+const nav = () => `<div class="nav">${[["home", "house", "Home"], ["orders", "package", "Orders"], ["owner", "store", "My restaurant"]]
+  .map(([k, ic, l]) => `<button data-nav="${k}" aria-current="${(k === "owner" ? S.view.startsWith("owner") : S.tab === k && !S.view.startsWith("owner"))}">${I(ic)}${l}</button>`).join("")}</div>`;
+
+function home() {
+  const list = R.filter(r => S.cuisine === "all" || r.tag === S.cuisine).map(r => ({ r, km: roadKm(r) })).sort((a, b) => (fee(a.km) === null) - (fee(b.km) === null) || (b.r.top ? 1 : 0) - (a.r.top ? 1 : 0) || a.km - b.km);
+  return `<div class="scroll"><div class="top">
+      <div class="row between"><button class="loc" data-act="place"><span class="pin">${I("map-pin", "sm")}</span><span><b>${me().name} ${I("chevron-down", "sm")}</b><span>Delivering to your pinned spot</span></span></button><span class="avatar">F</span></div>
+      <button class="search">${I("search")}Search “pizza”, “rista”, “Chunk City”</button>
+      <div class="hero"><b>Hot food from <span class="gradtext">Kulgam's best</span></b><p>Restaurants deliver with their own riders. Pay the restaurant directly by UPI or cash.</p><span class="tag">${I("zap", "sm")}Live tracking on every order</span></div>
+      <h2>What's on your mind?</h2>
+      <div class="cuis">${CUISINES.map(([k, l, ic]) => `<button class="cu" data-cuisine="${k}" aria-pressed="${S.cuisine === k}"><i>${I(ic, "lg")}</i>${l}</button>`).join("")}</div>
+      <h2>Restaurants near you<small>${list.length} places · top picks first, then nearest by road</small></h2>
+      ${list.map(({ r, km }) => { const f = fee(km); return `<button class="rcard ${f === null ? "off" : r.top ? "glow" : ""}" data-rest="${r.id}">
+        <div class="img" style="background-image:url('${PHOTO[r.tag]}')"><div class="badges">${r.top ? `<span class="pill hot">${I("flame", "sm")}Top in Kulgam</span>` : ""}<span class="pill">${I("star", "sm")}${r.rating}</span></div>
+          <span class="pill eta">${f === null ? `<span class="red">Too far</span>` : `${I("clock", "sm")}${eta(r)}–${eta(r) + 10} min`}</span></div>
+        <div class="bd"><div class="nm">${r.name}</div><div class="meta">${r.cuisine}<span class="dot"></span>${km.toFixed(1)} km</div>
+          <div class="fee">${f === null ? `${I("info", "sm")}Delivers within ${S.rules.maxKm} km only` : `${I("bike", "sm")}${rs(f)} delivery<span class="dot"></span>Min order ${rs(S.rules.minOrder)}<span class="dot"></span>Own rider`}</div></div></button>`; }).join("")}
+      <p class="mini" style="text-align:center;margin:8px 0 18px">Prototype: restaurant names and locations are real, menus and prices are samples.</p>
+    </div></div>${nav()}`;
+}
+
+function restaurant() {
+  const r = S.rest, km = roadKm(r), f = fee(km), c = cartCount();
+  return `<div class="scroll"><div class="rhead" style="background-image:url('${PHOTO[r.tag]}')"><button class="back" data-act="home">${I("chevron-left")}</button></div>
+    <div class="rinfo"><h1>${r.name}</h1><div class="meta">${r.cuisine} · ${r.area}</div>
+      <div class="rules"><div><b>${I("star", "sm")} ${r.rating}</b><span>Rating</span></div><div><b>${eta(r)} min</b><span>${km.toFixed(1)} km away</span></div><div><b>${f === null ? "—" : rs(f)}</b><span>Delivery</span></div></div>
+      <div class="own">${I("bike", "sm")}Delivered by ${r.name}'s own rider · min order ${rs(S.rules.minOrder)}</div></div>
+    <div class="sample">${I("info", "sm")} Sample menu for the prototype. The real menu card and prices come from the restaurant.</div>
+    ${MENUS[r.menu].map(([sec, list]) => `<div class="msec"><h3>${sec}</h3>${list.map(([n, p, v, d]) => { const q = S.cart[n] || 0; return `<div class="item"><div><span class="veg ${v ? "" : "nv"}"></span><b>${n}</b><div class="p">${rs(p)}</div>${d ? `<div class="d">${d}</div>` : ""}</div>
+      <div class="pic">${I(v ? "salad" : "drumstick", "lg")}${q ? `<div class="add on"><button data-dec="${esc(n)}">−</button>${q}<button data-inc="${esc(n)}">+</button></div>` : `<button class="add" data-inc="${esc(n)}">ADD</button>`}</div></div>`; }).join("")}</div>`).join("")}
+    <div style="height:110px"></div></div>
+    ${c ? `<button class="cartbar" data-act="cart"><span><b>${c} item${c > 1 ? "s" : ""} · ${rs(itemTotal())}</b><span>Delivery ${f === null ? "not available" : rs(f)}</span></span><b class="row">View cart ${I("chevron-right")}</b></button>` : ""}`;
+}
+
+function cart() {
+  const r = S.rest, km = roadKm(r), f = fee(km), it = itemTotal(), ru = S.rules;
+  const short = Math.max(0, ru.minOrder - it), total = it + (f || 0) + ru.packing;
+  const extraKm = Math.max(0, Math.ceil(km - ru.baseKm));
+  return `<div class="top row"><button class="back" style="position:static" data-act="restaurant">${I("chevron-left")}</button><div><b style="font-size:18px">${r.name}</b><div class="small muted">${eta(r)}–${eta(r) + 10} min to ${me().name}</div></div></div>
+  <div class="scroll" style="padding-top:6px">
+    <div class="card">${cartLines().map(l => `<div class="ci"><span><span class="veg ${l.veg ? "" : "nv"}"></span>${l.name}<div class="small muted" style="margin-left:20px">${rs(l.price)}</div></span>
+      <span class="qty"><button data-dec="${esc(l.name)}">−</button>${l.qty}<button data-inc="${esc(l.name)}">+</button></span><b>${rs(l.price * l.qty)}</b></div>`).join("")}
+      ${short ? `<div class="warn">${I("info", "sm")}Add ${rs(short)} more. Minimum order here is ${rs(ru.minOrder)}.</div>` : ""}</div>
+    <div class="card"><div class="addr"><i>${I("map-pin")}</i><div><b>Deliver to ${me().name}</b><div class="small muted">Pin on map + landmark: “Green gate, behind Jamia Masjid”</div></div><button class="small gradtext" style="font-weight:800" data-act="place">Change</button></div></div>
+    <div class="card"><h4>Bill details</h4>
+      <div class="line"><span>Item total</span><b>${rs(it)}</b></div>
+      <div class="line"><span>Delivery fee<small>${km.toFixed(1)} km: ${rs(ru.baseFee)} for first ${ru.baseKm} km${extraKm ? ` + ${extraKm} km × ${rs(ru.perKm)}` : ""}</small></span><b>${f === null ? "—" : rs(f)}</b></div>
+      <div class="line"><span>Packing</span><b>${rs(ru.packing)}</b></div>
+      <div class="line total"><span>To pay</span><span>${rs(total)}</span></div></div>
+    <div class="card"><h4>Pay with</h4><div class="paym">
+      <button class="opt" data-pay="upi" aria-checked="${S.pay === "upi"}"><i>${I("smartphone")}</i><span><b>UPI to restaurant</b><span>GPay, PhonePe, Paytm. Pay after they accept</span></span><span class="radio"></span></button>
+      <button class="opt" data-pay="cod" aria-checked="${S.pay === "cod"}" ${ru.cod ? "" : 'aria-disabled="true"'}><i>${I("wallet")}</i><span><b>Cash on delivery</b><span>${ru.cod ? "Pay the rider" : "This restaurant takes UPI only"}</span></span><span class="radio"></span></button></div></div>
+    <div class="card mini">${I("shield-check", "sm")} Cancel free until the restaurant confirms. After that you have ${ru.cancelMin} minutes, then the kitchen starts cooking.</div>
+    <div style="height:10px"></div></div>
+  <div class="foot"><button class="cta" data-act="place-order" ${short || f === null ? "disabled" : ""}>${short ? `Add ${rs(short)} more to order` : f === null ? "Out of delivery range" : `Place order · ${rs(total)}`}</button></div>`;
+}
+
+function newOrder() {
+  const r = S.rest, km = roadKm(r), f = fee(km), it = itemTotal();
+  return { id: "KE" + (1040 + Math.floor(Math.random() * 900)), rest: r, lines: cartLines(), items: it, fee: f, packing: S.rules.packing, total: it + f + S.rules.packing, km, pay: S.pay, placed: Date.now(), status: "placed" };
+}
+
+function waiting() {
+  const o = S.order;
+  return `<div class="center"><div><div class="radar"><i></i><i></i><i></i><div class="core">${I("store")}</div></div>
+    <h1>Asking ${o.rest.name}…</h1><p>Order ${o.id} · ${rs(o.total)}<br>The restaurant has <span class="timer" id="t">3:00</span> to accept.</p>
+    <div class="tbar"><i id="tb" style="width:100%"></i></div>
+    <p class="mini" style="margin-top:14px">${o.pay === "upi" ? "You'll pay only after they accept, so you never pay for an order they can't make." : "Pay cash to the rider when your food arrives."}</p></div></div>
+  <div class="foot"><button class="ghost red" data-act="cancel">Cancel order (free)</button></div>
+  <button class="demo" data-act="accept">Demo: restaurant accepts</button>
+  <button class="demo" style="top:calc(var(--sat) + 112px)" data-nav="owner">Demo: see the restaurant's phone</button>`;
+}
+after.waiting = () => countdown(S.rules.acceptMin * 60, "#t", "#tb", () => go("cancelled", { reason: "The restaurant didn't respond in time. Nothing was charged." }));
+
+function payment() {
+  const o = S.order, upi = "demo.restaurant@upi";
+  return `<div class="top row between"><button class="back" style="position:static" data-act="cancel">${I("x")}</button><span class="countdown">${I("clock", "sm")}Pay within <span id="t">10:00</span></span></div>
+  <div class="scroll">
+    <div class="payamt"><span>Pay ${o.rest.name}</span><b class="gradtext">${rs(o.total)}</b><span>Order ${o.id} · accepted ${I("circle-check", "sm")}</span></div>
+    <div class="qrwrap"><div id="qr"></div><div class="scan"></div></div>
+    <div class="upiid">UPI ID <code>${upi}</code><button data-act="copy">${I("copy", "sm")}</button></div>
+    <div class="card" style="margin-top:18px"><h4>Or pay from this phone</h4>
+      <button class="cta" data-act="upi-intent">${I("smartphone")}Pay ${rs(o.total)} with UPI app</button>
+      <div class="apps">${[["GPay", "#4285f4", "G"], ["PhonePe", "#5f259f", "Pe"], ["Paytm", "#00b9f1", "P"], ["BHIM", "#f47b20", "B"]].map(([n, c, l]) => `<button data-act="upi-intent"><span class="lg" style="background:${c}">${l}</span>${n}</button>`).join("")}</div></div>
+    <div class="card"><h4>After paying</h4><div class="steps">
+      <div><i>1</i><span>Pay exactly <b>${rs(o.total)}</b>. The amount and order number are already filled in.</span></div>
+      <div><i>2</i><span>Type the last 4 digits of the <b>UPI reference</b> (UTR) shown in your UPI app.</span></div>
+      <div><i>3</i><span>${o.rest.name} checks the money arrived and starts cooking.</span></div></div>
+      <input class="utr" id="utr" inputmode="numeric" maxlength="12" placeholder="UPI ref, e.g. 4821"></div>
+    <div class="card safe">${I("shield-check")}<span>Money goes straight to the restaurant's bank. Before paying, check your UPI app shows the name <b>${o.rest.name.toUpperCase()}</b>.</span></div>
+    <div style="height:10px"></div></div>
+  <div class="foot"><button class="cta" data-act="paid">I've paid ${rs(o.total)}</button></div>`;
+}
+after.payment = () => {
+  const o = S.order;
+  const link = `upi://pay?pa=demo.restaurant@upi&pn=${encodeURIComponent(o.rest.name)}&am=${o.total}.00&cu=INR&tn=${o.id}`;
+  const q = qrcode(0, "M"); q.addData(link); q.make(); document.getElementById("qr").innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+  S.upiLink = link;
+  countdown(S.rules.payMin * 60, "#t", null, () => go("cancelled", { reason: "Payment wasn't made in time, so the order was cancelled." }));
+};
+
+function verifying() {
+  const o = S.order;
+  return `<div class="center"><div><div class="radar"><i></i><i></i><i></i><div class="core">${I("indian-rupee")}</div></div>
+    <h1>Confirming your payment</h1><p>${o.rest.name} is checking that ${rs(o.total)} arrived${o.utr ? ` (UPI ref …${o.utr.slice(-4)})` : ""}.<br>This usually takes under a minute.</p></div></div>
+  <div class="foot"><p class="mini" style="text-align:center;margin:0 0 10px">Not confirmed in 10 minutes? Tap Help and we'll call the restaurant.</p><button class="ghost" data-act="help">${I("info", "sm")}Help</button></div>
+  <button class="demo" data-act="confirm">Demo: restaurant confirms</button>
+  <button class="demo" style="top:calc(var(--sat) + 112px)" data-nav="owner">Demo: see the restaurant's phone</button>`;
+}
+
+function tracking() {
+  const o = S.order, st = o.status;
+  const steps = [["placed", "Order placed"], ["accepted", "Accepted"], ["paid", o.pay === "upi" ? "Payment confirmed" : "Cash on delivery"], ["cooking", "Preparing"], ["out", "Out for delivery"]];
+  const idx = steps.findIndex(s => s[0] === st);
+  const title = { paid: "Order confirmed!", cooking: "Your food is being prepared", out: "On the way to you" }[st];
+  const canCancel = o.cancelUntil && Date.now() < o.cancelUntil;
+  return `<button class="back" data-act="home">${I("chevron-left")}</button>
+  <div class="scroll"><div class="map"><div id="map"></div></div>
+    <div class="status"><div class="row between"><div><div class="big">${title}</div><div class="eta2">${st === "out" ? `Arriving in <b id="eta">${Math.max(3, Math.round(o.km * 4))} min</b> · ${o.km.toFixed(1)} km` : `Ready in about ${o.rest.prep} min`}</div></div>
+      <span class="pill hot">${o.id}</span></div>
+      <div class="prog">${steps.map((s, i) => `<i class="${i < idx ? "done" : i === idx ? "now" : ""}"></i>`).join("")}</div></div>
+    ${st === "out" ? `<div class="card row"><span class="avatar" style="width:44px;height:44px">${I("bike")}</span><div style="flex:1"><b>Bilal from ${o.rest.name}</b><div class="small muted">Restaurant's own rider · live location</div></div><button class="ghost" style="width:46px;height:46px;border-radius:50%" data-act="call">${I("phone")}</button></div>` : ""}
+    <div class="card"><div class="tl">${steps.map((s, i) => `<div class="${i < idx ? "done" : i === idx ? "now" : ""}"><b>${i < idx ? I("check", "sm") : i + 1}</b><span>${s[1]}</span><small>${i <= idx ? new Date(o.placed + i * 60000).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" }) : ""}</small></div>`).join("")}</div></div>
+    <div class="card"><h4>${o.rest.name} · ${o.lines.length} item${o.lines.length > 1 ? "s" : ""}</h4>${o.lines.map(l => `<div class="line"><span>${l.qty} × ${l.name}</span><b>${rs(l.price * l.qty)}</b></div>`).join("")}
+      <div class="line total"><span>${o.pay === "upi" ? "Paid by UPI" : "Pay cash on delivery"}</span><span>${rs(o.total)}</span></div></div>
+    ${canCancel ? `<div class="card"><button class="ghost red" data-act="cancel-paid">Cancel order · <span class="timer" id="ct"></span> left</button><p class="mini" style="margin:8px 0 0">${o.pay === "upi" ? "The restaurant refunds your UPI payment within 24 hours. We track it." : "Free cancellation for the first few minutes."}</p></div>` : ""}
+    <div style="height:20px"></div></div>
+  ${st !== "out" ? `<button class="demo" data-act="${st === "paid" ? "cook" : "dispatch"}">Demo: ${st === "paid" ? "start cooking" : "rider leaves"}</button>` : ""}`;
+}
+after.tracking = () => {
+  const o = S.order, h = me();
+  const map = L.map("map", { zoomControl: false, attributionControl: false, preferCanvas: true }).setView([(o.rest.lat + h.lat) / 2, (o.rest.lon + h.lon) / 2], 15);
+  L.control.attribution({ position: "topright", prefix: false }).addAttribution("© OpenStreetMap contributors").addTo(map);
+  drawBase(map);
+  // The rider follows the real road route here. In the real app this is the rider phone's live GPS.
+  const path = roadPath(o.rest);
+  L.polyline(path, { color: "#ff2e83", weight: 9, opacity: .25, className: "route" }).addTo(map);
+  L.polyline(path, { color: "#ff6a8f", weight: 4, opacity: 1 }).addTo(map);
+  const ic = (cls, ico) => L.divIcon({ className: "", html: `<div class="mk ${cls}">${I(ico, "sm")}</div>`, iconSize: [42, 42], iconAnchor: [21, 21] });
+  L.marker(path[0], { icon: ic("rest", "store") }).addTo(map); L.marker(path[path.length - 1], { icon: ic("home", "house") }).addTo(map);
+  map.fitBounds(path, { padding: [50, 60] });
+  if (o.status === "out") {
+    const rider = L.marker(path[0], { icon: ic("rider", "bike"), zIndexOffset: 1000 }).addTo(map);
+    // move at constant speed along the route
+    const cum = [0]; for (let i = 1; i < path.length; i++) cum.push(cum[i - 1] + KM(path[i - 1][0], path[i - 1][1], path[i][0], path[i][1]));
+    const len = cum[cum.length - 1] || 1; let t = 0; const total = 400;
+    timers.push(setInterval(() => { t++; const f = Math.min(1, t / total), dd = f * len; let i = cum.findIndex(c => c >= dd); if (i < 1) i = 1;
+      const a = path[i - 1], b = path[i], lf = (dd - cum[i - 1]) / ((cum[i] - cum[i - 1]) || 1); rider.setLatLng([a[0] + (b[0] - a[0]) * lf, a[1] + (b[1] - a[1]) * lf]);
+      const e = document.getElementById("eta"); if (e) e.textContent = Math.max(1, Math.round((1 - f) * Math.max(3, o.km * 4))) + " min";
+      if (f >= 1) go("delivered"); }, 60));
+  }
+  if (o.cancelUntil) { const tick = () => { const left = Math.max(0, o.cancelUntil - Date.now()), el = document.getElementById("ct"); if (el) el.textContent = fmt(left / 1000); if (!left && el) render(); }; tick(); timers.push(setInterval(tick, 1000)); }
+};
+
+function delivered() {
+  const o = S.order;
+  const dots = Array.from({ length: 14 }, (_, i) => { const a = i / 14 * Math.PI * 2; return `<i style="--x:${Math.cos(a) * 110}px;--y:${Math.sin(a) * 110}px;--c:${["#ff5a36", "#ff2e83", "#8b5cff", "#3ef2a0", "#ffb547"][i % 5]}"></i>`; }).join("");
+  return `<div class="center"><div><div class="burst">${dots}<div class="ok">${I("check")}</div></div><h1>Delivered. Enjoy!</h1><p>${o.rest.name} · ${rs(o.total)}${o.pay === "cod" ? " paid in cash" : ""}</p>
+    <div class="row" style="justify-content:center;gap:8px;margin-top:20px">${[1, 2, 3, 4, 5].map(n => `<button data-act="rate" style="color:${n <= 4 ? "var(--amber)" : "var(--ink-3)"}">${I("star", "lg")}</button>`).join("")}</div><p class="mini" style="margin-top:6px">Rate the food and the delivery</p></div></div>
+  <div class="foot"><button class="cta" data-act="home">Back to home</button></div>`;
+}
+function cancelled() {
+  return `<div class="center"><div><div class="radar" style="width:140px;height:140px"><div class="core" style="background:#2a2d3b;box-shadow:none">${I("x")}</div></div><h1>Order cancelled</h1><p>${S.reason || ""}</p></div></div>
+  <div class="foot"><button class="cta" data-act="home">Back to home</button></div>`;
+}
+
+/* ---------- restaurant mode (same app) ---------- */
+function owner() {
+  const o = S.order, r = o?.rest || R[0];
+  const live = o && o.rest.id === r.id ? o : null;
+  return `<div class="scroll"><div class="top"><div class="row between"><div class="loc"><span class="pin">${I("store", "sm")}</span><span><b>${r.name}</b><span>Restaurant mode · open now</span></span></div><button class="switch" aria-checked="true"></button></div>
+    <div class="modebar"><button aria-pressed="true">Live orders</button><button data-act="owner-settings">Delivery & payments</button></div></div>
+    ${live && live.status === "placed" ? `<div class="neworder"><div class="row between"><span class="bell">${I("bell", "sm")}NEW ORDER · ${live.id}</span><span class="timer" id="t">3:00</span></div>
+      <div style="margin-top:10px">${live.lines.map(l => `<div class="line"><span>${l.qty} × ${l.name}</span><b>${rs(l.price * l.qty)}</b></div>`).join("")}
+      <div class="line total"><span>${live.pay === "upi" ? "UPI after you accept" : "Cash on delivery"}</span><span>${rs(live.total)}</span></div>
+      <div class="small muted">${live.km.toFixed(1)} km · ${me().name} · delivery fee ${rs(live.fee)} is yours</div></div>
+      <div class="two"><button class="btn2 no" data-act="cancel">${I("x", "sm")}Reject</button><button class="btn2 yes" data-act="accept">${I("check", "sm")}Accept</button></div></div>` : ""}
+    ${live && live.status === "verifying" ? `<div class="neworder"><span class="bell">${I("indian-rupee", "sm")}CHECK PAYMENT · ${live.id}</span>
+      <p style="margin:10px 0 0;line-height:1.5">Customer says they paid <b>${rs(live.total)}</b>${live.utr ? `, UPI ref ending <b>${live.utr.slice(-4)}</b>` : ""}. Open your UPI app or bank SMS and check.</p>
+      <div class="two"><button class="btn2 no" data-act="notpaid">Not received</button><button class="btn2 yes" data-act="confirm">${I("check", "sm")}Received</button></div></div>` : ""}
+    ${live && ["paid", "cooking", "out"].includes(live.status) ? `<div class="card"><div class="row between"><b>${live.id} · ${rs(live.total)}</b><span class="pill lime">${{ paid: "Confirmed", cooking: "Preparing", out: "Out for delivery" }[live.status]}</span></div>
+      <div class="two">${live.status === "paid" ? `<button class="btn2 go" data-act="cook">Start preparing</button>` : live.status === "cooking" ? `<button class="btn2 go" data-act="dispatch">${I("bike", "sm")}Send rider · share live location</button>` : `<button class="btn2 yes" style="grid-column:1/-1" data-act="mark-delivered">${I("check", "sm")}Mark delivered</button>`}</div></div>` : ""}
+    ${!live ? `<div class="card" style="text-align:center;padding:28px 16px"><div class="radar" style="width:120px;height:120px;margin-bottom:14px"><i></i><i></i><i></i><div class="core" style="width:60px;height:60px">${I("bell")}</div></div><b>Waiting for orders</b><p class="mini">New orders ring loudly until you accept. Place an order from Home to try it.</p></div>` : ""}
+    <div class="card"><h4>Today</h4><div class="rules" style="margin:0"><div><b>7</b><span>Orders</span></div><div><b>₹3,240</b><span>Sales</span></div><div><b>₹210</b><span>Delivery fees</span></div></div></div>
+    <div style="height:16px"></div></div>${nav()}`;
+}
+after.owner = () => { if (S.order?.status === "placed") countdown(S.rules.acceptMin * 60, "#t", null, () => {}); };
+
+function ownerSettings() {
+  const ru = S.rules, ex = [1.2, 3.4, 5.6];
+  const f = k => `<input type="number" inputmode="numeric" data-rule="${k}" value="${ru[k]}">`;
+  return `<div class="scroll"><div class="top"><div class="row between"><div class="loc"><span class="pin">${I("store", "sm")}</span><span><b>${(S.order?.rest || R[0]).name}</b><span>Restaurant mode</span></span></div></div>
+    <div class="modebar"><button data-nav="owner">Live orders</button><button aria-pressed="true">Delivery & payments</button></div></div>
+    <div class="card"><h4>Delivery charges (you deliver, you keep these)</h4>
+      <div class="field"><span>Fixed fee</span>${f("baseFee")}</div><div class="field"><span>…covers the first (km)</span>${f("baseKm")}</div>
+      <div class="field"><span>Then per extra km</span>${f("perKm")}</div><div class="field"><span>Deliver up to (km)</span>${f("maxKm")}</div>
+      <div class="field"><span>Minimum order</span>${f("minOrder")}</div><div class="field"><span>Packing charge</span>${f("packing")}</div>
+      <div class="example" id="ex">${ex.map(k => { const v = fee(k, ru); return `${k} km → ${v === null ? "not delivered" : rs(v)}`; }).join(" · ")}</div></div>
+    <div class="card"><h4>Payments</h4>
+      <div class="field"><span>UPI ID (from your QR)</span><input value="yourshop@ybl" style="text-align:left;font-weight:600"></div>
+      <div class="field"><span>Accept cash on delivery</span><button class="switch" data-act="cod" aria-checked="${ru.cod}"></button></div>
+      <p class="mini" style="margin:10px 0 0">Use a business UPI (PhonePe Business, Paytm Business, BharatPe). They're free, and UPI apps don't limit payments to them the way they do to personal accounts.</p></div>
+    <div class="card"><h4>Order timers</h4>
+      <div class="field"><span>Accept new orders within (min)</span>${f("acceptMin")}</div><div class="field"><span>Customer must pay within (min)</span>${f("payMin")}</div>
+      <div class="field"><span>Customer can cancel for (min)</span>${f("cancelMin")}</div></div>
+    <div style="height:16px"></div></div>${nav()}`;
+}
+
+/* ---------- helpers ---------- */
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+function countdown(secs, sel, barSel, onEnd) {
+  const end = Date.now() + secs * 1000;
+  const tick = () => { const left = Math.max(0, (end - Date.now()) / 1000); const el = document.querySelector(sel); if (el) el.textContent = fmt(left);
+    const b = barSel && document.querySelector(barSel); if (b) b.style.width = (left / secs * 100) + "%"; if (!left) { clearTimers(); onEnd(); } };
+  tick(); timers.push(setInterval(tick, 1000));
+}
+function rulesSheet(html) { const d = document.createElement("div"); d.innerHTML = `<div class="sheetdim"></div><div class="sheet">${html}<button class="cta" style="margin-top:16px" data-close>Got it</button></div>`; app.appendChild(d); d.addEventListener("click", e => { if (e.target.closest("[data-close]") || e.target.classList.contains("sheetdim")) d.remove(); }); }
+
+app.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return; const d = b.dataset;
+  if (d.nav) { if (d.nav === "owner") return go("owner"); if (d.nav === "orders") return S.order && !["cancelled"].includes(S.view) ? go(S.order.status === "placed" ? "waiting" : S.order.status === "accepted" ? "payment" : S.order.status === "verifying" ? "verifying" : "tracking", { tab: "orders" }) : toast("No orders yet"); return go("home", { tab: "home" }); }
+  if (d.cuisine) return go("home", { cuisine: d.cuisine });
+  if (d.rest) { const r = R.find(x => x.id === d.rest); if (S.rest?.id !== r.id) S.cart = {}; return go("restaurant", { rest: r }); }
+  if (d.inc) { S.cart[d.inc] = (S.cart[d.inc] || 0) + 1; const sc = app.querySelector(".scroll")?.scrollTop; clearTimers(); render(); app.querySelector(".scroll").scrollTop = sc; return; }
+  if (d.dec) { S.cart[d.dec]--; if (!S.cart[d.dec]) delete S.cart[d.dec]; if (!cartCount() && S.view === "cart") return go("restaurant"); const sc = app.querySelector(".scroll")?.scrollTop; render(); app.querySelector(".scroll").scrollTop = sc; return; }
+  if (d.pay) { if (b.getAttribute("aria-disabled") === "true") return; S.pay = d.pay; return render(); }
+  if (d.rule !== undefined) return;
+  const a = d.act; const o = S.order;
+  if (a === "home") return go("home", { tab: "home" });
+  if (a === "restaurant") return go("restaurant");
+  if (a === "cart") return go("cart");
+  if (a === "place") return rulesSheet(`<h3>Deliver to</h3><div class="seg">${PLACES.map((p, i) => `<button data-pick="${i}" aria-pressed="${S.place === i}">${p[0]}</button>`).join("")}</div><p class="mini" style="margin-top:12px">In the real app you drop a pin on the map and add a landmark, since most homes here have no house number.</p>`);
+  if (d.pick !== undefined) { S.place = +d.pick; app.querySelector(".sheetdim")?.parentElement.remove(); return render(); }
+  if (a === "place-order") { S.order = newOrder(); return go("waiting"); }
+  if (a === "accept") { o.status = "accepted"; o.accepted = Date.now(); if (o.pay === "cod") { o.status = "paid"; o.cancelUntil = Date.now() + S.rules.cancelMin * 60000; toast("Restaurant accepted · cash on delivery"); return go(S.view === "owner" ? "owner" : "tracking"); } return go(S.view === "owner" ? "owner" : "payment"); }
+  if (a === "cancel") { const free = !o || ["placed", "accepted"].includes(o.status); S.order = null; S.cart = {}; return go("cancelled", { reason: free ? "Cancelled before payment. Nothing was charged." : "" }); }
+  if (a === "copy") { navigator.clipboard?.writeText("demo.restaurant@upi").catch(() => {}); return toast("UPI ID copied"); }
+  if (a === "upi-intent") return toast(/Android/i.test(navigator.userAgent) ? (location.href = S.upiLink, "Opening your UPI app…") : "On a phone this opens GPay / PhonePe with the amount filled in");
+  if (a === "paid") { const u = (document.getElementById("utr").value || "").replace(/\D/g, ""); if (u && u.length < 4) return toast("Enter at least the last 4 digits"); o.utr = u; o.status = "verifying"; return go("verifying"); }
+  if (a === "confirm") { o.status = "paid"; o.cancelUntil = Date.now() + S.rules.cancelMin * 60000; toast("Payment confirmed by the restaurant"); return go(S.view === "owner" ? "owner" : "tracking"); }
+  if (a === "notpaid") { o.status = "accepted"; toast("Customer is told the payment wasn't found"); return go("owner"); }
+  if (a === "cook") { o.status = "cooking"; o.cancelUntil = 0; return go(S.view === "owner" ? "owner" : "tracking"); }
+  if (a === "dispatch") { o.status = "out"; return go(S.view === "owner" ? "owner" : "tracking"); }
+  if (a === "mark-delivered") { toast("Delivered · ₹" + o.total + " added to today's sales"); S.order = null; return go("owner"); }
+  if (a === "cancel-paid") { S.order = null; S.cart = {}; return go("cancelled", { reason: o.pay === "upi" ? `Cancelled within the free window. ${o.rest.name} refunds ${rs(o.total)} to your UPI within 24 hours. You'll see it under Orders.` : "Cancelled within the free window." }); }
+  if (a === "help") return rulesSheet(`<h3>Payment not confirmed?</h3><ol><li>Keep your UPI app's receipt.</li><li>We call ${o.rest.name} for you.</li><li>If the money reached them, they confirm and cook. If not, you can pay again or cancel.</li></ol>`);
+  if (a === "call") return toast("Calls the rider's phone");
+  if (a === "rate") return toast("Thanks for rating!");
+  if (a === "owner-settings") return go("ownerSettings");
+  if (a === "cod") { S.rules.cod = !S.rules.cod; return render(); }
+});
+app.addEventListener("input", e => { const k = e.target.dataset.rule; if (!k) return; S.rules[k] = Math.max(0, Number(e.target.value) || 0);
+  const ex = document.getElementById("ex"); if (ex) ex.textContent = [1.2, 3.4, 5.6].map(km => { const v = fee(km); return `${km} km → ${v === null ? "not delivered" : rs(v)}`; }).join(" · "); });
+render();
+</script>
+</body>
+</html>
