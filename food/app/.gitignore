@@ -1,0 +1,13 @@
+node_modules/
+www/vendor/
+www/data/
+www/fonts/
+www/js/icons.js
+www/js/config.js
+android/app/build/
+android/.gradle/
+android/build/
+*.keystore
+*.jks
+keystore.properties
+keys/

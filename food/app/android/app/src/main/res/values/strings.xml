@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Kezia\'s Food</string>
+    <string name="title_activity_main">Kezia\'s Food</string>
+    <string name="package_name">in.keziasfood.app</string>
+    <string name="custom_url_scheme">in.keziasfood.app</string>
+</resources>

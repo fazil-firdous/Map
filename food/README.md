@@ -1,10 +1,16 @@
-# Kulgam Eats (working name)
+# Kezia's Food
 
 Food ordering for Kulgam district. **One app** for everyone: customers order, and restaurant owners switch
 to restaurant mode in the same app. Each restaurant **delivers with its own rider** and is **paid directly**
 (UPI to the restaurant, or cash), so we need no payment gateway.
 
-- `prototype/app.html`: clickable UI prototype (customer flow, payment, live tracking, restaurant mode).
+- `app/`: the Android app (Capacitor, plain JS, Kahwa Green design). `npm install`, then
+  `KF_API=http://localhost:8090 npm run web && npm run serve` to try it in a browser, or `npm run sync` and
+  `cd android && ./gradlew assembleRelease bundleRelease` for a signed build (needs `android/keystore.properties`
+  and `keys/`, both kept out of git). `python3 scripts/make_logo.py && npm run assets` remakes the icons and splash.
+- `server/`: the API (Fastify + Postgres): orders, the UPI payment flow, commission, admin page at `/admin/`.
+  Deployed with the Srinagar Bazaar stack by `server/install.sh` at `kezia.<domain>`.
+- `prototype/app.html`: early clickable UI prototype (customer flow, payment, live tracking, restaurant mode).
   `python prototype/build.py` packs it into one file: `prototype/dist/kulgam-eats-prototype.html`.
 - `data/kulgam_restaurants.json`: food places around Kulgam, Devsar and Qazigund (Overture Maps), with phones.
 - `data/build_basemap.py`: our own Kulgam map (roads + water from OpenStreetMap). The app routes on it, so

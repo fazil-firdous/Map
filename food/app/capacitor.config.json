@@ -1,0 +1,11 @@
+{
+  "appId": "in.keziasfood.app",
+  "appName": "Kezia's Food",
+  "webDir": "www",
+  "android": { "allowMixedContent": false, "captureInput": true },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 700, "launchAutoHide": true, "backgroundColor": "#E3F5EA", "androidScaleType": "CENTER_CROP", "showSpinner": false },
+    "SystemBars": { "insetsHandling": "css", "initialViewportFitValueHint": "cover", "style": "LIGHT" },
+    "LocalNotifications": { "iconColor": "#0F8A4F" }
+  }
+}

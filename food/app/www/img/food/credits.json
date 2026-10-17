@@ -1,0 +1,92 @@
+{
+ "pizza-1": {
+  "title": "Pizza",
+  "by": "Seth W.",
+  "license": "CC BY-SA 2.0",
+  "source": "https://www.flickr.com/photos/62999165@N00/2150948508"
+ },
+ "pizza-2": {
+  "title": "Saki's Pizza",
+  "by": "The Pizza Review",
+  "license": "CC BY 2.0",
+  "source": "https://www.flickr.com/photos/23909884@N07/2426649282"
+ },
+ "pizza-3": {
+  "title": "rosso pomodoro pizza",
+  "by": "_gee_",
+  "license": "CC BY 2.0",
+  "source": "https://www.flickr.com/photos/32426344@N00/7097211551"
+ },
+ "wazwan": {
+  "title": "Lamb Rogan Josh, Goat Curry, Spinach and Beans with half-rice and 1 roti - Zam Zam AUD8",
+  "by": "avlxyz",
+  "license": "CC BY-SA 2.0",
+  "source": "https://www.flickr.com/photos/10559879@N00/2786164923"
+ },
+ "burger": {
+  "title": "Chicken Burger and Vegie Caesar Salad - Dicky Knees Cafe, Falls Creek",
+  "by": "avlxyz",
+  "license": "CC BY-SA 2.0",
+  "source": "https://www.flickr.com/photos/10559879@N00/1039357715"
+ },
+ "rolls": {
+  "title": "Shawarma Wrap mit Hähnchen",
+  "by": "ccnull.de Bilddatenbank",
+  "license": "CC BY 2.0",
+  "source": "https://www.flickr.com/photos/115225894@N07/54382650090"
+ },
+ "noodles": {
+  "title": "Tomato Beef Chow Mein with Crispy Hong Kong noodle",
+  "by": "pointnshoot",
+  "license": "CC BY 2.0",
+  "source": "https://www.flickr.com/photos/18244673@N00/284501614"
+ },
+ "momos": {
+  "title": "momo",
+  "by": "kudumomo",
+  "license": "CC BY 2.0",
+  "source": "https://www.flickr.com/photos/9751325@N02/6336553905"
+ },
+ "biryani": {
+  "title": "Chicken Biryani",
+  "by": "fourfridays",
+  "license": "CC BY-SA 2.0",
+  "source": "https://www.flickr.com/photos/72586449@N07/34109606322"
+ },
+ "fries": {
+  "title": "french fries",
+  "by": "waferboard",
+  "license": "CC BY 2.0",
+  "source": "https://www.flickr.com/photos/60944931@N00/5729028796"
+ },
+ "coffee": {
+  "title": "alcoholic root beer floats",
+  "by": "Stacy Spensley",
+  "license": "CC BY 2.0",
+  "source": "https://www.flickr.com/photos/21001756@N06/9198956404"
+ },
+ "cake": {
+  "title": "Chocolate Cake Slice",
+  "by": "Leslie Richards",
+  "license": "CC BY 2.0",
+  "source": "https://www.flickr.com/photos/14052937@N04/22011162965"
+ },
+ "kebab": {
+  "title": "Ready for sell",
+  "by": "saish746",
+  "license": "CC BY-SA 2.0",
+  "source": "https://www.flickr.com/photos/40873058@N00/9453890725"
+ },
+ "banner-wazwan": {
+  "title": "Lamb Rogan Josh, Goat Curry, Spinach and Beans with half-rice and 1 roti - Zam Zam AUD8",
+  "by": "avlxyz",
+  "license": "CC BY-SA 2.0",
+  "source": "https://www.flickr.com/photos/10559879@N00/2786164923"
+ },
+ "banner-pizza": {
+  "title": "rosso pomodoro pizza",
+  "by": "_gee_",
+  "license": "CC BY 2.0",
+  "source": "https://www.flickr.com/photos/32426344@N00/7097211551"
+ }
+}

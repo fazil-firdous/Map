@@ -1,0 +1,29 @@
+{
+  "name": "kezias-food-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kezia's Food Android app (Capacitor)",
+  "scripts": {
+    "web": "node scripts/build-web.js",
+    "sync": "node scripts/build-web.js && npx cap sync android",
+    "serve": "npx http-server www -p 8200 -c-1",
+    "assets": "npx capacitor-assets generate --android --iconBackgroundColor '#0F8A4F' --splashBackgroundColor '#E3F5EA'"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.2",
+    "@capacitor/app": "8.1.1",
+    "@capacitor/app-launcher": "8.0.1",
+    "@capacitor/core": "8.5.2",
+    "@capacitor/geolocation": "8.2.2",
+    "@capacitor/haptics": "8.0.2",
+    "@capacitor/local-notifications": "8.0.2",
+    "@capacitor/splash-screen": "8.0.2",
+    "leaflet": "1.9.4",
+    "qrcode-generator": "2.0.4"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "3.0.5",
+    "@capacitor/cli": "8.5.2",
+    "lucide-static": "0.460.0"
+  }
+}
