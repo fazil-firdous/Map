@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kezia's Food · Admin</title>
+<style>
+  :root { --g: #0f8a4f; --ink: #13201a; --ink2: #5d6b63; --line: #e3ebe6; --bg: #f4f8f5; }
+  * { box-sizing: border-box; } body { margin: 0; font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color: var(--ink); background: var(--bg); }
+  header { background: linear-gradient(120deg, #0f8a4f, #22b46a); color: #fff; padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  header b { font-size: 20px; } header input { padding: 8px 10px; border-radius: 8px; border: 0; width: 240px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 18px; display: grid; gap: 18px; }
+  section { background: #fff; border-radius: 14px; padding: 16px; box-shadow: 0 1px 3px rgb(0 0 0 / .06); overflow-x: auto; }
+  h2 { margin: 0 0 12px; font-size: 16px; } table { width: 100%; border-collapse: collapse; } td, th { text-align: left; padding: 8px 6px; border-top: 1px solid var(--line); vertical-align: middle; white-space: nowrap; }
+  th { color: var(--ink2); font-weight: 600; border-top: 0; font-size: 12.5px; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; } .kpi { background: var(--bg); border-radius: 12px; padding: 12px; } .kpi b { display: block; font-size: 22px; }
+  button { font: inherit; border: 0; border-radius: 8px; padding: 6px 10px; cursor: pointer; background: #e7f5ec; color: var(--g); font-weight: 600; } button.red { background: #fdecec; color: #c4320a; }
+  input, select { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; } .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 99px; background: var(--bg); font-size: 12px; } .muted { color: var(--ink2); } .err { color: #c4320a; }
+</style>
+</head>
+<body>
+<header><b>Kezia's Food · Admin</b><span class="row"><input id="tok" type="password" placeholder="Admin token"><button id="load">Open</button></span></header>
+<main id="main"><p class="muted">Enter the admin token (it's in the server's .env as ADMIN_TOKEN).</p></main>
+<script>
+const $ = s => document.querySelector(s), esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const rs = n => "₹" + Number(n || 0).toLocaleString("en-IN");
+$("#tok").value = localStorage.getItem("kf_admin") || "";
+async function api(method, path, body) {
+  const r = await fetch(path, { method, headers: { "x-admin-token": $("#tok").value, ...(body ? { "content-type": "application/json" } : {}) }, body: body ? JSON.stringify(body) : undefined });
+  const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || r.status); return j;
+}
+async function load() {
+  localStorage.setItem("kf_admin", $("#tok").value);
+  let d; try { d = await api("GET", "/v1/admin/overview"); } catch (e) { $("#main").innerHTML = `<p class="err">${esc(e.message)}</p>`; return; }
+  const s = d.settings, st = d.stats;
+  $("#main").innerHTML = `
+  <section><h2>Overview</h2><div class="kpis"><div class="kpi"><b>${st.today}</b>orders today</div><div class="kpi"><b>${st.delivered}</b>delivered in total</div>
+    <div class="kpi"><b>${rs(st.food)}</b>food sold</div><div class="kpi"><b>${rs(st.commission)}</b>your commission earned</div><div class="kpi"><b>${st.users}</b>users</div></div></section>
+  <section><h2>Settings</h2><div class="row">Commission <input id="pct" type="number" step="0.5" min="0" max="50" value="${s.commission_pct}" style="width:80px">% of food value ·
+    Your UPI <input id="pupi" value="${esc(s.platform_upi)}" placeholder="you@ybl"> · Support phone <input id="sup" value="${esc(s.support_phone)}" placeholder="98765 43210"> <button data-a="settings">Save</button></div>
+    <p class="muted">The rate applies to new orders. Each restaurant can have its own rate below (empty = default).</p></section>
+  <section><h2>Restaurants</h2><table><tr><th>Name</th><th>Status</th><th>Owner</th><th>UPI</th><th>Delivered</th><th>Commission owed</th><th>Rate %</th><th></th></tr>
+    ${d.restaurants.map(r => `<tr><td><b>${esc(r.name)}</b><br><span class="muted">${esc(r.area)} · ${r.id}</span></td><td><span class="pill">${r.status}</span>${r.is_open ? " · open" : ""}</td>
+      <td>${esc(r.owner_phone || "")}</td><td>${esc(r.upi_id || "-")}</td><td>${r.delivered}</td><td>${rs(r.due)}</td>
+      <td><input data-pct="${r.id}" value="${r.commission_pct ?? ""}" placeholder="${s.commission_pct}" style="width:60px"></td>
+      <td class="row">${["active", "test", "suspended"].filter(x => x !== r.status).map(x => `<button data-status="${x}" data-id="${r.id}" class="${x === "suspended" ? "red" : ""}">${x === "active" ? "Approve / activate" : x}</button>`).join("")}</td></tr>`).join("")}</table></section>
+  <section><h2>Commission payments</h2><table><tr><th>Restaurant</th><th>Orders</th><th>Food</th><th>Amount</th><th>UPI ref</th><th>Status</th><th></th></tr>
+    ${d.settlements.map(x => `<tr><td>${esc(x.restaurant)}</td><td>${x.orders}</td><td>${rs(x.food_total)}</td><td><b>${rs(x.amount)}</b></td><td>${esc(x.utr)}</td><td>${x.status}</td>
+      <td>${x.status === "claimed" ? `<button data-settle="paid" data-id="${x.id}">Received</button> <button class="red" data-settle="reject" data-id="${x.id}">Not received</button>` : ""}</td></tr>`).join("") || `<tr><td class="muted">No payments yet.</td></tr>`}</table></section>
+  <section><h2>Banners</h2><table>${d.banners.map(b => `<tr><td><b>${esc(b.title)}</b> <span class="muted">${esc(b.kicker || "")} · ${esc(b.subtitle || "")}</span></td><td>${b.active ? "shown" : "hidden"}</td>
+      <td><button data-banner="${b.id}" data-on="${!b.active}">${b.active ? "Hide" : "Show"}</button> <button class="red" data-delban="${b.id}">Delete</button></td></tr>`).join("")}</table>
+    <div class="row" style="margin-top:10px"><input id="bk" placeholder="Small line (WAZWAN NIGHTS)"><input id="bt" placeholder="Title"><input id="bs" placeholder="Subtitle"><input id="bp" placeholder="Photo (asset:banner-pizza.jpg or /uploads/…)">
+      <select id="br"><option value="">No restaurant</option>${d.restaurants.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join("")}</select><button data-a="banner">Add banner</button></div></section>
+  <section><h2>Latest orders</h2><table><tr><th>Order</th><th>Restaurant</th><th>Customer</th><th>Status</th><th>Pay</th><th>Total</th><th>Commission</th><th>When</th></tr>
+    ${d.orders.map(o => `<tr><td>${o.id}</td><td>${esc(o.restaurant)}</td><td>${esc(o.customer_phone || "")}</td><td>${o.status}${o.refund ? ` · refund ${o.refund}` : ""}</td><td>${o.pay_method}</td><td>${rs(o.total)}</td><td>${rs(o.commission)}</td>
+      <td class="muted">${new Date(o.created_at).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}</td></tr>`).join("")}</table></section>
+  <section><h2>Block a user</h2><div class="row"><input id="banp" placeholder="+91XXXXXXXXXX"><button class="red" data-a="ban">Block</button><button data-a="unban">Unblock</button></div></section>`;
+}
+$("#load").onclick = load;
+document.addEventListener("change", async e => { const id = e.target.dataset.pct; if (!id) return;
+  try { await api("PATCH", "/v1/admin/restaurants/" + id, { commission_pct: e.target.value }); e.target.style.borderColor = "#0f8a4f"; } catch (err) { alert(err.message); } });
+document.addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b || b.id === "load") return; const d = b.dataset;
+  try {
+    if (d.status) await api("PATCH", "/v1/admin/restaurants/" + d.id, { status: d.status });
+    else if (d.settle) await api("POST", `/v1/admin/settlements/${d.id}/${d.settle}`);
+    else if (d.banner) await api("PATCH", "/v1/admin/banners/" + d.banner, { active: d.on === "true" });
+    else if (d.delban) { if (!confirm("Delete this banner?")) return; await api("DELETE", "/v1/admin/banners/" + d.delban); }
+    else if (d.a === "settings") await api("PUT", "/v1/admin/settings", { commission_pct: $("#pct").value, platform_upi: $("#pupi").value, support_phone: $("#sup").value });
+    else if (d.a === "banner") await api("POST", "/v1/admin/banners", { kicker: $("#bk").value, title: $("#bt").value, subtitle: $("#bs").value, photo: $("#bp").value, restaurant_id: $("#br").value || null });
+    else if (d.a === "ban" || d.a === "unban") await api("POST", "/v1/admin/users/ban", { phone: $("#banp").value, banned: d.a === "ban" });
+    load();
+  } catch (err) { alert(err.message); }
+});
+if ($("#tok").value) load();
+</script>
+</body>
+</html>

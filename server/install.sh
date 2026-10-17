@@ -47,6 +47,21 @@ EOF
   chmod 600 "$ENV"
 fi
 
+# Kezia's Food settings (also added to older .env files). Its API lives at kezia.<your domain without "api.">.
+if ! grep -q '^KEZIA_SECRET=' "$ENV"; then
+  echo "==> Adding Kezia's Food settings to $ENV"
+  rnd() { openssl rand -base64 36 | tr -d '/+=' | cut -c1-40; }
+  {
+    echo "KEZIA_DOMAIN=${KEZIA_DOMAIN:-kezia.${DOMAIN#api.}}"
+    echo "KEZIA_SECRET=$(rnd)"
+    echo "KEZIA_ADMIN_TOKEN=$(rnd)"
+    echo "KEZIA_TEST_OWNER_PHONE=9000000101"
+    echo "KEZIA_TEST_CUSTOMER_PHONE=9000000102"
+    echo "KEZIA_TEST_CODE=$(printf '%06d' $(( $(od -An -N4 -tu4 /dev/urandom) % 1000000 )))"
+    echo "KEZIA_PLATFORM_UPI="
+  } >> "$ENV"
+fi
+
 if command -v ufw >/dev/null && ufw status | grep -q active; then ufw allow 80/tcp >/dev/null; ufw allow 443/tcp >/dev/null; fi
 
 echo "==> Starting database, API and HTTPS (first build takes a few minutes)"
@@ -56,6 +71,8 @@ $COMPOSE up -d --build
 echo "==> Waiting for the API"
 for i in $(seq 1 60); do $COMPOSE exec -T api wget -qO- http://localhost:8080/v1/health >/dev/null 2>&1 && break; sleep 3; done
 $COMPOSE exec -T api node scripts/seed.js
+for i in $(seq 1 40); do $COMPOSE exec -T kezia wget -qO- http://localhost:8090/v1/health >/dev/null 2>&1 && break; sleep 3; done
+$COMPOSE exec -T kezia node scripts/seed.js
 
 echo "==> Nightly backups at 02:30"
 chmod +x server/scripts/backup.sh
@@ -74,6 +91,13 @@ Srinagar Bazaar is running.
   Review page:    https://$DOMAIN/admin/
   Admin token:    $ADMIN_TOKEN
   Reviewer login: phone $REVIEW_PHONE, code $REVIEW_CODE
+
+Kezia's Food is running.
+  API health:     https://$KEZIA_DOMAIN/v1/health
+  Admin page:     https://$KEZIA_DOMAIN/admin/   (token: $KEZIA_ADMIN_TOKEN)
+  Privacy, terms: https://$KEZIA_DOMAIN/privacy.html  https://$KEZIA_DOMAIN/terms.html
+  Test restaurant owner login: $KEZIA_TEST_OWNER_PHONE, code $KEZIA_TEST_CODE
+  Test customer login:         $KEZIA_TEST_CUSTOMER_PHONE, code $KEZIA_TEST_CODE
 Keep these private. They are stored in $DIR/$ENV
 SMS codes for other numbers appear in:  $COMPOSE logs api | grep OTP
 EOF

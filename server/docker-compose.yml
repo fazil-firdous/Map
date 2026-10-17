@@ -1,4 +1,4 @@
-# Srinagar Bazaar on one VPS: database + API + HTTPS. Run from the repository root:
+# Srinagar Bazaar and Kezia's Food on one VPS: one database server, two APIs, HTTPS for both. Run from the repository root:
 #   cp server/.env.example server/.env   (fill it in)
 #   docker compose -f server/docker-compose.yml --env-file server/.env up -d --build
 #   docker compose -f server/docker-compose.yml --env-file server/.env exec api node scripts/seed.js   (first time only)
@@ -41,13 +41,37 @@ services:
     volumes:
       - uploads:/data/uploads
 
+  # Kezia's Food (food ordering for Kulgam): its own database "kezia" on the same Postgres server
+  kezia:
+    build:
+      context: ..
+      dockerfile: food/server/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      DATABASE_URL: postgres://bazaar:${DB_PASSWORD}@db:5432/kezia
+      APP_SECRET: ${KEZIA_SECRET:?set KEZIA_SECRET}
+      ADMIN_TOKEN: ${KEZIA_ADMIN_TOKEN:?set KEZIA_ADMIN_TOKEN}
+      SMS_PROVIDER: ${SMS_PROVIDER:-console}
+      MSG91_AUTH_KEY: ${MSG91_AUTH_KEY:-}
+      MSG91_TEMPLATE_ID: ${MSG91_TEMPLATE_ID:-}
+      TWOFACTOR_API_KEY: ${TWOFACTOR_API_KEY:-}
+      TEST_OWNER_PHONE: ${KEZIA_TEST_OWNER_PHONE:-}
+      TEST_CUSTOMER_PHONE: ${KEZIA_TEST_CUSTOMER_PHONE:-}
+      TEST_CODE: ${KEZIA_TEST_CODE:-}
+      KEZIA_PLATFORM_UPI: ${KEZIA_PLATFORM_UPI:-}
+    volumes:
+      - kezia_uploads:/data/uploads
+
   caddy:
     image: caddy:2.8
     restart: unless-stopped
-    depends_on: [api]
+    depends_on: [api, kezia]
     ports: ["80:80", "443:443"]
     environment:
       API_DOMAIN: ${API_DOMAIN:?set API_DOMAIN, e.g. api.srinagarbazaar.in}
+      KEZIA_DOMAIN: ${KEZIA_DOMAIN:?set KEZIA_DOMAIN, e.g. kezia.example.com}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
@@ -56,5 +80,6 @@ services:
 volumes:
   pgdata:
   uploads:
+  kezia_uploads:
   caddy_data:
   caddy_config:

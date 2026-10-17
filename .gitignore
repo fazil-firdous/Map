@@ -9,3 +9,5 @@ brand/photos/shops/*
 !brand/photos/shops/SXR-C8F0B869/
 !brand/photos/shops/SXR-E7AD8D5B/
 food/photos/candidates/
+food/server/node_modules/
+food/app/node_modules/
