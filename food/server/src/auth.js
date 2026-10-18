@@ -7,6 +7,13 @@ const { sendOtp } = require("./sms");
 
 const SESSION_DAYS = 365;
 const testCode = phone => config.test.code && [config.test.ownerPhone, config.test.customerPhone].filter(Boolean).map(normPhone).includes(phone) ? config.test.code : null;
+const isOwner = phone => !!(config.owner.phone && config.owner.code && phone === normPhone(config.owner.phone));
+/** Accounts that log in with a fixed code instead of an SMS (owner and test numbers). */
+const fixedCode = phone => (isOwner(phone) ? config.owner.code : testCode(phone));
+// Login limits count per phone number, not per network: mobile networks put many phones behind one IP.
+// (They run as preHandler hooks so the phone number in the body has been parsed.)
+const phoneKey = req => "otp:" + (normPhone(req.body?.phone) || req.ip);
+const fixedAllowed = req => !!fixedCode(normPhone(req.body?.phone));
 
 async function sessionFor(userId) {
   const t = token();
@@ -51,20 +58,20 @@ async function myPlaces(user) {
 const publicUser = u => ({ id: u.id, name: u.name, phone: u.phone, role: u.role });
 
 function routes(app) {
-  app.post("/v1/auth/otp/start", { config: { rateLimit: { max: 6, timeWindow: "1 hour" } } }, async (req) => {
+  app.post("/v1/auth/otp/start", { config: { rateLimit: { max: 8, timeWindow: "1 hour", keyGenerator: phoneKey, allowList: fixedAllowed, hook: "preHandler" } } }, async (req) => {
     const phone = normPhone(req.body?.phone);
     if (!isMobile(phone)) throw bad("Enter a 10-digit mobile number");
-    const prev = await db.one("SELECT sent_at FROM otps WHERE phone = $1", [phone]);
-    if (prev && Date.now() - new Date(prev.sent_at).getTime() < 45_000) throw new HttpError(429, "Wait a few seconds before asking for another code");
-    const fixed = testCode(phone);
+    const fixed = fixedCode(phone);
+    const prev = !fixed && await db.one("SELECT sent_at FROM otps WHERE phone = $1", [phone]);
+    if (prev && Date.now() - new Date(prev.sent_at).getTime() < 30_000) throw new HttpError(429, "Wait a few seconds before asking for another code");
     const code = fixed || otpCode();
     await db.q(`INSERT INTO otps (phone, code_hash, expires_at) VALUES ($1, $2, now() + interval '10 minutes')
       ON CONFLICT (phone) DO UPDATE SET code_hash = EXCLUDED.code_hash, attempts = 0, sent_at = now(), expires_at = EXCLUDED.expires_at`, [phone, hmac(phone + ":" + code)]);
     if (!fixed) await sendOtp(phone, code, req.log);
-    return { sent: true, phone, ...(config.sms.devReturnCode ? { dev_code: code } : {}) };
+    return { sent: true, phone, ...(config.sms.devReturnCode && !fixed ? { dev_code: code } : {}) };
   });
 
-  app.post("/v1/auth/otp/verify", { config: { rateLimit: { max: 20, timeWindow: "1 hour" } } }, async (req) => {
+  app.post("/v1/auth/otp/verify", { config: { rateLimit: { max: 30, timeWindow: "1 hour", keyGenerator: phoneKey, hook: "preHandler" } } }, async (req) => {
     const phone = normPhone(req.body?.phone);
     const code = String(req.body?.code || "").replace(/\D/g, "");
     const o = phone && await db.one("SELECT * FROM otps WHERE phone = $1", [phone]);
@@ -73,8 +80,15 @@ function routes(app) {
     if (o.code_hash !== hmac(phone + ":" + code)) { await db.q("UPDATE otps SET attempts = attempts + 1 WHERE phone = $1", [phone]); throw bad("Wrong code"); }
     await db.q("DELETE FROM otps WHERE phone = $1", [phone]);
     const name = str(req.body?.name, 40);
-    const user = await db.one(`INSERT INTO users (phone, name) VALUES ($1, $2) ON CONFLICT (phone) DO UPDATE SET name = COALESCE(users.name, EXCLUDED.name) RETURNING *`, [phone, name]);
-    if (user.banned) throw forbidden("This number is blocked. Contact support");
+    let user = await db.one(`INSERT INTO users (phone, name) VALUES ($1, $2) ON CONFLICT (phone) DO UPDATE SET name = COALESCE(users.name, EXCLUDED.name) RETURNING *`, [phone, name]);
+    if (user.banned && !isOwner(phone)) throw forbidden("This number is blocked. Contact support");
+    // The platform owner is an admin and owns the test restaurant (the test owner number stays on as its manager).
+    if (isOwner(phone)) {
+      user = await db.one("UPDATE users SET role = 'admin', banned = false WHERE id = $1 RETURNING *", [user.id]);
+      await db.q("UPDATE restaurants SET owner_id = $1 WHERE id = 'KF-TEST'", [user.id]);
+      if (config.test.ownerPhone) await db.q(`INSERT INTO staff (restaurant_id, phone, name, role) VALUES ('KF-TEST', $1, 'Test Owner', 'manager')
+        ON CONFLICT (restaurant_id, phone) DO NOTHING`, [normPhone(config.test.ownerPhone)]);
+    }
     // The test owner manages the test restaurant.
     if (config.test.ownerPhone && phone === normPhone(config.test.ownerPhone)) await db.q("UPDATE restaurants SET owner_id = $1 WHERE id = 'KF-TEST' AND owner_id IS NULL", [user.id]);
     return { token: await sessionFor(user.id), user: publicUser(user), places: await myPlaces(user) };

@@ -60,6 +60,8 @@ services:
       TEST_OWNER_PHONE: ${KEZIA_TEST_OWNER_PHONE:-}
       TEST_CUSTOMER_PHONE: ${KEZIA_TEST_CUSTOMER_PHONE:-}
       TEST_CODE: ${KEZIA_TEST_CODE:-}
+      OWNER_PHONE: ${KEZIA_OWNER_PHONE:-}
+      OWNER_CODE: ${KEZIA_OWNER_CODE:-}
       KEZIA_PLATFORM_UPI: ${KEZIA_PLATFORM_UPI:-}
     volumes:
       - kezia_uploads:/data/uploads

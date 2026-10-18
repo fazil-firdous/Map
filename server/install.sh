@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 # Srinagar Bazaar: one-time VPS setup (Ubuntu 22.04/24.04, run as root).
-#   bash install.sh --domain api.45-92-1-150.sslip.io --review-phone 9XXXXXXXXX
+#   bash install.sh --domain api.45-92-1-150.sslip.io --review-phone 9XXXXXXXXX [--kezia-owner 9XXXXXXXXX]
 # Safe to run again: it updates the code and keeps your existing passwords and data.
 set -euo pipefail
 
-DOMAIN=""; REVIEW_PHONE=""; BRANCH="ccr-cade9a1c-6u8263"; DIR=/opt/srinagar-bazaar
+DOMAIN=""; REVIEW_PHONE=""; KEZIA_OWNER=""; BRANCH="ccr-cade9a1c-6u8263"; DIR=/opt/srinagar-bazaar
 REPO="https://github.com/fazil-mastu/Map.git"
 while [ $# -gt 0 ]; do
   case "$1" in
     --domain) DOMAIN="$2"; shift 2 ;;
     --review-phone) REVIEW_PHONE="$2"; shift 2 ;;
+    --kezia-owner) KEZIA_OWNER="$2"; shift 2 ;;
     --branch) BRANCH="$2"; shift 2 ;;
     *) echo "Unknown option $1"; exit 1 ;;
   esac
@@ -62,6 +63,13 @@ if ! grep -q '^KEZIA_SECRET=' "$ENV"; then
   } >> "$ENV"
 fi
 
+# Kezia's Food owner: admin account with a fixed login code (works before SMS is set up). Kept only in .env.
+if [ -n "$KEZIA_OWNER" ]; then
+  sed -i '/^KEZIA_OWNER_PHONE=/d' "$ENV"
+  echo "KEZIA_OWNER_PHONE=$KEZIA_OWNER" >> "$ENV"
+  grep -q '^KEZIA_OWNER_CODE=' "$ENV" || echo "KEZIA_OWNER_CODE=$(printf '%06d' $(( $(od -An -N4 -tu4 /dev/urandom) % 1000000 )))" >> "$ENV"
+fi
+
 if command -v ufw >/dev/null && ufw status | grep -q active; then ufw allow 80/tcp >/dev/null; ufw allow 443/tcp >/dev/null; fi
 
 echo "==> Starting database, API and HTTPS (first build takes a few minutes)"
@@ -96,8 +104,9 @@ Kezia's Food is running.
   API health:     https://$KEZIA_DOMAIN/v1/health
   Admin page:     https://$KEZIA_DOMAIN/admin/   (token: $KEZIA_ADMIN_TOKEN)
   Privacy, terms: https://$KEZIA_DOMAIN/privacy.html  https://$KEZIA_DOMAIN/terms.html
-  Test restaurant owner login: $KEZIA_TEST_OWNER_PHONE, code $KEZIA_TEST_CODE
+  Owner login (admin, owns the test restaurant): ${KEZIA_OWNER_PHONE:-not set, add --kezia-owner}${KEZIA_OWNER_CODE:+, code $KEZIA_OWNER_CODE}
+  Test restaurant manager login: $KEZIA_TEST_OWNER_PHONE, code $KEZIA_TEST_CODE
   Test customer login:         $KEZIA_TEST_CUSTOMER_PHONE, code $KEZIA_TEST_CODE
 Keep these private. They are stored in $DIR/$ENV
-SMS codes for other numbers appear in:  $COMPOSE logs api | grep OTP
+SMS codes for other numbers appear in:  $COMPOSE logs api kezia | grep OTP   (until SMS_PROVIDER is set up)
 EOF

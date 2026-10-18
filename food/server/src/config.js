@@ -21,6 +21,8 @@ module.exports = {
   },
   // Test accounts with a fixed code and no SMS: the test restaurant's owner, and a test customer.
   test: { ownerPhone: env.TEST_OWNER_PHONE || "", customerPhone: env.TEST_CUSTOMER_PHONE || "", code: env.TEST_CODE || "" },
+  // The platform owner: admin, owns the test restaurant, logs in with a fixed code (works before SMS is live).
+  owner: { phone: env.OWNER_PHONE || "", code: env.OWNER_CODE || "" },
   // Kulgam district (orders only within this box)
   bbox: { minLat: 33.52, maxLat: 33.75, minLon: 74.80, maxLon: 75.15 },
 };
