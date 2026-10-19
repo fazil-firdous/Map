@@ -262,7 +262,7 @@ textarea.input { min-height: 84px; resize: none; line-height: 1.45; }
 /* ---------- sheet, toast, skeleton, boot ---------- */
 .sheet { position: absolute; inset: 0; z-index: 80; }
 .sheet .dim { position: absolute; inset: 0; background: rgb(10 20 15 / .45); animation: fade .25s; }
-.sheet .panel { position: absolute; left: 0; right: 0; bottom: 0; max-height: 90%; overflow-y: auto; border-radius: 28px 28px 0 0; background: var(--bg); padding: 8px var(--gut) calc(var(--sab) + 18px); animation: up .32s var(--ease); box-shadow: var(--e3); }
+.sheet .panel { position: absolute; left: 0; right: 0; bottom: 0; max-height: 90%; overflow-y: auto; border-radius: 28px 28px 0 0; background: var(--bg); padding: 8px var(--gut) calc(var(--sab) + 18px); animation: up .46s cubic-bezier(.16, 1.08, .3, 1); box-shadow: var(--e3); }
 .sheet.closing .panel { animation: down .2s ease-in forwards; } .sheet.closing .dim { animation: fade .2s reverse forwards; }
 .sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line-2); margin: 4px auto 14px; }
 .sheet h2 { margin: 0 0 6px; font-size: 21px; letter-spacing: -.02em; } .sheet .sub { color: var(--ink-2); margin: 0 0 16px; line-height: 1.5; }
@@ -324,8 +324,42 @@ textarea.input { min-height: 84px; resize: none; line-height: 1.45; }
 @keyframes float { 50% { translate: 0 -10px; } }
 @keyframes flash { 25% { background: var(--g-soft); box-shadow: 0 0 0 8px var(--g-soft); } }
 
+/* ---------- 1.1: depth transitions, logo boot, owner dashboard, navigation map ---------- */
+.layer { transition: transform .42s cubic-bezier(.22, 1, .36, 1), filter .42s; }
+.layer.behind { transform: translateX(-24%); filter: brightness(.93); }
+.nav button[aria-current="true"] .ico { animation: navpop .4s cubic-bezier(.2, 1.6, .4, 1); }
+.nav button[aria-current="true"]::before { content: ""; position: absolute; top: 6px; width: 46px; height: 30px; border-radius: 99px; background: var(--g-soft); z-index: -1; animation: fade .3s; }
+.nav button { z-index: 0; }
+.btn:active, .chip:active, .opt:active, .menu-list button:active { transition-duration: .06s; }
+.card, .ocard, .rcard { transition: transform .15s var(--ease); }
+.vtitle { margin-top: 14px; font-size: 24px; font-weight: 800; letter-spacing: -.025em; animation: fadeup .4s var(--ease); }
+.spin1 .ico { animation: spin .7s var(--ease); }
+.boot { gap: 14px; }
+.bootlogo { position: relative; width: 128px; height: 128px; animation: logoin .9s cubic-bezier(.2, 1.4, .35, 1) both; }
+.bootlogo img { position: relative; width: 100%; height: 100%; border-radius: 30px; box-shadow: 0 22px 40px -14px rgb(15 138 79 / .7); }
+.bootlogo i { position: absolute; inset: 0; border-radius: 34px; border: 2px solid rgb(15 138 79 / .35); animation: ring 2.2s ease-out .5s infinite; }
+.bootlogo i:nth-child(2) { animation-delay: 1.4s; }
+.boot .brand { animation: fadeup .6s .35s var(--ease) both; }
+.boot .brand small { letter-spacing: .16em; }
+.boot .bootbar { animation: fade .4s .7s both; }
+.boot.out { opacity: 0; transform: scale(1.06); transition: opacity .45s, transform .45s var(--ease); }
+@keyframes logoin { from { transform: scale(.4) rotate(-8deg); opacity: 0; } 60% { opacity: 1; } }
+@keyframes navpop { 40% { transform: translateY(-3px) scale(1.18); } }
+.due .duegrid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+.due .duegrid div { background: rgb(255 255 255 / .14); border-radius: 12px; padding: 8px 10px; } .due .duegrid span { font-size: 11px; opacity: .9; font-weight: 700; } .due .duegrid b { font-size: 16px; margin: 0; }
+.stats .stat b { font-variant-numeric: tabular-nums; } .stat b span, .due b span { font: inherit; color: inherit; letter-spacing: inherit; }
+.mgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+.mgrid div { background: var(--card-2); border-radius: 12px; padding: 9px 10px; } .mgrid b { display: block; font-size: 15px; letter-spacing: -.01em; } .mgrid span { font-size: 11px; color: var(--ink-3); font-weight: 700; }
+.bars i[data-a] { cursor: pointer; }
+.modecard { margin: -6px var(--gut) 14px; padding: 14px; border-radius: 18px; background: var(--grad); color: #fff; display: flex; gap: 12px; align-items: center; box-shadow: var(--glow); animation: fadeup .4s var(--ease); }
+.modecard .tile { background: rgb(255 255 255 / .2); color: #fff; } .modecard .small { opacity: .9; }
+.navmap { position: relative; flex: 1; background: #eef3ee; } .navmap .mapel { position: absolute; inset: 0; background: #eef3ee; }
+.navmap .leaflet-bottom.leaflet-right { bottom: 16px; }
+.navcard { position: relative; z-index: 600; margin-top: -26px; padding: 16px var(--gut) calc(var(--sab) + 16px); border-radius: 26px 26px 0 0; background: var(--bg); box-shadow: 0 -14px 34px -14px rgb(0 0 0 / .3); animation: up .45s cubic-bezier(.16, 1.08, .3, 1); }
+.navkm b { font-size: 18px; letter-spacing: -.02em; }
+
 /* ---------- motion ---------- */
-.enter { animation: slidein .32s var(--ease); } .leave { animation: slideout .24s ease-in forwards; } .fadein { animation: fade .25s ease-out; }
+.enter { animation: slidein .42s cubic-bezier(.22, 1, .36, 1); } .leave { animation: slideout .26s cubic-bezier(.4, 0, .9, .6) forwards; } .fadein { animation: fadeup .34s var(--ease); }
 .stagger > * { animation: fadeup .45s var(--ease) both; animation-delay: calc(var(--i, 0) * 60ms); }
 @keyframes slidein { from { transform: translateX(100%); } } @keyframes slideout { to { transform: translateX(100%); } }
 @keyframes up { from { transform: translateY(100%); } } @keyframes down { to { transform: translateY(100%); } } @keyframes fade { from { opacity: 0; } }

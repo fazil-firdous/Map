@@ -1,50 +1,62 @@
-// Kezia's Food: app start. Boot animation, welcome, bottom tabs, Android back button, resume refresh.
+// Kezia's Food: app start. Logo boot screen, welcome, the bottom bar for each kind of account, Android back button.
+// One app, four modes: customers order; restaurants (owner/manager) run their kitchen; riders deliver; the owner
+// of Kezia's Food sees everything. Restaurant, rider and owner accounts don't see the ordering screens.
 (() => {
-  const { $, $$, h, I, esc, S, emit, on, sleep, plugin, pop, top, topSheet, haptic, bell } = KF;
-  const C = KF.customer, P = KF.partner;
+  const { $, h, I, S, emit, on, sleep, plugin, pop, top, topSheet, haptic, bell } = KF;
+  const C = KF.customer, P = KF.partner, AD = KF.admin;
   const app = $("#app");
   const layers = {};
-  let current = "home";
+  let current = null;
 
+  const mode = () => (S.user && S.user.role === "admin" ? "admin" : S.kitchens().length ? "kitchen" : S.rides().length ? "rider" : "customer");
+  KF.mode = mode;
   function tabs() {
-    const t = [["home", "house", "Home"], ["search", "search", "Search"], ["orders", "receipt", "Orders"]];
-    if (S.kitchens().length) t.push(["kitchen", "chef-hat", "Kitchen"]);
-    else if (S.rides().length) t.push(["kitchen", "bike", "Deliver"]);
-    t.push(["profile", "user", "You"]);
-    return t;
+    return {
+      customer: [["home", "house", "Home"], ["search", "search", "Search"], ["orders", "receipt", "Orders"], ["profile", "user", "You"]],
+      kitchen: [["k:orders", "bell-ring", "Orders"], ["k:menu", "utensils", "Menu"], ["k:money", "wallet", "Earnings"], ["k:settings", "settings", "Settings"], ["profile", "user", "You"]],
+      rider: [["k:rides", "bike", "Deliveries"], ["profile", "user", "You"]],
+      admin: [["a:home", "chart-column", "Dashboard"], ["a:rest", "store", "Restaurants"], ["a:orders", "receipt", "Orders"], ["a:users", "users", "Users"], ["profile", "user", "You"]],
+    }[mode()];
   }
+  KF.firstTab = () => tabs()[0][0];
+  const layerOf = k => (k.startsWith("k:") ? "kitchen" : k.startsWith("a:") ? "admin" : k);
+
   const badges = {};
   function nav() {
     let n = $(".nav", app);
     if (!n) { n = h(`<nav class="nav"></nav>`); app.append(n); n.onclick = e => { const b = e.target.closest("button"); if (b) tab(b.dataset.tab); }; }
-    if (!tabs().some(t => t[0] === current)) current = "home";
     n.innerHTML = tabs().map(([k, icon, label]) => `<button data-tab="${k}" aria-current="${k === current}">${I(icon)}<span>${label}</span>${badges[k] ? `<span class="badge">${badges[k]}</span>` : ""}</button>`).join("");
   }
   KF.badge = (k, v) => { if ((badges[k] || 0) === v) return; badges[k] = v; nav(); };
 
   function tab(k) {
-    if (!layers[k]) return;
+    if (!tabs().some(t => t[0] === k)) k = KF.firstTab();
     while (top()) pop();
-    const again = k === current && !layers[k].hidden;
+    const again = k === current;
     current = k;
-    Object.entries(layers).forEach(([name, el]) => { el.hidden = name !== k; });
-    layers[k].classList.remove("fadein"); void layers[k].offsetWidth; layers[k].classList.add("fadein");
+    const L = layerOf(k);
+    Object.entries(layers).forEach(([name, el]) => { el.hidden = name !== L; });
+    layers[L].classList.remove("fadein"); void layers[L].offsetWidth; layers[L].classList.add("fadein");
     nav(); haptic();
+    const view = k.split(":")[1];
     if (k === "home") { if (again) { const sc = $(".scroll", layers.home); if (sc) sc.scrollTo({ top: 0, behavior: "smooth" }); } C.loadHome(); }
     if (k === "search") C.search.focus();
     if (k === "orders") { C.renderOrders(); C.loadOrders(); }
-    if (k === "kitchen") P.show();
+    if (L === "kitchen") P.show(view);
+    if (L === "admin") AD.show(view);
     if (k === "profile") drawProfile();
   }
   KF.tab = tab;
+  // Logging in or out can change the kind of account: rebuild the bar and open that mode's first screen
+  let lastMode = null;
+  const remode = () => { const m = mode(); if (m !== lastMode) { lastMode = m; tab(KF.firstTab()); } else nav(); };
 
   let drawProfile;
   function build() {
-    ["home", "search", "orders", "kitchen", "profile"].forEach(k => { const el = h(`<div class="layer" id="t-${k}" ${k === "home" ? "" : "hidden"}></div>`); app.append(el); layers[k] = el; });
-    C.initHome(layers.home); C.initSearch(layers.search); C.initOrders(layers.orders); P.init(layers.kitchen); drawProfile = C.initProfile(layers.profile);
-    nav();
-    on("places", nav);
-    on("auth", nav);
+    ["home", "search", "orders", "kitchen", "admin", "profile"].forEach(k => { const el = h(`<div class="layer" id="t-${k}" hidden></div>`); app.append(el); layers[k] = el; });
+    C.initHome(layers.home); C.initSearch(layers.search); C.initOrders(layers.orders); P.init(layers.kitchen); AD.init(layers.admin); drawProfile = C.initProfile(layers.profile);
+    on("places", remode);
+    on("auth", remode);
   }
 
   function welcome() {
@@ -68,14 +80,14 @@
   function back() {
     const s = topSheet(); if (s) { s.close(); return; }
     if (pop()) return;
-    if (current !== "home") { tab("home"); return; }
+    if (current !== KF.firstTab()) { tab(KF.firstTab()); return; }
     const A = plugin("App"); if (A) A.exitApp();
   }
 
   async function start() {
     build();
     const boot = $(".boot");
-    const SS = plugin("SplashScreen"); if (SS) SS.hide({ fadeOutDuration: 200 }).catch(() => {});
+    const SS = plugin("SplashScreen"); if (SS) SS.hide({ fadeOutDuration: 250 }).catch(() => {});
     const A = plugin("App");
     if (A) {
       A.addListener("backButton", back);
@@ -84,15 +96,19 @@
     document.addEventListener("pointerdown", () => bell.unlock(), { once: true });
     const t0 = Date.now();
     if (S.token) {
-      KF.get("/v1/me").then(j => { S.setAuth({ user: j.user, places: j.places }); emit("places"); }).catch(() => {});
+      try { const j = await Promise.race([KF.get("/v1/me"), sleep(4000).then(() => null)]); if (j) S.setAuth({ user: j.user, places: j.places }); } catch {}
       C.loadAddresses().then(() => emit("addr"));
     }
-    await Promise.race([C.loadHome(), sleep(5000)]);
-    await sleep(Math.max(0, 1100 - (Date.now() - t0)));
-    if (!KF.ls.get("kf_welcomed", 0)) { boot.classList.add("out"); await welcome(); }
-    boot.classList.add("out"); setTimeout(() => boot.remove(), 450);
+    lastMode = mode();
+    if (lastMode === "customer") await Promise.race([C.loadHome(), sleep(5000)]);
+    await sleep(Math.max(0, 2300 - (Date.now() - t0))); // let the logo breathe
+    boot.classList.add("out");
+    if (!KF.ls.get("kf_welcomed", 0)) await welcome();
+    tab(KF.firstTab());
+    setTimeout(() => boot.remove(), 600);
     C.loadOrders();
     if (S.kitchens().length) P.pollKitchen();
   }
   start();
+  // icons: house search receipt user bell-ring utensils wallet settings bike chart-column store users
 })();

@@ -82,12 +82,13 @@ function routes(app) {
     const name = str(req.body?.name, 40);
     let user = await db.one(`INSERT INTO users (phone, name) VALUES ($1, $2) ON CONFLICT (phone) DO UPDATE SET name = COALESCE(users.name, EXCLUDED.name) RETURNING *`, [phone, name]);
     if (user.banned && !isOwner(phone)) throw forbidden("This number is blocked. Contact support");
-    // The platform owner is an admin and owns the test restaurant (the test owner number stays on as its manager).
+    // The platform owner is the admin: sees every restaurant, order and user, and runs no restaurant itself.
+    // (An earlier version gave them the test restaurant; hand it back to the test owner number.)
     if (isOwner(phone)) {
       user = await db.one("UPDATE users SET role = 'admin', banned = false WHERE id = $1 RETURNING *", [user.id]);
-      await db.q("UPDATE restaurants SET owner_id = $1 WHERE id = 'KF-TEST'", [user.id]);
-      if (config.test.ownerPhone) await db.q(`INSERT INTO staff (restaurant_id, phone, name, role) VALUES ('KF-TEST', $1, 'Test Owner', 'manager')
-        ON CONFLICT (restaurant_id, phone) DO NOTHING`, [normPhone(config.test.ownerPhone)]);
+      const testOwner = config.test.ownerPhone ? normPhone(config.test.ownerPhone) : null;
+      await db.q("UPDATE restaurants SET owner_id = (SELECT id FROM users WHERE phone = $2) WHERE id = 'KF-TEST' AND owner_id = $1", [user.id, testOwner]);
+      if (testOwner) await db.q("DELETE FROM staff WHERE restaurant_id = 'KF-TEST' AND phone = $1 AND role = 'manager'", [testOwner]);
     }
     // The test owner manages the test restaurant.
     if (config.test.ownerPhone && phone === normPhone(config.test.ownerPhone)) await db.q("UPDATE restaurants SET owner_id = $1 WHERE id = 'KF-TEST' AND owner_id IS NULL", [user.id]);

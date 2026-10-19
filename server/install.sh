@@ -104,8 +104,8 @@ Kezia's Food is running.
   API health:     https://$KEZIA_DOMAIN/v1/health
   Admin page:     https://$KEZIA_DOMAIN/admin/   (token: $KEZIA_ADMIN_TOKEN)
   Privacy, terms: https://$KEZIA_DOMAIN/privacy.html  https://$KEZIA_DOMAIN/terms.html
-  Owner login (admin, owns the test restaurant): ${KEZIA_OWNER_PHONE:-not set, add --kezia-owner}${KEZIA_OWNER_CODE:+, code $KEZIA_OWNER_CODE}
-  Test restaurant manager login: $KEZIA_TEST_OWNER_PHONE, code $KEZIA_TEST_CODE
+  Owner login (sees everything): ${KEZIA_OWNER_PHONE:-not set, add --kezia-owner}${KEZIA_OWNER_CODE:+, code $KEZIA_OWNER_CODE}
+  Test restaurant login: $KEZIA_TEST_OWNER_PHONE, code $KEZIA_TEST_CODE
   Test customer login:         $KEZIA_TEST_CUSTOMER_PHONE, code $KEZIA_TEST_CODE
 Keep these private. They are stored in $DIR/$ENV
 SMS codes for other numbers appear in:  $COMPOSE logs api kezia | grep OTP   (until SMS_PROVIDER is set up)

@@ -10,7 +10,6 @@
   const keep = price => price - Math.round(price * pct() / 100);
   const place = () => S.kitchens().find(p => p.id === K.rid) || S.kitchens()[0] || null;
   const isOwner = () => (place() || {}).role === "owner";
-  const mapsLink = (lat, lon) => `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=driving`;
 
   // ---------- live GPS while this phone is delivering ----------
   const gps = (() => {
@@ -41,7 +40,7 @@
       j.orders.filter(o => o.status === "pay_claimed").forEach(o => { const k = o.id + ":paid"; if (!K.seen.has(k)) { K.seen.add(k); notify(`Check payment ${rs(o.total)}`, `Customer says they paid for ${o.id}${o.utr ? " · ref " + o.utr : ""}`); haptic("warning"); } });
       KF.ls.set("kf_rang", [...K.seen].slice(-60));
       if (waiting.length) bell.start(); else bell.stop();
-      KF.badge("kitchen", waiting.length + j.orders.filter(o => o.status === "pay_claimed").length);
+      KF.badge("k:orders", waiting.length + j.orders.filter(o => o.status === "pay_claimed").length);
       gps.sync([...new Set([...j.orders.filter(mine).map(o => o.id), ...rideList.filter(mine).map(o => o.id)])]);
       if (!K.el.hidden && flipped) frame();
       else if (!K.el.hidden && K.view === "orders" && K.scope === "live" && !KF.topSheet()) drawOrders();
@@ -51,7 +50,7 @@
     if (!S.rides().length || !S.token) { rideList = []; return; }
     try {
       const j = await get("/v1/rider/orders"); rideList = j.orders;
-      if (!S.kitchens().length) { KF.badge("kitchen", rideList.filter(o => o.status !== "out").length); gps.sync(rideList.filter(mine).map(o => o.id)); }
+      if (!S.kitchens().length) { KF.badge("k:rides", rideList.filter(o => o.status !== "out").length); gps.sync(rideList.filter(mine).map(o => o.id)); }
       if (!K.el.hidden && K.view === "rides" && !KF.topSheet()) drawRides();
     } catch {}
   }
@@ -59,21 +58,16 @@
   setInterval(() => { if (!S.token) return; pollKitchen(); pollRides(); }, 5000);
 
   // ---------- the tab ----------
-  function views() {
-    const v = [];
-    if (S.kitchens().length) v.push(["orders", "Orders"], ["menu", "Menu"], ["money", "Earnings"], ["settings", "Settings"]);
-    if (S.rides().length || S.kitchens().length) v.push(["rides", S.kitchens().length ? "Deliver" : "Deliveries"]);
-    return v;
-  }
+  const TITLES = { orders: "Live orders", menu: "Your menu", money: "Earnings", settings: "Settings", rides: "Deliveries" };
   function frame() {
-    const p = place(), vs = views();
-    if (!vs.some(v => v[0] === K.view)) K.view = vs[0][0];
+    const p = S.kitchens().length ? place() : null;
+    if (!p) K.view = "rides";
     const head = p ? `<div class="row between"><button class="row grow" data-a="switch" style="text-align:left;min-width:0"><span class="tile">${I("chef-hat", "sm")}</span>
         <span class="grow" style="min-width:0"><b class="ell" style="display:block;font-size:17px">${esc(p.name)}</b><span class="muted small">${p.role === "owner" ? "Owner" : "Manager"}${S.kitchens().length > 1 ? " · switch" : ""}${p.status === "test" ? " · test" : p.status === "pending" ? " · waiting for approval" : ""}</span></span></button>
         <button class="row" data-a="open" style="gap:8px;font-weight:800;font-size:13px;color:${K.open ? "var(--g)" : "var(--ink-3)"}">${K.open ? "Open" : "Closed"}<span class="switch" role="switch" aria-checked="${!!K.open}"></span></button></div>`
       : `<div class="row"><span class="tile">${I("bike", "sm")}</span><span><b style="font-size:17px">Deliveries</b><br><span class="muted small">${S.rides().map(r => esc(r.name)).join(", ")}</span></span></div>`;
-    K.el.innerHTML = `<div class="layer-in page-grad" style="display:flex;flex-direction:column;height:100%"><div class="rm-head">${head}
-      ${vs.length > 1 ? `<div class="seg" style="margin-top:12px">${vs.map(([k, l]) => `<button data-a="view" data-v="${k}" aria-pressed="${K.view === k}">${l}</button>`).join("")}</div>` : ""}</div>
+    K.el.innerHTML = `<div class="layer-in page-grad fadein" style="display:flex;flex-direction:column;height:100%"><div class="rm-head">${head}
+      ${p ? `<div class="vtitle">${TITLES[K.view]}</div>` : ""}</div>
       <div class="gpsbar" data-gps ${gps.on ? "" : "hidden"}>${I("navigation", "xs")} Sharing your live location with the customer. Keep the app open.</div>
       <div class="scroll" data-body></div></div>`;
     draw();
@@ -99,8 +93,9 @@
     else if (s === "preparing") { top = `<span class="pill green">${I("flame", "xs")} Cooking since ${time(o.times.preparing)}</span>`;
       act = `<button class="btn shine" style="margin-top:14px" data-a="send" data-id="${o.id}">${I("bike", "sm")} Food ready: send for delivery</button>`; }
     else if (s === "out") { top = `<span class="pill solid">${I("bike", "xs")} ${esc((o.rider && o.rider.name) || "Rider")} on the way${o.rider && o.rider.at ? " · GPS " + time(o.rider.at) : ""}</span>`;
-      act = `<div class="two">${o.pay_method === "cod" ? `<button class="btn ghost" data-a="noshow" data-id="${o.id}">Didn't take it</button>` : `<button class="btn ghost" data-a="nav" data-id="${o.id}">${I("navigation", "sm")} Map</button>`}
-        <button class="btn" data-a="delivered" data-id="${o.id}">${I("circle-check", "sm")} Delivered</button></div>`; }
+      act = `<button class="btn soft" style="margin-top:12px" data-a="nav" data-id="${o.id}">${I("map", "sm")} Live map and route</button>
+        ${o.pay_method === "cod" ? `<div class="two"><button class="btn ghost" data-a="noshow" data-id="${o.id}">Didn't take it</button><button class="btn" data-a="delivered" data-id="${o.id}">${I("circle-check", "sm")} Delivered</button></div>`
+          : `<button class="btn" style="margin-top:10px" data-a="delivered" data-id="${o.id}">${I("circle-check", "sm")} Delivered</button>`}`; }
     else {
       top = `<span class="pill ${s === "delivered" ? "green" : "red"}">${STATUS[s]}</span>${o.rating ? ` <span class="rating" style="margin-left:6px">${o.rating} ${I("star", "xs")}</span>` : ""}`;
       if (o.refund === "due") act = `<div class="warn red" style="margin-top:12px">${I("hand-coins", "sm")} <span>Refund <b>${rs(o.total)}</b> to the customer by UPI${cust.phone ? ` (${esc(cust.phone)})` : ""}, then tap below.</span></div>
@@ -308,9 +303,10 @@
       const r = o.restaurant, me = mine(o), c = o.customer || {};
       return `<div class="ocard ${o.status !== "out" ? "" : "pay"}" style="animation-delay:${i * 50}ms"><div class="hd"><b>${esc(o.id)}</b><span class="pill ${o.status === "out" ? "solid" : "green"}">${o.status === "out" ? (me ? "You're delivering" : "Out") : o.status === "preparing" ? "Cooking" : "Confirmed"}</span></div>
         <div class="list" style="margin-top:6px"><div class="li"><span class="tile gold">${I("chef-hat", "sm")}</span><span><b>Pick up</b><br><span class="muted small">${esc(r.name)} · ${esc(r.area || "")}</span></span>
-          <button class="iconbtn" data-a="mapto" data-lat="${r.lat}" data-lon="${r.lon}" aria-label="Directions">${I("navigation", "sm")}</button></div>
+</div>
           <div class="li"><span class="tile">${I("house", "sm")}</span><span><b>${esc(c.name || "Customer")}</b><br><span class="muted small">${esc(o.address.landmark)} · ${o.km} km</span></span>
-          <button class="iconbtn" data-a="mapto" data-lat="${o.address.lat}" data-lon="${o.address.lon}" aria-label="Directions">${I("navigation", "sm")}</button></div></div>
+</div></div>
+        <button class="btn soft" style="margin-top:10px" data-a="nav" data-id="${o.id}">${I("map", "sm")} Open map and route</button>
         <div style="margin-top:6px">${itemsHTML(o)}</div>
         <div class="line total" style="font-size:15px"><span>${o.pay_method === "cod" ? "Collect cash" : "Paid by UPI"}</span><span>${o.pay_method === "cod" ? rs(o.total) : I("circle-check", "sm green")}</span></div>
         ${c.phone ? `<button class="btn ghost sm" style="width:100%;margin-top:10px" data-a="callc" data-p="${esc(c.phone)}">${I("phone", "sm")} Call ${esc((c.name || "customer").split(" ")[0])}</button>` : ""}
@@ -321,11 +317,75 @@
   }
   const ride = (path) => btn => busy(btn, async () => { await post(`/v1/orders/${btn.dataset.id}/${path}`); haptic("success"); await pollRides(); await pollKitchen(); drawRides(); });
 
+  // ---------- in-app navigation map (riders and restaurants delivering themselves) ----------
+  // Our own Kulgam roads with the road route drawn on top: from this phone to the pickup, then to the customer.
+  function openNav(first) {
+    KF.push(async (el, scr) => {
+      let o = first, me = null, m = null, mk = {}, line = null, casing = null, routeFrom = null, routeAt = 0, follow = true, poll = null;
+      el.innerHTML = `<div class="navmap"><div class="mapel"></div>
+          <div class="rhead-bar"><button class="iconbtn glass" data-a="back" aria-label="Back">${I("arrow-left")}</button></div>
+          <button class="iconbtn glass mapfab" data-a="me" aria-label="Follow me" style="bottom:auto;top:calc(var(--sat) + 10px)">${I("locate-fixed")}</button></div>
+        <div class="navcard" data-card></div>`;
+      const target = () => (o.status === "out" ? [o.address.lat, o.address.lon] : [o.restaurant.lat, o.restaurant.lon]);
+      const card = (km) => {
+        const out = o.status === "out", c = o.customer || {}, r = o.restaurant;
+        const mins = km !== null && km !== undefined ? Math.max(1, Math.round(km * 3 + 1)) : null;
+        $("[data-card]", el).innerHTML = `<div class="row between"><span class="pill ${out ? "solid" : "gold"}">${out ? "Deliver" : "Pick up"}</span>
+            <span class="navkm">${km !== null && km !== undefined ? `<b>${km} km</b> · ${mins} min` : `<span class="muted small">Finding you…</span>`}</span></div>
+          <div class="row" style="margin-top:12px"><span class="tile ${out ? "" : "gold"}">${I(out ? "house" : "chef-hat", "sm")}</span>
+            <span class="grow"><b style="font-size:16px">${esc(out ? c.name || "Customer" : r.name)}</b><br><span class="muted small">${esc(out ? o.address.landmark : r.area || "")}</span></span>
+            ${(out ? c.phone : r.phone) ? `<button class="iconbtn" data-a="ring" aria-label="Call" style="background:var(--g);color:#fff;box-shadow:var(--glow)">${I("phone", "sm")}</button>` : ""}</div>
+          ${out && o.pay_method === "cod" ? `<div class="warn" style="margin-top:12px">${I("banknote", "sm")} Collect ${rs(o.total)} cash</div>` : ""}
+          ${o.status === "delivered" ? `<div class="warn green" style="margin-top:12px">${I("circle-check", "sm")} Delivered. Thank you!</div>`
+            : !out ? `<button class="btn shine" style="margin-top:12px" data-a="go">${I("bike", "sm")} Picked up: start delivery</button>`
+            : `<button class="btn" style="margin-top:12px" data-a="done">${I("circle-check", "sm")} Delivered</button>`}`;
+      };
+      card(null);
+      m = await KF.map($(".mapel", el), { center: target(), zoom: 15 });
+      if (!scr.alive) return;
+      mk.rest = L.marker([o.restaurant.lat, o.restaurant.lon], { icon: KF.pin("rest", "chef-hat"), interactive: false }).addTo(m);
+      mk.home = L.marker([o.address.lat, o.address.lon], { icon: KF.pin("home", "house"), interactive: false }).addTo(m);
+      m.fitBounds(L.latLngBounds([[o.restaurant.lat, o.restaurant.lon], [o.address.lat, o.address.lon]]), { padding: [70, 70] });
+      m.on("dragstart", () => { follow = false; });
+      const draw = async (force) => {
+        const from = me ? [me.lat, me.lon] : [o.restaurant.lat, o.restaurant.lon];
+        const moved = !routeFrom || KF_KM(routeFrom, from) > 0.12;
+        if (!force && !(moved && Date.now() - routeAt > 8000)) return;
+        routeFrom = from; routeAt = Date.now();
+        let r;
+        try { r = await get(`/v1/route?from=${from[0]},${from[1]}&to=${target().join(",")}`); } catch { r = { km: null, line: [from, target()] }; }
+        if (!scr.alive) return;
+        if (casing) { casing.setLatLngs(r.line); line.setLatLngs(r.line); }
+        else { casing = L.polyline(r.line, { color: "#ffffff", weight: 11, opacity: .95, interactive: false }).addTo(m);
+          line = L.polyline(r.line, { color: "#0f8a4f", weight: 6, className: "route-glow", interactive: false }).addTo(m); }
+        card(r.km);
+        if (force && !me) m.fitBounds(L.latLngBounds(r.line), { padding: [70, 70], maxZoom: 16 });
+      };
+      const stop = KF.watch(p => {
+        me = p;
+        if (!mk.me) mk.me = L.marker([p.lat, p.lon], { icon: KF.pin("rider", "bike"), zIndexOffset: 600, interactive: false }).addTo(m);
+        else mk.me.setLatLng([p.lat, p.lon]);
+        if (follow) m.panTo([p.lat, p.lon], { animate: true });
+        draw(false);
+      });
+      draw(true);
+      poll = setInterval(async () => { if (document.hidden) return; try { const j = await get("/v1/orders/" + o.id); const changed = j.order.status !== o.status; o = j.order; if (changed) { routeFrom = null; draw(true); } } catch {} }, 6000);
+      scr.onClose(() => { stop(); clearInterval(poll); m.remove(); });
+      KF.bind(el, {
+        back: () => KF.pop(scr),
+        me: () => { follow = true; if (me) m.flyTo([me.lat, me.lon], 17, { duration: .6 }); else toast("Waiting for GPS…", "locate-fixed"); },
+        ring: () => call(o.status === "out" ? o.customer.phone : o.restaurant.phone),
+        go: b => busy(b, async () => { o = (await post(`/v1/orders/${o.id}/dispatch`)).order; haptic("success"); routeFrom = null; await draw(true); pollRides(); pollKitchen(); }),
+        done: b => busy(b, async () => { o = (await post(`/v1/orders/${o.id}/delivered`)).order; haptic("success"); card(0); pollRides(); pollKitchen(); toast("Delivered. Great job!", "party-popper"); setTimeout(() => scr.alive && KF.pop(scr), 1400); }),
+      });
+    });
+  }
+  const KF_KM = (a, b) => { const r = Math.PI / 180, x = Math.sin((b[0] - a[0]) * r / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin((b[1] - a[1]) * r / 2) ** 2; return 12742 * Math.asin(Math.sqrt(x)); };
+
   // ---------- wiring ----------
   function init(el) {
     K.el = el;
     bind(el, {
-      view: b => { K.view = b.dataset.v; haptic(); $$("[data-a=view]", el).forEach(x => x.setAttribute("aria-pressed", x === b)); draw(); },
       switch: () => { if (S.kitchens().length < 2) return;
         const s = sheet(`<h2>Your restaurants</h2>${S.kitchens().map(p => `<button class="opt" data-a="pickr" data-id="${esc(p.id)}" aria-checked="${p.id === place().id}"><span class="tile">${I("store", "sm")}</span><span><b>${esc(p.name)}</b><span>${p.role}</span></span><i class="radio"></i></button>`).join("")}`);
         bind(s, { pickr: b => { K.rid = b.dataset.id; KF.ls.set("kf_rid", K.rid); K.data = null; K.live = []; K.hist = []; s.close(); frame(); pollKitchen(); loadData().then(frame).catch(() => {}); } }); },
@@ -353,8 +413,7 @@
         if (v) act("cancel", { reason: v.reason })(b);
       },
       callc: b => call(b.dataset.p),
-      nav: b => { const o = K.live.find(x => x.id === b.dataset.id); if (o) openExternal(mapsLink(o.address.lat, o.address.lon)); },
-      mapto: b => openExternal(mapsLink(b.dataset.lat, b.dataset.lon)),
+      nav: b => { const o = K.live.find(x => x.id === b.dataset.id) || rideList.find(x => x.id === b.dataset.id); if (o) openNav(o); },
       pickup: ride("dispatch"), rdone: ride("delivered"),
       rnoshow: async b => { if (await confirm("Customer didn't take the order?", "This cancels it.", "Yes", true)) ride("no-show")(b); },
       cover: () => pickPhoto(`/v1/restaurant/${place().id}/photo`),
@@ -392,8 +451,9 @@
     on("places", () => { if (!S.kitchens().some(p => p.id === K.rid)) { K.rid = (S.kitchens()[0] || {}).id || null; K.data = null; } if (!el.hidden && S.places.length) frame(); });
     on("auth", () => { K.data = null; K.live = []; K.hist = []; bell.stop(); gps.sync([]); });
   }
-  async function show() {
+  async function show(view) {
     if (!S.places.length) return;
+    if (view) K.view = view;
     frame();
     if (S.kitchens().length) { pollKitchen(); if (!K.data) loadData().then(() => { if (!K.el.hidden) frame(); }).catch(fail); bell.awake(!!K.open); KF.askNotify(); }
     if (S.rides().length) pollRides();

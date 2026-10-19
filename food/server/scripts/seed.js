@@ -35,6 +35,9 @@ const MENU = [
       ('WAZWAN NIGHTS', 'Kezia''s Test Kitchen', 'Trami for 2 from ₹1,199', 'asset:banner-wazwan.jpg', 'KF-TEST', 1),
       ('PIZZA TIME', 'Hot pizza in 30 min', 'From ₹199 · Kulgam town', 'asset:banner-pizza.jpg', 'KF-TEST', 2)`);
   }
+  // Contact number shown in the app's Help: the owner's number unless one is already set
+  const support = process.env.SUPPORT_PHONE || process.env.OWNER_PHONE;
+  if (support) await db.q("UPDATE settings SET value = $1 WHERE key = 'support_phone' AND value = '\"\"'", [JSON.stringify("+91" + support.replace(/\D/g, "").slice(-10))]);
   if (process.env.KEZIA_PLATFORM_UPI) await db.q("UPDATE settings SET value = $1 WHERE key = 'platform_upi' AND value = '\"\"'", [JSON.stringify(process.env.KEZIA_PLATFORM_UPI)]);
   console.log("seed done");
   await db.pool.end();

@@ -259,7 +259,7 @@
         const rec = [q, ...KF.ls.get("kf_recent", []).filter(x => x.toLowerCase() !== q.toLowerCase())].slice(0, 6); KF.ls.set("kf_recent", rec);
         res.innerHTML = !j.restaurants.length && !j.items.length ? empty("search", `Nothing for "${q}"`, "Try another dish, like pizza or rista.") :
           `${j.restaurants.length ? `<div class="sec"><h2>Restaurants</h2></div><div class="menu-list">${j.restaurants.map(r => `<button data-a="rest" data-id="${esc(r.id)}">
-            <span class="tile" ${bg(r.photo)} style="background-size:cover;background-position:center${r.photo ? ";background-image:url('" + esc(KF.img(r.photo)) + "')" : ""}">${r.photo ? "" : I("store", "sm")}</span>
+            <span class="tile" ${KF.bgc(r.photo)}>${r.photo ? "" : I("store", "sm")}</span>
             <span>${esc(r.name)}<small>${esc(r.cuisines || "")} · ${esc(r.area || "")}${r.is_open ? "" : " · Closed"}</small></span>${I("chevron-right", "sm muted")}</button>`).join("")}</div>` : ""}
           ${j.items.length ? `<div class="sec"><h2>Dishes</h2></div><div class="card stagger" style="padding:4px 14px">${j.items.map((it, i) => `<button class="mitem" style="width:100%;text-align:left;--i:${i}" data-a="dish" data-id="${esc(it.restaurant_id)}" data-item="${it.id}">
             <span class="ph" ${bg(it.photo)}>${it.photo ? "" : I("utensils", "sm")}</span><span>${vegMark(it.veg)} <b>${esc(it.name)}</b><small>${esc(it.restaurant)}${it.in_stock ? "" : " · Sold out"}</small></span>
@@ -424,16 +424,16 @@
       ${o.note ? `<div class="line"><span>Note</span><b style="text-align:right">${esc(o.note)}</b></div>` : ""}</div>`;
   }
   const callRow = o => `<div class="two" style="margin:0 var(--gut) 14px">${o.restaurant.phone ? `<button class="btn ghost sm" style="width:100%" data-a="callr">${I("phone", "sm")} Restaurant</button>` : ""}
-    ${o.rider && o.rider.phone ? `<button class="btn soft sm" style="width:100%" data-a="callrider">${I("bike", "sm")} Rider</button>` : S.support ? `<button class="btn ghost sm" style="width:100%" data-a="help">${I("circle-help", "sm")} Help</button>` : ""}</div>`;
+    ${o.rider && o.rider.phone ? `<button class="btn soft sm" style="width:100%" data-a="callrider">${I("bike", "sm")} Rider</button>` : `<button class="btn ghost sm" style="width:100%" data-a="help">${I("circle-help", "sm")} Help</button>`}</div>`;
 
   function openOrder(id, first) {
     push(async (el, scr) => {
-      let o = first || null, key = "", m = null, marks = {}, line = null, timer = null;
+      let o = first || null, key = "", m = null, marks = {}, line = null, timer = null, routeKey = "";
       el.innerHTML = `${topbar("Order " + id)}<div class="scroll">${skelLines(5)}</div>`;
       bind(el, { back: () => pop(scr) });
       const build = () => {
         const ph = phase(o), r = o.restaurant;
-        if (m) { m.remove(); m = null; marks = {}; line = null; }
+        if (m) { m.remove(); m = null; marks = {}; line = null; routeKey = ""; }
         const head = ph === "track" ? "" : topbar(ph === "pay" ? "Pay " + r.name : "Order " + o.id, ph === "pay" ? `<span class="countdown">${I("timer", "xs")} <span data-until="${o.times.pay_by}">--:--</span></span>` : "");
         let body = "";
         if (ph === "wait") body = `<div class="center" style="min-height:62%"><div><div class="radar"><i></i><i></i><i></i><div class="core">${I("chef-hat")}</div></div>
@@ -520,8 +520,11 @@
         if (!m) return;
         const r = o.restaurant, a = o.address, rd = o.rider && o.rider.lat ? [o.rider.lat, o.rider.lon] : null;
         const from = o.status === "out" && rd ? rd : [r.lat, r.lon];
-        if (line) line.setLatLngs([from, [a.lat, a.lon]]);
-        else line = L.polyline([from, [a.lat, a.lon]], { color: "#0f8a4f", weight: 4, dashArray: "2 9", lineCap: "round", className: "route-glow", interactive: false }).addTo(m);
+        if (!line) line = L.polyline([from, [a.lat, a.lon]], { color: "#0f8a4f", weight: 5, lineCap: "round", className: "route-glow", interactive: false }).addTo(m);
+        // follow the real roads; ask again only when the start point has moved
+        const key = from.map(x => x.toFixed(3)).join(",");
+        if (key !== routeKey) { routeKey = key;
+          get(`/v1/route?from=${from.join(",")}&to=${a.lat},${a.lon}`).then(r => { if (scr.alive && line) line.setLatLngs(r.line); }).catch(() => {}); }
         if (o.status === "out" && rd) {
           if (!marks.rider) { marks.rider = L.marker(rd, { icon: pin("rider", "bike"), interactive: false, zIndexOffset: 500 }).addTo(m); m.fitBounds(L.latLngBounds([rd, [a.lat, a.lon]]), { padding: [60, 60], maxZoom: 16 }); }
           else glide(marks.rider, rd);
@@ -558,7 +561,7 @@
         back: () => pop(scr),
         callr: () => call(o.restaurant.phone),
         callrider: () => call(o.rider.phone),
-        help: () => call(S.support),
+        help: () => call(S.support || "+916005648933"),
         copy: () => { navigator.clipboard && navigator.clipboard.writeText(o.pay.upi_id).then(() => toast("UPI ID copied"), () => {}); },
         upi: async b => { haptic(); const ok = await openExternal(upiLink(b.dataset.s, o)); if (!ok) toast("That app isn't installed. Try another or scan the QR", "info"); },
         paid: b => busy(b, async () => {
@@ -631,25 +634,29 @@
   }
 
   // ---------- profile ----------
+  const SUPPORT_PHONE = "+916005648933", SUPPORT_EMAIL = "fazil.mastu@gmail.com";
   function renderProfile(el) {
-    const u = S.user;
-    const credits = KF.ls.get("kf_credits", null);
-    el.innerHTML = `<div class="scroll page-grad safe">
+    const u = S.user, md = KF.mode ? KF.mode() : "customer", cust = md === "customer";
+    const badge = { admin: ["sparkles", "Owner of Kezia's Food", "You see every restaurant, order and user"], kitchen: ["chef-hat", "Restaurant account", S.kitchens().map(p => esc(p.name)).join(", ")],
+      rider: ["bike", "Rider account", S.rides().map(p => esc(p.name)).join(", ")] }[md];
+    el.innerHTML = `<div class="scroll page-grad safe fadein">
       <div class="pad row" style="margin:6px 0 18px">${u ? `<span class="avatar" style="width:58px;height:58px;font-size:22px">${esc((u.name || "K")[0].toUpperCase())}</span>
         <span class="grow"><b style="font-size:20px">${esc(u.name || "Add your name")}</b><br><span class="muted">${esc(u.phone)}</span></span><button class="iconbtn" data-a="name" aria-label="Edit name">${I("pencil", "sm")}</button>`
         : `<span class="grow"><div class="brand" style="text-align:left">Kezia's Food</div><span class="muted">Kulgam's own food app</span></span>`}</div>
-      ${u ? "" : `<div class="card"><h3>Log in to order</h3><p class="note" style="margin:0 0 12px">Save addresses, pay restaurants directly and track your rider live.</p><button class="btn" data-a="login">Log in with phone</button></div>`}
-      ${u ? `<div class="menu-list"><button data-a="addrs"><span class="tile">${I("map-pin", "sm")}</span><span>Saved addresses<small>${plural(S.addresses.length, "address").replace("addresss", "addresses")}</small></span>${I("chevron-right", "sm")}</button>
+      ${badge ? `<div class="modecard"><span class="tile">${I(badge[0], "sm")}</span><span><b>${badge[1]}</b><br><span class="small">${badge[2]}</span></span></div>` : ""}
+      ${u ? "" : `<div class="card"><h3>Log in</h3><p class="note" style="margin:0 0 12px">Customers, restaurants and riders all log in here with their phone number.</p><button class="btn" data-a="login">Log in with phone</button></div>`}
+      ${u && cust ? `<div class="menu-list"><button data-a="addrs"><span class="tile">${I("map-pin", "sm")}</span><span>Saved addresses<small>${S.addresses.length === 1 ? "1 address" : S.addresses.length + " addresses"}</small></span>${I("chevron-right", "sm")}</button>
         <button data-a="orders"><span class="tile">${I("receipt", "sm")}</span><span>Your orders<small>Track, rate and refunds</small></span>${I("chevron-right", "sm")}</button></div>` : ""}
-      <div class="menu-list"><button data-a="partner"><span class="tile gold">${I("store", "sm")}</span><span>${S.places.length ? "Your restaurant" : "Own a restaurant in Kulgam?"}<small>${S.places.length ? S.places.map(p => esc(p.name)).join(", ") : "List it free. Your riders, your prices, your UPI"}</small></span>${I("chevron-right", "sm")}</button>
-        <button data-a="how"><span class="tile">${I("circle-help", "sm")}</span><span>How Kezia's Food works<small>Payments, cancellations, refunds</small></span>${I("chevron-right", "sm")}</button>
-        ${S.support ? `<button data-a="help"><span class="tile">${I("phone", "sm")}</span><span>Help and support<small>Call us</small></span>${I("chevron-right", "sm")}</button>` : ""}</div>
+      ${cust ? `<div class="menu-list"><button data-a="partner"><span class="tile gold">${I("store", "sm")}</span><span>Own a restaurant in Kulgam?<small>List it free. Your riders, your prices, your UPI</small></span>${I("chevron-right", "sm")}</button>
+        <button data-a="how"><span class="tile">${I("circle-help", "sm")}</span><span>How Kezia's Food works<small>Payments, cancellations, refunds</small></span>${I("chevron-right", "sm")}</button></div>` : ""}
+      <div class="menu-list"><button data-a="help"><span class="tile">${I("phone", "sm")}</span><span>Call support<small>${esc((S.support || SUPPORT_PHONE).replace(/^\+91/, "+91 "))}</small></span>${I("chevron-right", "sm")}</button>
+        <button data-a="mail"><span class="tile">${I("mail", "sm")}</span><span>Email us<small>${SUPPORT_EMAIL}</small></span>${I("chevron-right", "sm")}</button></div>
       <div class="menu-list"><button data-a="terms"><span class="tile blue">${I("file-text", "sm")}</span><span>Terms, cancellations and refunds</span>${I("chevron-right", "sm")}</button>
         <button data-a="privacy"><span class="tile blue">${I("lock", "sm")}</span><span>Privacy policy</span>${I("chevron-right", "sm")}</button>
         <button data-a="credits"><span class="tile blue">${I("image", "sm")}</span><span>Photo credits</span>${I("chevron-right", "sm")}</button></div>
       ${u ? `<div class="menu-list"><button data-a="logout"><span class="tile red">${I("log-out", "sm")}</span><span>Log out</span><span></span></button>
         <button data-a="delete"><span class="tile red">${I("trash-2", "sm")}</span><span class="red">Delete my account</span><span></span></button></div>` : ""}
-      <p class="note" style="text-align:center;margin:18px 0 28px">Kezia's Food v${esc(KF_CONFIG.version)} · Made in Kulgam${credits ? "" : ""}</p></div>`;
+      <p class="note" style="text-align:center;margin:18px 0 28px">Kezia's Food v${esc(KF_CONFIG.version)} · Made in Kulgam</p></div>`;
   }
   function initProfile(el) {
     const draw = () => renderProfile(el);
@@ -669,7 +676,7 @@
         });
       },
       orders: () => KF.tab("orders"),
-      partner: () => S.places.length ? KF.tab("kitchen") : apply(),
+      partner: () => apply(),
       how: () => sheet(`<h2>How Kezia's Food works</h2><div class="steps3" style="margin-top:10px">
           <div><i>1</i><span><b>Order</b> from a Kulgam restaurant. It has ${"a few"} minutes to accept.</span></div>
           <div><i>2</i><span><b>Pay the restaurant directly</b> by UPI (QR or your UPI app) once it accepts, or choose cash on delivery where offered. Kezia's Food never holds your money.</span></div>
@@ -677,7 +684,8 @@
           <div><i>4</i><span>The restaurant's <b>own rider</b> brings your food. Watch them live on the map.</span></div>
           <div><i>5</i><span><b>Refunds</b> for cancelled paid orders come from the restaurant to your UPI. Tell us in the app when it arrives.</span></div></div>
           <p class="note" style="margin-top:14px">Delivery fee: a fixed amount for the first few km, then a small charge per km, by road distance. Each restaurant sets its own minimum order and range.</p>`),
-      help: () => call(S.support),
+      help: () => call(S.support || SUPPORT_PHONE),
+      mail: () => openExternal("mailto:" + SUPPORT_EMAIL + "?subject=" + encodeURIComponent("Kezia's Food help")),
       terms: () => openExternal(KF.API + "/terms.html"),
       privacy: () => openExternal(KF.API + "/privacy.html"),
       credits: async () => {
@@ -707,7 +715,7 @@
       const j = await post("/v1/restaurants/apply", { ...v, lat: p.lat, lon: p.lon });
       S.setAuth({ user: S.user, places: j.places }); emit("places"); haptic("success");
       toast("Restaurant added. Set up your menu while we check it");
-      KF.tab("kitchen");
+      KF.tab(KF.firstTab());
     });
   }
 

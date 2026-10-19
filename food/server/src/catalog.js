@@ -1,7 +1,7 @@
 // What customers browse: restaurants near them (distance by road), menus, banners, search, and price quotes.
 const db = require("./db");
-const { roadKm, deliveryFee, etaMin } = require("./geo");
-const { bad, notFound } = require("./util");
+const { roadKm, roadRoute, deliveryFee, etaMin } = require("./geo");
+const { bad, notFound, HttpError } = require("./util");
 
 async function setting(key) { const r = await db.one("SELECT value FROM settings WHERE key = $1", [key]); return r ? r.value : null; }
 const visible = "r.status IN ('active', 'test')";
@@ -71,6 +71,16 @@ function routes(app) {
     const lat = Number(b.lat), lon = Number(b.lon);
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) throw bad("Choose where to deliver");
     return quote(r, b.items, lat, lon);
+  });
+
+  // Road route for the in-app maps (rider navigation, customer tracking). Logged-in users only.
+  app.get("/v1/route", async (req) => {
+    if (!req.user) throw new HttpError(401, "Please log in first");
+    const [a, b, c, d] = [req.query.from, req.query.to].flatMap(x => String(x || "").split(",").map(Number));
+    const ok = v => Number.isFinite(v) && Math.abs(v) <= 180;
+    if (![a, b, c, d].every(ok)) throw bad("from and to must be lat,lon");
+    const r = roadRoute(a, b, c, d);
+    return { km: r.km, line: r.line.map(([y, x]) => [Math.round(y * 1e5) / 1e5, Math.round(x * 1e5) / 1e5]) };
   });
 
   app.get("/v1/search", async (req) => {

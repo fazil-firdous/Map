@@ -15,6 +15,8 @@
   const rs = n => "₹" + Number(n || 0).toLocaleString("en-IN");
   const img = p => !p ? "" : p.startsWith("asset:") ? "img/food/" + p.slice(6) : p.startsWith("/uploads/") ? API + p : p;
   const bg = p => p ? `style="background-image:url('${esc(img(p))}')"` : "";
+  /** One style attribute with a cover photo plus extra rules (two style attributes on one element drop the second). */
+  const bgc = (p, extra = "") => `style="${p ? `background:url('${esc(img(p))}') center/cover no-repeat;` : ""}${extra}"`;
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const phone10 = p => String(p || "").replace(/\D/g, "").slice(-10);
   const ls = {
@@ -154,8 +156,11 @@
   /** Push a full screen. build(el, scr) renders into it; scr.onClose(fn) registers cleanup. */
   function push(build) {
     const el = h(`<div class="layer full pushed enter"></div>`);
+    // the screen underneath slides back a little (iOS/Swiggy-style depth)
+    const under = stack.length ? stack[stack.length - 1].el : $$(".layer:not(.full)").find(l => !l.hidden);
+    if (under) under.classList.add("behind");
     app().append(el);
-    const scr = { el, alive: true, closers: [], onClose(fn) { this.closers.push(fn); }, close: () => pop(scr) };
+    const scr = { el, under, alive: true, closers: [], onClose(fn) { this.closers.push(fn); }, close: () => pop(scr) };
     stack.push(scr);
     haptic();
     Promise.resolve(build(el, scr)).catch(e => { console.error(e); toast(e.message, "circle-alert"); });
@@ -167,6 +172,7 @@
     stack.splice(stack.indexOf(scr), 1);
     scr.alive = false; scr.closers.forEach(fn => { try { fn(); } catch {} });
     scr.el.classList.remove("enter"); scr.el.classList.add("leave");
+    if (scr.under) scr.under.classList.remove("behind");
     setTimeout(() => scr.el.remove(), 240);
     return true;
   }
@@ -270,7 +276,7 @@
   }
   const pin = (kind, icon) => L.divIcon({ className: "", html: `<div class="mk ${kind}">${I(icon, "sm")}</div>`, iconSize: [40, 40], iconAnchor: [20, 20] });
 
-  window.KF = { API, native, plugin, $, $$, esc, h, I, rs, img, bg, sleep, ls, time, when, plural, phone10, S, now, api, get, post, on, emit,
+  window.KF = { API, native, plugin, $, $$, esc, h, I, rs, img, bg, bgc, sleep, ls, time, when, plural, phone10, S, now, api, get, post, on, emit,
     haptic, openExternal, call, position, watch, notify, askNotify, bell, push, pop, popAll, top, stack, sheet, topSheet, confirm, ask, toast, fail, busy, bind,
     skelCards, skelLines, empty, topbar, lift, map, pin };
 })();
