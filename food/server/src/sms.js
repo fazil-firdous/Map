@@ -25,7 +25,8 @@ async function sendOtp(phone, code, log) {
     const r = await fetch("https://sms.renflair.in/V1.php?" + new URLSearchParams({ API: p.renflairKey, PHONE: digits.slice(-10), OTP: code }));
     const body = await r.text();
     let j = null; try { j = JSON.parse(body); } catch {}
-    const failed = !r.ok || (j && (j.status === false || j.status === "error" || j.return === false || /fail|error|invalid/i.test(String(j.message || ""))));
+    // renflair answers {"status":"SUCCESS","message":"SMS sent successfully."} or {"status":"FAILED","message":"..."}
+    const failed = !r.ok || !j || String(j.status).toUpperCase() !== "SUCCESS";
     if (failed) { log.error({ phone, status: r.status, body: body.slice(0, 300) }, "renflair SMS failed"); throw new Error("SMS couldn't be sent. Try again in a minute"); }
     log.info({ phone, body: body.slice(0, 200) }, "renflair SMS sent");
     return;

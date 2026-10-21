@@ -138,29 +138,35 @@ function routes(app) {
     await db.q("DELETE FROM staff WHERE restaurant_id = $1 AND phone = $2", [req.params.rid, normPhone(req.params.phone)]); return { ok: true };
   });
 
-  // Earnings and commission
+  // Earnings and commission. Billing is weekly: every Monday the restaurant gets the bill for the week before
+  // (Monday to Sunday, India time), to pay by Wednesday. This week's commission goes on next Monday's bill.
+  const WEEK = "(date_trunc('week', now() AT TIME ZONE 'Asia/Kolkata') AT TIME ZONE 'Asia/Kolkata')";
   app.get("/v1/restaurant/:rid/earnings", { preHandler: mgr }, async (req) => {
     const r = await db.one("SELECT * FROM restaurants WHERE id = $1", [req.params.rid]);
-    const sum = (where) => db.one(`SELECT count(*)::int orders, COALESCE(sum(item_total), 0)::int food, COALESCE(sum(delivery_fee + packing), 0)::int fees, COALESCE(sum(commission), 0)::int commission
+    const sum = (where) => db.one(`SELECT count(*)::int orders, COALESCE(sum(item_total), 0)::int food, COALESCE(sum(delivery_fee + packing), 0)::int fees, COALESCE(sum(commission), 0)::int commission,
+        min(delivered_at) first, max(delivered_at) last
       FROM orders WHERE restaurant_id = $1 AND status = 'delivered' AND ${where}`, [r.id]);
-    const [today, week, month, due, settlements, days] = await Promise.all([
-      sum("delivered_at >= date_trunc('day', now() AT TIME ZONE 'Asia/Kolkata') AT TIME ZONE 'Asia/Kolkata'"), sum("delivered_at >= now() - interval '7 days'"), sum("delivered_at >= now() - interval '30 days'"),
-      sum("settlement_id IS NULL"),
+    const [today, week, month, due, bill, current, settlements, days, w] = await Promise.all([
+      sum("delivered_at >= date_trunc('day', now() AT TIME ZONE 'Asia/Kolkata') AT TIME ZONE 'Asia/Kolkata'"), sum(`delivered_at >= ${WEEK}`), sum("delivered_at >= now() - interval '30 days'"),
+      sum("settlement_id IS NULL"), sum(`settlement_id IS NULL AND delivered_at < ${WEEK}`), sum(`settlement_id IS NULL AND delivered_at >= ${WEEK}`),
       db.many("SELECT * FROM settlements WHERE restaurant_id = $1 ORDER BY created_at DESC LIMIT 20", [r.id]),
       db.many(`SELECT to_char(delivered_at AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD') d, count(*)::int n, sum(item_total)::int food FROM orders
-        WHERE restaurant_id = $1 AND status = 'delivered' AND delivered_at > now() - interval '14 days' GROUP BY 1 ORDER BY 1`, [r.id]),
+        WHERE restaurant_id = $1 AND status = 'delivered' AND delivered_at >= ${WEEK} - interval '7 days' GROUP BY 1 ORDER BY 1`, [r.id]),
+      db.one(`SELECT ${WEEK} week_start, ${WEEK} + interval '2 days 23 hours 59 minutes' due_by`),
     ]);
-    return { commission_pct: await pctFor(r), platform_upi: await setting("platform_upi"), platform_name: await setting("platform_name"), today, week, month, due, settlements, days };
+    return { commission_pct: await pctFor(r), platform_upi: await setting("platform_upi"), platform_name: await setting("platform_name"), today, week, month, due, settlements, days,
+      bill: { ...bill, amount: bill.commission, week_start: w.week_start, due_by: w.due_by, late: bill.commission > 0 && new Date() > new Date(w.due_by) }, current };
   });
-  // Pay the platform what's owed: all delivered, unsettled orders go into one statement
+  // Pay the weekly bill: delivered, unpaid orders from before this Monday go into one payment
   app.post("/v1/restaurant/:rid/settle", { preHandler: mgr }, async (req) => {
     const utr = String(req.body?.utr || "").replace(/\D/g, "").slice(-12);
     if (utr.length < 4) throw bad("Enter the UPI reference number of your payment");
     return db.tx(async c => {
-      const due = (await c.query(`SELECT count(*)::int n, COALESCE(sum(item_total), 0)::int food, COALESCE(sum(commission), 0)::int amount FROM orders WHERE restaurant_id = $1 AND status = 'delivered' AND settlement_id IS NULL`, [req.params.rid])).rows[0];
-      if (!due.amount) throw bad("Nothing to pay right now");
+      const where = `restaurant_id = $1 AND status = 'delivered' AND settlement_id IS NULL AND delivered_at < ${WEEK}`;
+      const due = (await c.query(`SELECT count(*)::int n, COALESCE(sum(item_total), 0)::int food, COALESCE(sum(commission), 0)::int amount FROM orders WHERE ${where}`, [req.params.rid])).rows[0];
+      if (!(due.amount > 0)) throw bad("Nothing to pay right now. This week's commission comes on next Monday's bill");
       const s = (await c.query("INSERT INTO settlements (restaurant_id, orders, food_total, amount, utr) VALUES ($1, $2, $3, $4, $5) RETURNING *", [req.params.rid, due.n, due.food, due.amount, utr])).rows[0];
-      await c.query("UPDATE orders SET settlement_id = $2 WHERE restaurant_id = $1 AND status = 'delivered' AND settlement_id IS NULL", [req.params.rid, s.id]);
+      await c.query(`UPDATE orders SET settlement_id = $2 WHERE ${where}`, [req.params.rid, s.id]);
       return { settlement: s };
     });
   });

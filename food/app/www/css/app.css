@@ -251,6 +251,7 @@ textarea.input { min-height: 84px; resize: none; line-height: 1.45; }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 var(--gut); margin-bottom: 14px; }
 .stat { padding: 14px 12px; border-radius: 18px; background: var(--card); box-shadow: var(--e1), inset 0 0 0 1px var(--line); } .stat b { display: block; font-size: 20px; letter-spacing: -.02em; } .stat span { font-size: 11.5px; color: var(--ink-3); font-weight: 700; }
 .due { margin: 0 var(--gut) 14px; padding: 18px; border-radius: 22px; color: #fff; background: linear-gradient(135deg, #0a6b3c, #22b46a); box-shadow: var(--glow); position: relative; overflow: hidden; }
+.due.late { background: linear-gradient(135deg, #a1271b, #d23a3a); box-shadow: 0 12px 26px -10px rgb(210 58 58 / .6); }
 .due::after { content: ""; position: absolute; right: -40px; top: -40px; width: 150px; height: 150px; border-radius: 50%; background: rgb(255 255 255 / .1); }
 .due small { font-size: 12.5px; opacity: .9; font-weight: 600; } .due b { display: block; font-size: 32px; letter-spacing: -.03em; margin: 2px 0 4px; } .due p { margin: 0; font-size: 12.5px; opacity: .9; line-height: 1.45; }
 .bars { display: flex; align-items: end; gap: 4px; height: 90px; } .bars i { flex: 1; border-radius: 6px 6px 2px 2px; background: var(--grad); min-height: 4px; opacity: .9; animation: grow .6s var(--ease) both; transform-origin: bottom; }

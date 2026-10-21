@@ -117,9 +117,22 @@
       <div class="muted small">Kezia's fee ${o.commission_pct}% of food (${rs(o.item_total)}) = ${rs(fee)} · you keep <b class="green">${rs(o.total - fee)}</b></div>
       ${act}${canCancel && s !== "out" ? `<button class="link small" style="margin-top:12px;color:var(--ink-3)" data-a="kcancel" data-id="${o.id}">Cancel this order</button>` : ""}</div>`;
   }
+  /** Monday reminder: tell the restaurant its weekly bill (once per week, as a notification and a banner on Orders). */
+  let billAt = 0;
+  async function checkBill() {
+    const p = place(); if (!p || K.override || Date.now() - billAt < 3600000) return;
+    billAt = Date.now();
+    try {
+      const e = await get(`/v1/restaurant/${encodeURIComponent(p.id)}/earnings`); K.earn = e; K.bill = e.bill;
+      const key = "kf_bill_" + p.id + "_" + e.bill.week_start;
+      if (e.bill.amount > 0 && !KF.ls.get(key, 0)) { KF.ls.set(key, 1); notify(`Weekly bill: ${rs(e.bill.amount)}`, `Kezia's ${pct() || ""}% for last week. Pay in Earnings by Wednesday.`); }
+      if (K.view === "orders" && !K.el.hidden) drawOrders();
+    } catch {}
+  }
   async function drawOrders() {
     const b = body(), p = place();
     if (!b) return;
+    checkBill();
     const pend = p && p.status === "pending" ? `<div class="warn" style="margin:0 var(--gut) 14px">${I("clock", "sm")} <span>Kezia's Food is checking your restaurant. Meanwhile add your menu, UPI ID and delivery rules in Menu and Settings.</span></div>` : "";
     const closed = !K.open ? `<div class="warn red" style="margin:0 var(--gut) 14px">${I("moon", "sm")} <span>You're closed, so customers can't order. Switch to Open at the top when the kitchen is ready.</span></div>` : "";
     const scrollTop = b.scrollTop;
@@ -127,7 +140,9 @@
       const order = { placed: 0, pay_claimed: 1, accepted: 2, confirmed: 3, preparing: 4, out: 5 };
       const list = K.live.slice().sort((x, y) => order[x.status] - order[y.status]);
       const refunds = K.hist.filter(o => o.refund === "due");
-      b.innerHTML = `${pend}${closed}<div class="chips pad" style="margin-bottom:12px"><button class="chip" data-a="scope" data-s="live" aria-pressed="true">Live ${list.length ? `(${list.length})` : ""}</button><button class="chip" data-a="scope" data-s="hist">Last 30 days</button></div>
+      const billBar = K.bill && K.bill.amount > 0 ? `<button class="warn ${K.bill.late ? "red" : ""}" data-a="gobill" style="margin:0 var(--gut) 14px;width:calc(100% - 2*var(--gut));text-align:left">${I("receipt", "sm")}
+        <span class="grow"><b>Weekly bill: ${rs(K.bill.amount)}</b> ${K.bill.late ? "is overdue" : `· pay by ${dayName(K.bill.due_by)}`}</span>${I("chevron-right", "sm")}</button>` : "";
+      b.innerHTML = `${pend}${closed}${billBar}<div class="chips pad" style="margin-bottom:12px"><button class="chip" data-a="scope" data-s="live" aria-pressed="true">Live ${list.length ? `(${list.length})` : ""}</button><button class="chip" data-a="scope" data-s="hist">Last 30 days</button></div>
         ${refunds.map(ocard).join("")}
         ${list.length ? list.map(ocard).join("") : empty("bell-ring", "No live orders", K.open ? "Keep this screen open. New orders ring loudly here." : "Open the kitchen to start getting orders.")}
         <div style="height:20px"></div>`;
@@ -242,30 +257,36 @@
   }
 
   // ---------- earnings ----------
+  const dayName = d => new Date(d).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", timeZone: "Asia/Kolkata" });
   async function drawMoney() {
     const b = body(), p = place();
     b.innerHTML = `<div class="stats">${[1, 2, 3].map(() => `<div class="stat skel" style="height:66px"></div>`).join("")}</div>${skelLines(4)}`;
     let e; try { e = K.earn = await get(`/v1/restaurant/${encodeURIComponent(p.id)}/earnings`); } catch (er) { b.innerHTML = empty("circle-alert", "Couldn't load earnings", er.message); return; }
     if (K.view !== "money") return;
-    const days = Array.from({ length: 14 }, (_, i) => { const d = new Date(Date.now() - (13 - i) * 86400000); const k = d.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
-      const row = e.days.find(x => x.d === k); return { d, food: row ? row.food : 0, n: row ? row.n : 0 }; });
+    // this week, Monday to Sunday (India time)
+    const mon = new Date(e.bill.week_start);
+    const days = Array.from({ length: 7 }, (_, i) => { const d = new Date(mon.getTime() + i * 86400000); const k = d.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+      const row = e.days.find(x => x.d === k); return { d, food: row ? row.food : 0, n: row ? row.n : 0, future: d > new Date() }; });
     const max = Math.max(1, ...days.map(d => d.food));
-    const dueAmt = e.due.commission;
-    b.innerHTML = `<div class="stats stagger">${[["Today", e.today], ["7 days", e.week], ["30 days", e.month]].map(([l, x], i) => `<div class="stat" style="--i:${i}"><b>${rs(x.food + x.fees - x.commission)}</b><span>${l} · ${plural(x.orders, "order")}</span></div>`).join("")}</div>
-      <div class="card"><div class="row between"><h3 style="margin:0">Food sales, last 14 days</h3><span class="muted small">${rs(days.reduce((s, d) => s + d.food, 0))}</span></div>
-        <div class="bars" style="margin-top:14px">${days.map((d, i) => `<i style="height:${Math.max(4, d.food / max * 100)}%;animation-delay:${i * 30}ms;${d.food ? "" : "opacity:.25"}" title="${d.d.toDateString()}: ${rs(d.food)}"></i>`).join("")}</div>
-        <div class="row between muted small" style="margin-top:6px"><span>${days[0].d.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span><span>Today</span></div></div>
-      <div class="due"><small>Kezia's Food fee to pay</small><b>${rs(dueAmt)}</b><p>${dueAmt ? `${pct()}% of ${rs(e.due.food)} food on ${plural(e.due.orders, "delivered order")} not yet paid for.` : "All paid up. Thank you!"}</p>
-        ${dueAmt ? `<button class="btn gold" style="margin-top:14px;position:relative;z-index:1" data-a="paydue">${I("qr-code", "sm")} Pay ${rs(dueAmt)} by UPI</button>` : ""}</div>
+    const bill = e.bill, lastSun = new Date(mon.getTime() - 86400000);
+    b.innerHTML = `${bill.amount > 0 ? `<div class="due ${bill.late ? "late" : ""}"><small>${bill.late ? "Overdue · weekly bill" : "Weekly bill"} · ${bill.first ? dayName(bill.first) : ""} to ${dayName(lastSun)}</small><b>${rs(bill.amount)}</b>
+        <p>Kezia's ${pct()}% on ${plural(bill.orders, "delivered order")} (${rs(bill.food)} food). Please pay by <b>${dayName(bill.due_by)}</b>.</p>
+        <button class="btn gold" style="margin-top:14px;position:relative;z-index:1" data-a="paydue">${I("qr-code", "sm")} Pay ${rs(bill.amount)} by UPI</button></div>`
+      : `<div class="due"><small>Weekly bill</small><b>All paid up</b><p>Thank you! Your next bill comes on Monday.</p></div>`}
+      <div class="stats stagger">${[["Today", e.today], ["This week", e.week], ["30 days", e.month]].map(([l, x], i) => `<div class="stat" style="--i:${i}"><b>${rs(x.food + x.fees - x.commission)}</b><span>${l} · ${plural(x.orders, "order")}</span></div>`).join("")}</div>
+      <div class="card"><div class="row between"><h3 style="margin:0">This week's sales</h3><span class="muted small">${rs(days.reduce((s, d) => s + d.food, 0))}</span></div>
+        <div class="bars" style="margin-top:14px">${days.map((d, i) => `<i style="height:${Math.max(4, d.food / max * 100)}%;animation-delay:${i * 40}ms;${d.food ? "" : "opacity:.25"}" title="${d.d.toDateString()}: ${rs(d.food)}"></i>`).join("")}</div>
+        <div class="row between muted small" style="margin-top:6px">${days.map(d => `<span style="flex:1;text-align:center">${d.d.toLocaleDateString("en-IN", { weekday: "narrow", timeZone: "Asia/Kolkata" })}</span>`).join("")}</div>
+        <div class="line" style="margin-top:10px"><span>Kezia's ${pct()}% so far this week<small>Comes on next Monday's bill</small></span><b>${rs(e.current.commission)}</b></div></div>
       <div class="card"><h3>How the fee works</h3><p class="note" style="margin:0">Customers pay you directly. Kezia's Food takes <b>${pct()}%</b> of the food value of each <b>delivered</b> order, and nothing on cancelled orders, delivery or packing.
-        The rate is fixed on each order when it's placed. Pay what's due here whenever you like (weekly is good). ${e.platform_upi ? "" : "The payment UPI ID isn't set up yet."}</p></div>
-      ${e.settlements.length ? `<div class="sec"><h2>Fee payments</h2></div><div class="card" style="padding:4px 14px"><div class="list">${e.settlements.map(x => `<div class="li"><span class="tile ${x.status === "paid" ? "" : x.status === "rejected" ? "red" : "gold"}">${I(x.status === "paid" ? "circle-check" : x.status === "rejected" ? "circle-x" : "clock", "sm")}</span>
+        Every <b>Monday</b> you get the bill for the week before (Monday to Sunday). Pay it here by UPI by Wednesday. ${e.platform_upi ? "" : "The payment UPI ID isn't set up yet."}</p></div>
+      ${e.settlements.length ? `<div class="sec"><h2>Bills paid</h2></div><div class="card" style="padding:4px 14px"><div class="list">${e.settlements.map(x => `<div class="li"><span class="tile ${x.status === "paid" ? "" : x.status === "rejected" ? "red" : "gold"}">${I(x.status === "paid" ? "circle-check" : x.status === "rejected" ? "circle-x" : "clock", "sm")}</span>
         <span><b>${rs(x.amount)}</b><br><span class="muted small">${plural(x.orders, "order")} · ref ${esc(x.utr)} · ${when(x.created_at)}</span></span>
         <span class="pill ${x.status === "paid" ? "green" : x.status === "rejected" ? "red" : "gold"}">${x.status === "claimed" ? "Checking" : x.status === "paid" ? "Received" : "Not received"}</span></div>`).join("")}</div></div>` : ""}
       <div style="height:20px"></div>`;
   }
   function payDue() {
-    const e = K.earn, amt = e.due.commission, p = place();
+    const e = K.earn, amt = e.bill.amount, p = place();
     if (!e.platform_upi) return toast("Kezia's Food hasn't set its UPI ID yet. Call support", "info");
     const link = `upi://pay?pa=${encodeURIComponent(e.platform_upi)}&pn=${encodeURIComponent(e.platform_name || "Kezia's Food")}&am=${amt}.00&cu=INR&tn=${encodeURIComponent("Kezia fee " + p.id)}`;
     const s = sheet(`<h2>Pay Kezia's Food</h2><p class="sub">Pay <b>${rs(amt)}</b> to <span class="selectable">${esc(e.platform_upi)}</span>, then enter the UPI reference.</p>
@@ -293,7 +314,8 @@
         <div class="row between"><span><b>Cash on delivery</b><br><span class="muted small">Riders collect cash. Customers who refuse orders twice lose this</span></span><span class="switch" role="switch" data-t="cod" aria-checked="${r.cod}"></span></div></div></div>
       <div class="card"><h3>Delivery charges</h3><div class="two" style="margin-top:0">${n("base_fee", "Fixed fee", "₹")}${n("base_km", "Covers first", "km")}${n("per_km", "Then per km", "₹")}${n("max_km", "Deliver up to", "km")}
         ${n("min_order", "Minimum order", "₹")}${n("packing", "Packing charge", "₹")}</div>
-        <label class="field" style="margin-top:12px">Free delivery above (empty = never)<input class="input" data-k="free_above" inputmode="numeric" value="${esc(r.free_above ?? "")}" placeholder="e.g. 799"></label>
+        <label class="field" style="margin-top:12px">Free delivery when the food is ₹… or more (you pay the delivery, empty = never)<input class="input" data-k="free_above" inputmode="numeric" value="${esc(r.free_above ?? "")}" placeholder="e.g. 499"></label>
+        <p class="note" style="margin:6px 0 0">Customers see "Free delivery over ₹…" on your restaurant. A great way to get bigger orders.</p>
         <div class="keep" data-example style="margin-top:12px"></div></div>
       <div class="card"><h3>Timers</h3><div class="two" style="margin-top:0">${n("accept_min", "Time to accept", "min")}${n("pay_min", "Time for customer to pay", "min")}${n("cancel_min", "Customer cancel window", "min")}${n("prep_min", "Usual cooking time", "min")}</div>
         <p class="note" style="margin:10px 0 0">Unanswered orders expire after the accept time. Cancel window is at most 5 minutes after payment, then the order is yours.</p></div>
@@ -463,6 +485,7 @@
         });
       },
       paydue: () => payDue(),
+      gobill: () => KF.tab("k:money"),
       savesettings: b => saveSettings(b),
       addstaff: async () => {
         const s = sheet(`<h2>Add to your team</h2><p class="sub">They log in to Kezia's Food with this number.</p><div class="form">

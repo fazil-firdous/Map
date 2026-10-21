@@ -53,7 +53,8 @@ test("prices pay the restaurant exactly what it asked for, also after a rate cha
   assert.equal((await blast()).variants[0].p, 245);
 });
 
-test("new customers get free delivery on their first order up to ₹400; Kezia pays the restaurant the fee", async () => {
+test("new customers get free delivery on their first order up to ₹400 (when switched on); Kezia pays the restaurant the fee", async () => {
+  await db.query("UPDATE settings SET value = '1' WHERE key = 'promo_new_orders'");
   const items = (await call("GET", "/v1/restaurants/80-degrees")).items, fries = items.find(i => i.name === "Peri Peri Fries");
   const lat = 33.6431, lon = 75.0172;
   const addr = (await call("POST", "/v1/addresses", { label: "Home", landmark: "Test lane", lat, lon }, fresh)).address;
@@ -69,6 +70,14 @@ test("new customers get free delivery on their first order up to ₹400; Kezia p
   const again = await call("POST", "/v1/quote", { restaurant_id: "80-degrees", items: [{ id: fries.id, qty: 2 }], lat, lon }, fresh);
   assert.equal(again.promo, null, "only the first order");
   await call("POST", `/v1/orders/${o.id}/cancel`, {}, fresh);
+  await db.query("UPDATE settings SET value = '0' WHERE key = 'promo_new_orders'");
+});
+test("restaurants can give free delivery above an amount (they pay it, not Kezia)", async () => {
+  const items = (await call("GET", "/v1/restaurants/80-degrees")).items, fries = items.find(i => i.name === "Peri Peri Fries");
+  await db.query("UPDATE restaurants SET free_above = 300 WHERE id = '80-degrees'");
+  const q = await call("POST", "/v1/quote", { restaurant_id: "80-degrees", items: [{ id: fries.id, qty: 3 }], lat: 33.6431, lon: 75.0172 }, fresh);
+  assert.equal(q.delivery_fee, 0); assert.equal(q.promo, null, "not a Kezia offer");
+  await db.query("UPDATE restaurants SET free_above = NULL WHERE id = '80-degrees'");
 });
 
 test("suggestions reach the owner; support number only for restaurant teams", async () => {

@@ -45,7 +45,7 @@
     b.innerHTML = `
       <div class="due fadein"><small>Your commission · all time</small><b>${num(t.commission_all, 1)}</b>
         <p>Today ${rs(t.commission_today)} · last 30 days ${rs(t.commission_30)}</p>
-        <div class="duegrid"><div><span>To collect</span><b>${rs(t.commission_due)}</b></div><div><span>Checking</span><b>${rs(t.commission_checking)}</b></div><div><span>Received</span><b>${rs(t.commission_received)}</b></div></div></div>
+        <div class="duegrid"><div><span>Bills unpaid</span><b>${rs(t.weekly_unpaid)}</b></div><div><span>Checking</span><b>${rs(t.commission_checking)}</b></div><div><span>Received</span><b>${rs(t.commission_received)}</b></div></div></div>
       ${d.places.pending ? `<button class="warn" data-a="requests" style="margin:0 var(--gut) 14px;width:calc(100% - 2*var(--gut));text-align:left">${I("store", "sm")} <span class="grow"><b>${plural(d.places.pending, "restaurant request")}</b> waiting for your approval</span>${I("chevron-right", "sm")}</button>` : ""}
       ${d.claims.length ? `<div class="card"><h3>${I("hand-coins", "xs")} Commission payments to confirm</h3>${d.claims.map(c => `<div class="ci" style="grid-template-columns:1fr auto">
           <span><b>${esc(c.restaurant)}</b> paid <b class="green">${rs(c.amount)}</b><br><span class="muted small">${plural(c.orders, "order")} · UPI ref <span class="selectable">${esc(c.utr)}</span> · ${ago(c.created_at)}</span></span>
@@ -108,7 +108,7 @@
           <span class="grow" style="min-width:0"><b class="ell" style="display:block;font-size:16px">${esc(r.name)}</b><span class="muted small">${esc(r.area || "")}${r.cuisines ? " · " + esc(r.cuisines) : ""}</span></span>
           <span style="text-align:right">${statusPill(r.status)}<br><span class="small ${r.is_open ? "green" : "muted"}" style="font-weight:800">${r.is_open ? "● Open" : "○ Closed"}</span></span></div>
         <div class="mgrid"><div><b>${r.delivered}</b><span>delivered</span></div><div><b>${rs(r.food)}</b><span>sales</span></div><div><b class="green">${rs(r.commission)}</b><span>your ${r.rate}%</span></div>
-          <div><b class="${r.due ? "red" : ""}">${rs(r.due)}</b><span>to collect</span></div><div><b>${rs(r.received)}</b><span>received</span></div><div><b>${r.rating ? r.rating + "★" : "–"}</b><span>${r.dishes} dishes</span></div></div>
+          <div><b class="${r.bill ? "red" : ""}">${rs(r.bill)}</b><span>weekly bill</span></div><div><b>${rs(r.received)}</b><span>received</span></div><div><b>${r.rating ? r.rating + "★" : "–"}</b><span>${r.dishes} dishes</span></div></div>
         ${!r.owner_phone ? `<div class="warn" style="margin-top:10px">${I("key-round", "sm")} <span>${r.pending_owner_phone ? `Waiting for <b>${esc(r.pending_owner_phone)}</b> to log in: it becomes theirs then.` : "No owner yet: you manage it. Hand it over when the owner is ready."}</span></div>` : ""}
         <div class="muted small" style="margin-top:10px">${I("user", "xs")} ${esc(r.owner_name || (r.owner_phone ? "Owner" : "You"))} ${esc(r.owner_phone || "")} · UPI ${esc(r.upi_id || "not set")} · ${r.cod ? "cash ok" : "UPI only"} · last order ${ago(r.last_order)}${r.missed ? ` · <span class="red">${r.missed} missed</span>` : ""}</div>
         <div class="two">${r.status === "pending" ? `<button class="btn danger" data-a="rstatus" data-id="${r.id}" data-s="suspended">Decline</button><button class="btn shine" data-a="rstatus" data-id="${r.id}" data-s="active">${I("check", "sm")} Approve</button>`

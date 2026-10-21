@@ -57,6 +57,8 @@ function routes(app) {
       db.many("SELECT key, value FROM settings"),
     ]);
     const extra = await db.one(`SELECT (SELECT count(*)::int FROM suggestions WHERE status = 'new') suggestions_new,
+      (SELECT COALESCE(sum(commission), 0)::int FROM orders WHERE status = 'delivered' AND settlement_id IS NULL
+         AND delivered_at < (date_trunc('week', now() AT TIME ZONE 'Asia/Kolkata') AT TIME ZONE 'Asia/Kolkata')) weekly_unpaid,
       (SELECT COALESCE(sum(promo_amount), 0)::int FROM orders WHERE status = 'delivered') promo_cost`);
     return { totals: { ...totals, ...extra }, users, places, days, top, active, claims, settings: Object.fromEntries(settings.map(x => [x.key, x.value])), now: new Date() };
   });
@@ -73,6 +75,8 @@ function routes(app) {
         COALESCE(sum(o.item_total) FILTER (WHERE o.status = 'delivered' AND o.delivered_at > now() - interval '30 days'), 0)::int food_30,
         COALESCE(sum(o.commission) FILTER (WHERE o.status = 'delivered'), 0)::int commission,
         COALESCE(sum(o.commission) FILTER (WHERE o.status = 'delivered' AND o.settlement_id IS NULL), 0)::int due,
+        COALESCE(sum(o.commission) FILTER (WHERE o.status = 'delivered' AND o.settlement_id IS NULL
+          AND o.delivered_at < (date_trunc('week', now() AT TIME ZONE 'Asia/Kolkata') AT TIME ZONE 'Asia/Kolkata')), 0)::int bill,
         (SELECT COALESCE(sum(amount), 0)::int FROM settlements s WHERE s.restaurant_id = r.id AND s.status = 'paid') received,
         (SELECT count(*)::int FROM menu_items m WHERE m.restaurant_id = r.id) dishes,
         max(o.created_at) last_order

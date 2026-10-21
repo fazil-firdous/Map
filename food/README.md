@@ -7,7 +7,7 @@ to restaurant mode in the same app. Each restaurant **delivers with its own ride
 - `app/`: the Android app (Capacitor, plain JS, Kahwa Green design). `npm install`, then
   `KF_API=http://localhost:8090 npm run web && npm run serve` to try it in a browser, or `npm run sync` and
   `cd android && ./gradlew assembleRelease bundleRelease` for a signed build (needs `android/keystore.properties`
-  and `keys/`, both kept out of git). `python3 scripts/make_logo.py && npm run assets` remakes the icons and splash.
+  and `keys/`, both kept out of git). `node scripts/make_logo_svg.js && npm run assets` remakes the icons, splash and store graphics from `brand/logo.svg`.
 - `server/`: the API (Fastify + Postgres): orders, the UPI payment flow, commission, admin page at `/admin/`.
   Deployed with the Srinagar Bazaar stack by `server/install.sh` at `kezia.<domain>`.
 - `prototype/app.html`: early clickable UI prototype (customer flow, payment, live tracking, restaurant mode).

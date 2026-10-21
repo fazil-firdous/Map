@@ -67,11 +67,17 @@ test("UPI order: accept, pay, confirm, cook, deliver, rate; commission is charge
 
 test("commission: earnings show what's owed, settle, admin confirms", async () => {
   let e = await call("GET", "/v1/restaurant/KF-TEST/earnings", null, owner);
-  assert.equal(e.commission_pct, 8); assert.ok(e.due.commission > 0); assert.equal(e.platform_upi, "kezias.platform@upi");
+  assert.equal(e.commission_pct, 8); assert.ok(e.current.commission > 0, "this week's commission is counted"); assert.equal(e.platform_upi, "kezias.platform@upi");
   assert.equal((await call("GET", "/v1/restaurant/KF-TEST/earnings", null, cust)).status, 403, "customers can't see earnings");
+  // weekly bills: this week's orders wait for Monday's bill; last week's are billed now
+  if (!e.bill.amount) assert.equal((await call("POST", "/v1/restaurant/KF-TEST/settle", { utr: "998877665544" }, owner)).status, 400, "nothing billed yet");
+  const pg = require("pg"); const c = new pg.Client({ connectionString: process.env.DATABASE_URL || "postgres://postgres:dev@localhost:5432/kezia" }); await c.connect();
+  await c.query("UPDATE orders SET delivered_at = delivered_at - interval '8 days' WHERE restaurant_id = 'KF-TEST' AND status = 'delivered' AND settlement_id IS NULL"); await c.end();
+  e = await call("GET", "/v1/restaurant/KF-TEST/earnings", null, owner);
+  assert.ok(e.bill.amount > 0 && e.bill.due_by, "last week's bill");
   const s = (await call("POST", "/v1/restaurant/KF-TEST/settle", { utr: "998877665544" }, owner)).settlement;
-  assert.equal(s.amount, e.due.commission);
-  e = await call("GET", "/v1/restaurant/KF-TEST/earnings", null, owner); assert.equal(e.due.commission, 0);
+  assert.equal(s.amount, e.bill.amount);
+  e = await call("GET", "/v1/restaurant/KF-TEST/earnings", null, owner); assert.equal(e.bill.amount, 0);
   const ok = await call("POST", `/v1/admin/settlements/${s.id}/paid`, null, null, { "x-admin-token": ADMIN });
   assert.equal(ok.settlement.status, "paid");
 });
