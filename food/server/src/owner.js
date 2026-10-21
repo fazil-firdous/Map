@@ -10,7 +10,7 @@ const db = require("./db");
 const config = require("./config");
 const { needUser, needRole, myPlaces } = require("./auth");
 const { setting } = require("./catalog");
-const { ratePct, priced } = require("./pricing");
+const { ratePct, priced, customerPrice } = require("./pricing");
 const { bad, notFound, str, normPhone, isMobile } = require("./util");
 
 async function savePhoto(file) {
@@ -43,12 +43,13 @@ function routes(app) {
   app.get("/v1/restaurant/:rid", { preHandler: any }, async (req) => {
     const r = await db.one("SELECT * FROM restaurants WHERE id = $1", [req.params.rid]);
     if (!r) throw notFound();
-    const [sections, items, staff] = await Promise.all([
+    const [sections, items, staff, offers] = await Promise.all([
       db.many("SELECT * FROM menu_sections WHERE restaurant_id = $1 ORDER BY sort, id", [r.id]),
       db.many("SELECT * FROM menu_items WHERE restaurant_id = $1 ORDER BY sort, id", [r.id]),
       db.many("SELECT phone, name, role FROM staff WHERE restaurant_id = $1 ORDER BY role, name", [r.id]),
+      db.many("SELECT * FROM offers WHERE restaurant_id = $1 AND ends_at > now() ORDER BY created_at DESC", [r.id]),
     ]);
-    return { restaurant: { ...r, base_km: Number(r.base_km), max_km: Number(r.max_km), commission_pct: await pctFor(r) }, sections, items, staff, role: req.role };
+    return { offers, restaurant: { ...r, base_km: Number(r.base_km), max_km: Number(r.max_km), commission_pct: await pctFor(r) }, sections, items, staff, role: req.role };
   });
 
   app.patch("/v1/restaurant/:rid", { preHandler: mgr }, async (req) => {
@@ -124,6 +125,34 @@ function routes(app) {
   app.post("/v1/restaurant/:rid/photo", { preHandler: mgr, config: { rateLimit: { max: 20, timeWindow: "1 hour" } } }, async (req) => {
     const file = await req.file(); if (!file) throw bad("Attach a photo");
     return { restaurant: await db.one("UPDATE restaurants SET photo = $2 WHERE id = $1 RETURNING *", [req.params.rid, await savePhoto(file)]) };
+  });
+
+  // Today's specials: a dish (or a size) at a special price until the end of today, or for a few days
+  app.post("/v1/restaurant/:rid/offers", { preHandler: mgr }, async (req) => {
+    const b = req.body || {}, rid = req.params.rid;
+    const title = str(b.title, 50) || "Today's special", note = str(b.note, 140), days = int(b.days, 1, 7) || 1;
+    const live = await db.one("SELECT count(*)::int n FROM offers WHERE restaurant_id = $1 AND ends_at > now()", [rid]);
+    if (live.n >= 6) throw bad("You can run up to 6 specials at a time. Remove one first");
+    let item = null, v = null, net = null, price = null;
+    if (b.item_id) {
+      item = await db.one("SELECT * FROM menu_items WHERE id = $1 AND restaurant_id = $2", [Number(b.item_id), rid]);
+      if (!item) throw bad("That dish isn't on your menu");
+      const sizes = Array.isArray(item.variants) && item.variants.length ? item.variants : null;
+      if (sizes) { v = int(b.v, 0, sizes.length - 1); if (v === null) throw bad("Choose which size is on offer"); }
+      net = int(b.net_price, 1, 20000);
+      if (!net) throw bad("Enter the special price you want to receive");
+      price = customerPrice(net, await ratePct(rid));
+      const normal = sizes ? sizes[v].p : item.price;
+      if (price >= normal) throw bad(`A special must cost less than the usual ${normal}`);
+    }
+    // ends at midnight India time after `days` days
+    const o = await db.one(`INSERT INTO offers (restaurant_id, item_id, v, title, note, net_price, price, ends_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, (date_trunc('day', now() AT TIME ZONE 'Asia/Kolkata') + make_interval(days => $8)) AT TIME ZONE 'Asia/Kolkata') RETURNING *`,
+      [rid, item ? item.id : null, v, title, note, net, price, days]);
+    return { offer: o };
+  });
+  app.delete("/v1/restaurant/:rid/offers/:id", { preHandler: mgr }, async (req) => {
+    await db.q("DELETE FROM offers WHERE id = $1 AND restaurant_id = $2", [Number(req.params.id), req.params.rid]); return { ok: true };
   });
 
   // Team: managers and riders, by phone

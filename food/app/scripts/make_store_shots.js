@@ -6,9 +6,9 @@ const { chromium } = require(process.env.PLAYWRIGHT || "/opt/node-tools/node_mod
 const root = path.join(__dirname, ".."), src = process.argv[2];
 const font = "data:font/woff2;base64," + fs.readFileSync(path.join(root, "..", "styles/fonts/Fraunces-800.woff2")).toString("base64");
 const SHOTS = [
-  ["shots3/01-home.png", "Kulgam's best food,", "in one app"],
-  ["shots3/02-80-degrees.png", "Real menus,", "real restaurants"],
-  ["shots3/03-sizes.png", "Pick your size,", "see the price"],
+  ["shots5/01-home.png", "Kulgam's best food,", "in one app"],
+  ["shots5/03-chunk-city.png", "Real menus,", "real photos"],
+  ["shots5/05-80-special.png", "Today's specials,", "fresh every day"],
   ["shots/14-pay.png", "Pay the restaurant", "directly by UPI"],
   ["shots2/30-customer-route.png", "Watch your rider", "live on the map"],
   ["shots2/20-kitchen-orders.png", "For restaurants:", "orders ring loud"],

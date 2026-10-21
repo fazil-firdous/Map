@@ -40,7 +40,7 @@
       }
      ],
      "description": "Spicy hot chicken",
-     "photo": "asset:pizza-1.jpg",
+     "photo": "/img/r/80-degrees/pizza-meat.jpg",
      "bestseller": true
     },
     {
@@ -61,7 +61,7 @@
       }
      ],
      "description": "Chicken in hot Schezwan sauce with onion & capsicum",
-     "photo": "asset:pizza-2.jpg"
+     "photo": "/img/r/80-degrees/pizza-close.jpg"
     },
     {
      "name": "BBQ Chicken",
@@ -81,7 +81,7 @@
       }
      ],
      "description": "BBQ-marinated chicken, onion & capsicum",
-     "photo": "asset:pizza-3.jpg"
+     "photo": "/img/r/80-degrees/pizza-pan.jpg"
     },
     {
      "name": "Chilly Chicken",
@@ -101,7 +101,7 @@
       }
      ],
      "description": "Chicken, onion & green chillies, Chinese style",
-     "photo": "asset:pizza-4.jpg"
+     "photo": "/img/r/80-degrees/pizza-slices.jpg"
     },
     {
      "name": "Roast Chicken",
@@ -121,7 +121,7 @@
       }
      ],
      "description": "Roasted chicken",
-     "photo": "asset:pizza-1.jpg"
+     "photo": "/img/r/80-degrees/pizza-meal.jpg"
     },
     {
      "name": "Spicy Chicken Kebab",
@@ -141,7 +141,7 @@
       }
      ],
      "description": "Kebab with onion, coriander & chilli flakes",
-     "photo": "asset:pizza-2.jpg"
+     "photo": "/img/r/80-degrees/pizza-close.jpg"
     },
     {
      "name": "Mexican Bite",
@@ -161,7 +161,7 @@
       }
      ],
      "description": "Hot chicken, mushroom, jalapeños, capsicum & chicken salami",
-     "photo": "asset:pizza-3.jpg"
+     "photo": "/img/r/80-degrees/pizza-slices.jpg"
     },
     {
      "name": "Chicken Fiesta",
@@ -181,7 +181,7 @@
       }
      ],
      "description": "Hot chicken, roast chicken, red paprika & sweet corn",
-     "photo": "asset:pizza-4.jpg"
+     "photo": "/img/r/80-degrees/pizza-meat.jpg"
     },
     {
      "name": "Chicken Tikka Pizza",
@@ -201,7 +201,7 @@
       }
      ],
      "description": "Chicken tikka & capsicum",
-     "photo": "asset:pizza-1.jpg"
+     "photo": "/img/r/80-degrees/pizza-pan.jpg"
     },
     {
      "name": "80 Degrees Special Pizza",
@@ -221,7 +221,7 @@
       }
      ],
      "description": "Hot chicken, mushroom, American corn, onion, capsicum, sausage, jalapeño & black olives",
-     "photo": "asset:pizza-2.jpg",
+     "photo": "/img/r/80-degrees/pizza-meal.jpg",
      "bestseller": true
     }
    ]
@@ -247,7 +247,7 @@
       }
      ],
      "description": "Three layers of cheese",
-     "photo": "asset:pizza-2.jpg"
+     "photo": "/img/r/80-degrees/pizza-board.jpg"
     },
     {
      "name": "Plain Cheese",
@@ -267,7 +267,7 @@
       }
      ],
      "description": "Three kinds of cheese",
-     "photo": "asset:pizza-3.jpg"
+     "photo": "/img/r/80-degrees/pizza-board.jpg"
     },
     {
      "name": "Cheese & Corn",
@@ -287,7 +287,7 @@
       }
      ],
      "description": "Cheese & sweet corn",
-     "photo": "asset:pizza-4.jpg"
+     "photo": "/img/r/80-degrees/pizza-corn.jpg"
     },
     {
      "name": "Margherita",
@@ -307,7 +307,7 @@
       }
      ],
      "description": "Oregano mix, tomato slices",
-     "photo": "asset:pizza-1.jpg"
+     "photo": "/img/r/80-degrees/pizza-80.jpg"
     },
     {
      "name": "Hot Veggie Supreme",
@@ -327,7 +327,7 @@
       }
      ],
      "description": "Onion, capsicum & baby corn in Schezwan sauce",
-     "photo": "asset:pizza-2.jpg"
+     "photo": "/img/r/80-degrees/pizza-corn.jpg"
     },
     {
      "name": "Farmhouse",
@@ -347,7 +347,7 @@
       }
      ],
      "description": "Black olives, corn, onion, mushroom, jalapeño, capsicum",
-     "photo": "asset:pizza-3.jpg"
+     "photo": "/img/r/80-degrees/pizza-veg.jpg"
     },
     {
      "name": "Deluxe Margherita",
@@ -367,7 +367,7 @@
       }
      ],
      "description": "Extra cheese, mushroom, onion, basil",
-     "photo": "asset:pizza-4.jpg"
+     "photo": "/img/r/80-degrees/pizza-80.jpg"
     },
     {
      "name": "Veg Blast",
@@ -387,7 +387,7 @@
       }
      ],
      "description": "Spicy onion, capsicum, mushroom",
-     "photo": "asset:pizza-1.jpg"
+     "photo": "/img/r/80-degrees/pizza-olive.jpg"
     },
     {
      "name": "Simply Veg",
@@ -407,7 +407,7 @@
       }
      ],
      "description": "Onion, tomato",
-     "photo": "asset:pizza-2.jpg"
+     "photo": "/img/r/80-degrees/pizza-veg.jpg"
     },
     {
      "name": "Guest Choice",
@@ -427,7 +427,7 @@
       }
      ],
      "description": "Any four veg toppings",
-     "photo": "asset:pizza-3.jpg"
+     "photo": "/img/r/80-degrees/pizza-olive.jpg"
     }
    ]
   },
@@ -544,28 +544,28 @@
      "veg": false,
      "net": 490,
      "description": "Chicken Blast pizza (S), French fries, chicken popcorn (S), cold drink 250 ml",
-     "photo": "asset:pizza-1.jpg"
+     "photo": "/img/r/80-degrees/pizza-meal.jpg"
     },
     {
      "name": "Double Meal",
      "veg": false,
      "net": 670,
      "description": "Chicken Blast pizza (M), French fries, chicken popcorn (S), cold drink 500 ml",
-     "photo": "asset:pizza-2.jpg"
+     "photo": "/img/r/80-degrees/pizza-meal.jpg"
     },
     {
      "name": "Family Meal",
      "veg": false,
      "net": 990,
      "description": "Chicken Blast pizza (L), peri peri fries, chicken strips 9 pcs, cold drink 500 ml",
-     "photo": "asset:pizza-4.jpg"
+     "photo": "/img/r/80-degrees/pizza-meal.jpg"
     },
     {
      "name": "80 Degrees Special Meal",
      "veg": false,
      "net": 1190,
      "description": "Chicken Blast pizza (L), French fries, spicy boneless strips 3 pcs, chicken popcorn (S), cold drink 1 L",
-     "photo": "asset:pizza-3.jpg",
+     "photo": "/img/r/80-degrees/pizza-meal.jpg",
      "bestseller": true
     }
    ]
@@ -577,44 +577,44 @@
      "name": "Chicken Zinger",
      "veg": false,
      "net": 170,
-     "photo": "asset:burger.jpg",
+     "photo": "/img/r/80-degrees/burger.jpg",
      "bestseller": true
     },
     {
      "name": "Jumbo Burger",
      "veg": false,
      "net": 190,
-     "photo": "asset:burger-2.jpg"
+     "photo": "/img/r/80-degrees/burger.jpg"
     },
     {
      "name": "Chicken Tikka Burger",
      "veg": false,
      "net": 190,
-     "photo": "asset:burger.jpg"
+     "photo": "/img/r/80-degrees/burger-2.jpg"
     },
     {
      "name": "Grilled Chicken Burger",
      "veg": false,
      "net": 180,
-     "photo": "asset:burger-2.jpg"
+     "photo": "/img/r/80-degrees/burger-2.jpg"
     },
     {
      "name": "Chicken Burst Burger",
      "veg": false,
      "net": 140,
-     "photo": "asset:burger.jpg"
+     "photo": "/img/r/80-degrees/burger.jpg"
     },
     {
      "name": "Peri Peri Chicken Burger",
      "veg": false,
      "net": 140,
-     "photo": "asset:burger-2.jpg"
+     "photo": "/img/r/80-degrees/burger-2.jpg"
     },
     {
      "name": "Crispy Chicken Burger",
      "veg": false,
      "net": 140,
-     "photo": "asset:burger.jpg"
+     "photo": "/img/r/80-degrees/burger-2.jpg"
     },
     {
      "name": "Veg Deluxe Burger",
@@ -637,7 +637,7 @@
      "name": "Shawarma",
      "veg": false,
      "net": 190,
-     "photo": "asset:rolls.jpg",
+     "photo": "/img/r/80-degrees/shawarma.jpg",
      "bestseller": true
     },
     {
@@ -656,7 +656,7 @@
      "name": "Chicken Kabab Roll",
      "veg": false,
      "net": 180,
-     "photo": "asset:rolls.jpg"
+     "photo": "/img/r/80-degrees/shawarma.jpg"
     },
     {
      "name": "Mutton Kabab Roll",
@@ -703,19 +703,19 @@
      "name": "Chicken Twist Wrap",
      "veg": false,
      "net": 150,
-     "photo": "asset:wrap.jpg"
+     "photo": "/img/r/80-degrees/shawarma.jpg"
     },
     {
      "name": "Peri Peri Twist Wrap",
      "veg": false,
      "net": 160,
-     "photo": "asset:wrap.jpg"
+     "photo": "/img/r/80-degrees/shawarma.jpg"
     },
     {
      "name": "Fire Cracker Wrap",
      "veg": false,
      "net": 160,
-     "photo": "asset:wrap.jpg"
+     "photo": "/img/r/80-degrees/shawarma.jpg"
     }
    ]
   },
@@ -813,7 +813,7 @@
      "name": "Fully Loaded Fries",
      "veg": false,
      "net": 140,
-     "photo": "asset:fries-2.jpg"
+     "photo": "/img/r/80-degrees/fries.jpg"
     },
     {
      "name": "Fully Loaded Popcorn",
@@ -825,13 +825,13 @@
      "name": "French Fries",
      "veg": true,
      "net": 100,
-     "photo": "asset:fries.jpg"
+     "photo": "/img/r/80-degrees/fries.jpg"
     },
     {
      "name": "Peri Peri Fries",
      "veg": true,
      "net": 120,
-     "photo": "asset:fries-2.jpg"
+     "photo": "/img/r/80-degrees/fries.jpg"
     }
    ]
   },
@@ -848,13 +848,13 @@
      "name": "Grilled Chicken Sandwich",
      "veg": false,
      "net": 140,
-     "photo": "asset:sandwich.jpg"
+     "photo": "/img/r/80-degrees/sandwich.jpg"
     },
     {
      "name": "80 Degrees Special Sandwich",
      "veg": false,
      "net": 170,
-     "photo": "asset:sandwich.jpg"
+     "photo": "/img/r/80-degrees/sandwich.jpg"
     }
    ]
   },
@@ -865,25 +865,25 @@
      "name": "Chicken Pakora (10 pcs)",
      "veg": false,
      "net": 280,
-     "photo": "asset:fried-chicken.jpg"
+     "photo": "/img/r/80-degrees/fried.jpg"
     },
     {
      "name": "Zeera Chicken (10 pcs)",
      "veg": false,
      "net": 290,
-     "photo": "asset:fried-chicken.jpg"
+     "photo": "/img/r/80-degrees/fried.jpg"
     },
     {
      "name": "Fried Fish (10 pcs)",
      "veg": false,
      "net": 280,
-     "photo": "asset:fried-chicken.jpg"
+     "photo": "/img/r/80-degrees/fish.jpg"
     },
     {
      "name": "80 Degrees Fried Chicken (8 pcs)",
      "veg": false,
      "net": 380,
-     "photo": "asset:fried-chicken.jpg",
+     "photo": "/img/r/80-degrees/fried.jpg",
      "bestseller": true
     }
    ]
@@ -904,7 +904,7 @@
        "net": 600
       }
      ],
-     "photo": "asset:tandoori.jpg",
+     "photo": "/img/r/80-degrees/tandoori.jpg",
      "bestseller": true
     },
     {
@@ -920,7 +920,7 @@
        "net": 700
       }
      ],
-     "photo": "asset:tandoori.jpg"
+     "photo": "/img/r/80-degrees/tandoori-2.jpg"
     },
     {
      "name": "Haryali Chicken",
@@ -935,7 +935,7 @@
        "net": 630
       }
      ],
-     "photo": "asset:tandoori.jpg"
+     "photo": "/img/r/80-degrees/tandoori-2.jpg"
     },
     {
      "name": "Multani Chicken",
@@ -950,37 +950,37 @@
        "net": 630
       }
      ],
-     "photo": "asset:tandoori.jpg"
+     "photo": "/img/r/80-degrees/tandoori.jpg"
     },
     {
      "name": "Chicken Tikka",
      "veg": false,
      "net": 270,
-     "photo": "asset:tikka.jpg"
+     "photo": "/img/r/80-degrees/tikka.jpg"
     },
     {
      "name": "Malai Tikka",
      "veg": false,
      "net": 290,
-     "photo": "asset:tikka.jpg"
+     "photo": "/img/r/80-degrees/seekh.jpg"
     },
     {
      "name": "Achari Tikka",
      "veg": false,
      "net": 280,
-     "photo": "asset:tikka.jpg"
+     "photo": "/img/r/80-degrees/tikka.jpg"
     },
     {
      "name": "Angari Tikka",
      "veg": false,
      "net": 270,
-     "photo": "asset:tikka.jpg"
+     "photo": "/img/r/80-degrees/tikka.jpg"
     },
     {
      "name": "Fish Tikka",
      "veg": false,
      "net": 290,
-     "photo": "asset:tikka.jpg"
+     "photo": "/img/r/80-degrees/seekh.jpg"
     }
    ]
   },
@@ -1000,7 +1000,7 @@
        "net": 490
       }
      ],
-     "photo": "asset:butter-chicken.jpg"
+     "photo": "/img/r/80-degrees/curry.jpg"
     },
     {
      "name": "Chicken Kabab Kanti",
@@ -1015,7 +1015,7 @@
        "net": 470
       }
      ],
-     "photo": "asset:butter-chicken.jpg"
+     "photo": "/img/r/80-degrees/curry.jpg"
     },
     {
      "name": "Mutton Kabab Kanti",
@@ -1030,7 +1030,7 @@
        "net": 520
       }
      ],
-     "photo": "asset:butter-chicken.jpg"
+     "photo": "/img/r/80-degrees/curry.jpg"
     },
     {
      "name": "Butter Chicken (with bone)",
@@ -1045,7 +1045,7 @@
        "net": 640
       }
      ],
-     "photo": "asset:butter-chicken.jpg"
+     "photo": "/img/r/80-degrees/curry-naan.jpg"
     },
     {
      "name": "Butter Chicken (boneless)",
@@ -1060,7 +1060,7 @@
        "net": 650
       }
      ],
-     "photo": "asset:butter-chicken.jpg",
+     "photo": "/img/r/80-degrees/curry-naan.jpg",
      "bestseller": true
     },
     {
@@ -1076,7 +1076,7 @@
        "net": 630
       }
      ],
-     "photo": "asset:butter-chicken.jpg"
+     "photo": "/img/r/80-degrees/curry-2.jpg"
     },
     {
      "name": "Chicken Kadai",
@@ -1091,7 +1091,7 @@
        "net": 630
       }
      ],
-     "photo": "asset:butter-chicken.jpg"
+     "photo": "/img/r/80-degrees/curry.jpg"
     },
     {
      "name": "Chicken Handi",
@@ -1106,7 +1106,7 @@
        "net": 630
       }
      ],
-     "photo": "asset:butter-chicken.jpg"
+     "photo": "/img/r/80-degrees/curry-2.jpg"
     },
     {
      "name": "Shahi Chicken Korma",
@@ -1121,7 +1121,7 @@
        "net": 690
       }
      ],
-     "photo": "asset:butter-chicken.jpg"
+     "photo": "/img/r/80-degrees/korma.jpg"
     }
    ]
   },
@@ -1200,7 +1200,7 @@
        "net": 290
       }
      ],
-     "photo": "asset:biryani.jpg"
+     "photo": "/img/r/80-degrees/biryani-2.jpg"
     },
     {
      "name": "Veg Pulao",
@@ -1212,7 +1212,7 @@
      "name": "Chicken Pulao",
      "veg": false,
      "net": 350,
-     "photo": "asset:biryani-2.jpg"
+     "photo": "/img/r/80-degrees/biryani.jpg"
     }
    ]
   },
@@ -1281,13 +1281,13 @@
      "name": "Chilli Chicken Dry",
      "veg": false,
      "net": 340,
-     "photo": "asset:chilli-chicken.jpg"
+     "photo": "/img/r/80-degrees/chilli-chicken.jpg"
     },
     {
      "name": "Schezwan Chicken Dry",
      "veg": false,
      "net": 340,
-     "photo": "asset:chilli-chicken.jpg"
+     "photo": "/img/r/80-degrees/chilli-chicken.jpg"
     },
     {
      "name": "Chicken 65 (15 pcs)",
@@ -1299,7 +1299,7 @@
      "name": "Garlic Chicken Dry",
      "veg": false,
      "net": 340,
-     "photo": "asset:chilli-chicken.jpg"
+     "photo": "/img/r/80-degrees/chilli-chicken.jpg"
     },
     {
      "name": "Lemon Fish Dry",
@@ -1334,7 +1334,7 @@
      "name": "Chilli Chicken Gravy",
      "veg": false,
      "net": 360,
-     "photo": "asset:chilli-chicken.jpg"
+     "photo": "/img/r/80-degrees/chilli-chicken.jpg"
     },
     {
      "name": "Lemon Chicken Gravy",
@@ -1375,25 +1375,25 @@
      "name": "Veg Noodles",
      "veg": true,
      "net": 160,
-     "photo": "asset:noodles.jpg"
+     "photo": "/img/r/80-degrees/noodles.jpg"
     },
     {
      "name": "Chicken Noodles",
      "veg": false,
      "net": 190,
-     "photo": "asset:noodles-2.jpg"
+     "photo": "/img/r/80-degrees/chowmein.jpg"
     },
     {
      "name": "Schezwan Veg Noodles",
      "veg": true,
      "net": 180,
-     "photo": "asset:noodles.jpg"
+     "photo": "/img/r/80-degrees/noodles.jpg"
     },
     {
      "name": "Schezwan Chicken Noodles",
      "veg": false,
      "net": 210,
-     "photo": "asset:noodles-2.jpg"
+     "photo": "/img/r/80-degrees/chowmein.jpg"
     }
    ]
   },
@@ -1498,19 +1498,19 @@
      "name": "Creamy Chicken Pasta",
      "veg": false,
      "net": 270,
-     "photo": "asset:pasta.jpg"
+     "photo": "/img/r/80-degrees/pasta-white.jpg"
     },
     {
      "name": "Creamy Mushroom Pasta",
      "veg": true,
      "net": 240,
-     "photo": "asset:pasta.jpg"
+     "photo": "/img/r/80-degrees/pasta-white-2.jpg"
     },
     {
      "name": "Pink Sauce Pasta",
      "veg": true,
      "net": 280,
-     "photo": "asset:pasta.jpg"
+     "photo": "/img/r/80-degrees/pasta-red.jpg"
     }
    ]
   },
@@ -1532,7 +1532,7 @@
      "name": "Virgin Mojito",
      "veg": true,
      "net": 140,
-     "photo": "asset:mojito.jpg"
+     "photo": "/img/r/80-degrees/mojito-blue.jpg"
     },
     {
      "name": "Watermelon Mojito",
@@ -1550,7 +1550,7 @@
      "name": "Blue Lagoon Mojito",
      "veg": true,
      "net": 160,
-     "photo": "asset:mojito.jpg"
+     "photo": "/img/r/80-degrees/lagoon.jpg"
     },
     {
      "name": "Strawberry Mojito",
@@ -1568,7 +1568,7 @@
      "name": "Kiwi Mojito",
      "veg": true,
      "net": 160,
-     "photo": "asset:mojito.jpg"
+     "photo": "/img/r/80-degrees/mojito-blue-2.jpg"
     },
     {
      "name": "Fresh Lime Water",
@@ -1591,7 +1591,7 @@
      "name": "Mango Delight Shake",
      "veg": true,
      "net": 180,
-     "photo": "asset:shake.jpg"
+     "photo": "/img/r/80-degrees/shakes.jpg"
     },
     {
      "name": "Strawberry Shake",
@@ -1603,13 +1603,13 @@
      "name": "Chocolate Shake",
      "veg": true,
      "net": 180,
-     "photo": "asset:shake.jpg"
+     "photo": "/img/r/80-degrees/shakes.jpg"
     },
     {
      "name": "Banana Shake",
      "veg": true,
      "net": 170,
-     "photo": "asset:shake.jpg"
+     "photo": "/img/r/80-degrees/shakes.jpg"
     },
     {
      "name": "Black Currant Shake",
@@ -1621,14 +1621,14 @@
      "name": "Cold Coffee",
      "veg": true,
      "net": 180,
-     "photo": "asset:coffee.jpg",
+     "photo": "/img/r/80-degrees/shakes.jpg",
      "bestseller": true
     },
     {
      "name": "Vanilla Shake",
      "veg": true,
      "net": 170,
-     "photo": "asset:shake.jpg"
+     "photo": "/img/r/80-degrees/shakes.jpg"
     }
    ]
   },
@@ -1639,13 +1639,13 @@
      "name": "Hot Chocolate Brownie",
      "veg": true,
      "net": 150,
-     "photo": "asset:brownie.jpg"
+     "photo": "/img/r/80-degrees/brownie.jpg"
     },
     {
      "name": "Sizzling Brownie with Vanilla Ice Cream",
      "veg": true,
      "net": 220,
-     "photo": "asset:brownie.jpg"
+     "photo": "/img/r/80-degrees/sizzling-brownie.jpg"
     },
     {
      "name": "Mango Ice Cream",
@@ -1686,7 +1686,7 @@
      "name": "Cappuccino",
      "veg": true,
      "net": 80,
-     "photo": "asset:coffee-2.jpg"
+     "photo": "/img/r/80-degrees/cappuccino.jpg"
     },
     {
      "name": "Green Tea",

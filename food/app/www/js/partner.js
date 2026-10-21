@@ -174,6 +174,12 @@
     const secs = [...d.sections, ...(d.items.some(i => !d.sections.some(s => s.id === i.section_id)) ? [{ id: 0, name: "No section" }] : [])];
     b.innerHTML = `<div class="card" style="padding:0;overflow:hidden"><div class="rcard" style="margin:0;width:100%;box-shadow:none;border-radius:0"><div class="im" ${bg(r.photo)}>
         <div class="tags"><span class="pill">${plural(d.items.length, "dish")}</span></div><button class="eta" data-a="cover">${I("camera", "xs")} Change cover</button></div></div></div>
+      <div class="card spcard"><div class="row between"><h3 style="margin:0">${I("flame", "sm")} Today's specials</h3><button class="btn gold sm" data-a="newoffer">${I("plus", "xs")} Add</button></div>
+        ${(d.offers || []).length ? `<div class="list" style="margin-top:6px">${d.offers.map(o => { const it = d.items.find(i => i.id === o.item_id), size = it && it.variants && o.v !== null ? it.variants[o.v] : null;
+          return `<div class="li"><span class="ph" ${bg(it && it.photo)} style="width:40px;height:40px;border-radius:12px;background-size:cover;background-position:center;background-color:var(--gold-soft)"></span>
+            <span><b>${esc(o.title)}</b><br><span class="muted small">${it ? `${esc(it.name)}${size ? ` (${esc(size.n)})` : ""} · <b class="green">${rs(o.price)}</b> <s>${rs(size ? size.p : it.price)}</s> · you get ${rs(o.net_price)}` : esc(o.note || "")} · until ${new Date(o.ends_at).toLocaleDateString("en-IN", { weekday: "short", timeZone: "Asia/Kolkata" })} night</span></span>
+            <button class="iconbtn plain" data-a="deloffer" data-id="${o.id}" aria-label="Remove special">${I("trash-2", "sm")}</button></div>`; }).join("")}</div>`
+          : `<p class="note" style="margin:8px 0 0">Put a dish on a special price for today or a few days. It shows on the home screen and at the top of your menu.</p>`}</div>
       <div class="warn green" style="margin:0 var(--gut) 14px">${I("badge-percent", "sm")} <span>Kezia's Food fee is <b>${pct()}%</b> of the food price on delivered orders. Delivery and packing charges are all yours. You type what you want to receive for each dish, and we add the ${pct()}% on top for the customer.</span></div>
       ${secs.map(s => { const list = d.items.filter(i => (s.id ? i.section_id === s.id : !d.sections.some(x => x.id === i.section_id)));
         return `<div class="sec" style="margin-top:14px"><h2>${esc(s.name)} <span class="muted small">${list.length}</span></h2>${s.id ? `<button data-a="sec" data-id="${s.id}">${I("pencil", "xs")} Edit</button>` : ""}</div>
@@ -236,6 +242,33 @@
       del: async b => { if (!(await confirm("Delete this dish?", it.name, "Delete", true))) return; busy(b, async () => { await api("DELETE", `/v1/restaurant/${place().id}/items/${it.id}`); s.close(); await loadData(); drawMenu(); }); },
     });
   }
+  /** Add a special: pick a dish (and size), the special price you want to receive, and how long it runs. */
+  function offerSheet() {
+    const d = K.data, opts = [];
+    d.items.filter(i => i.in_stock).forEach(it => { if (it.variants && it.variants.length) it.variants.forEach((v, vi) => opts.push({ id: it.id, v: vi, name: `${it.name} (${v.n})`, p: v.p, net: v.net ?? keep(v.p) }));
+      else opts.push({ id: it.id, v: null, name: it.name, p: it.price, net: netOf(it) }); });
+    if (!opts.length) return toast("Add dishes to your menu first", "info");
+    const s = sheet(`<h2>${I("flame", "sm")} New special</h2><div class="form" style="margin-top:12px">
+      <label class="field">Dish<select class="input" data-o="dish">${opts.map((o, i) => `<option value="${i}">${esc(o.name)} · ${rs(o.p)}</option>`).join("")}</select></label>
+      <label class="field">Special price you receive (₹)<input class="input" data-o="net" inputmode="numeric" placeholder="less than now"><div class="keep" data-o="say"></div></label>
+      <label class="field">Title<input class="input" data-o="title" maxlength="50" value="Today's special"></label>
+      <label class="field">Note (optional)<input class="input" data-o="note" maxlength="140" placeholder="e.g. Only till 10 pm, with free cold drink"></label>
+      <div class="seg" data-o="days"><button data-d="1" aria-pressed="true">Today</button><button data-d="3" aria-pressed="false">3 days</button><button data-d="7" aria-pressed="false">7 days</button></div>
+      <button class="btn gold" data-a="saveoffer">Start special</button></div>`);
+    const pick = () => opts[Number($("[data-o=dish]", s).value)], net = $("[data-o=net]", s);
+    const say = () => { const o = pick(), v = Math.round(Number(net.value) || 0);
+      $("[data-o=say]", s).innerHTML = v ? `${I("wallet", "xs")} Customers pay <b>${rs(custPrice(v))}</b> instead of ${rs(o.p)} · you get ${rs(v)}${custPrice(v) >= o.p ? ` <b class="red">(must be lower than now)</b>` : ""}`
+        : `Usually you get ${rs(o.net)} (customers pay ${rs(o.p)})`; };
+    net.oninput = () => { net.value = net.value.replace(/\D/g, "").slice(0, 5); say(); }; $("[data-o=dish]", s).onchange = say; say();
+    $("[data-o=days]", s).onclick = e => { const x = e.target.closest("button"); if (x) $$("[data-o=days] button", s).forEach(y => y.setAttribute("aria-pressed", y === x)); };
+    bind(s, { saveoffer: b => busy(b, async () => {
+      const o = pick();
+      await post(`/v1/restaurant/${place().id}/offers`, { item_id: o.id, v: o.v, net_price: Number(net.value), title: $("[data-o=title]", s).value, note: $("[data-o=note]", s).value,
+        days: Number($("[data-o=days] [aria-pressed=true]", s).dataset.d) });
+      s.close(); haptic("success"); toast("Special is live", "flame"); await loadData(); drawMenu();
+    }) });
+  }
+
   /** Shrink a photo on the phone before uploading (max 1280 px, JPEG). */
   async function shrink(file) {
     const url = URL.createObjectURL(file);
@@ -470,6 +503,9 @@
       cover: () => pickPhoto(`/v1/restaurant/${place().id}/photo`),
       photo: b => pickPhoto(`/v1/restaurant/${place().id}/items/${b.dataset.id}/photo`),
       item: b => itemSheet(K.data.items.find(i => i.id === Number(b.dataset.id))),
+      newoffer: () => offerSheet(),
+      deloffer: async b => { if (!(await confirm("End this special?", "Customers see the usual price again.", "End special", true))) return;
+        busy(b, async () => { await api("DELETE", `/v1/restaurant/${place().id}/offers/${b.dataset.id}`); await loadData(); drawMenu(); }); },
       newitem: () => K.data.sections.length ? itemSheet(null) : toast("Add a section first, like Pizza or Wazwan", "info"),
       stock: b => busy(null, async () => { const on = b.getAttribute("aria-checked") !== "true"; b.setAttribute("aria-checked", on); haptic();
         await api("PATCH", `/v1/restaurant/${place().id}/items/${b.dataset.id}`, { in_stock: on }); const it = K.data.items.find(i => i.id === Number(b.dataset.id)); it.in_stock = on; toast(on ? "Back in stock" : "Marked sold out"); }),

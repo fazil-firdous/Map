@@ -36,6 +36,8 @@ async function reprice(restaurantId) {
     const p = priced(it, pct);
     await db.q("UPDATE menu_items SET price = $2, variants = $3 WHERE id = $1", [it.id, p.price, p.variants ? JSON.stringify(p.variants) : null]);
   }
+  for (const o of await db.many("SELECT id, net_price FROM offers WHERE restaurant_id = $1 AND net_price IS NOT NULL AND ends_at > now()", [restaurantId]))
+    await db.q("UPDATE offers SET price = $2 WHERE id = $1", [o.id, customerPrice(o.net_price, pct)]);
   return items.length;
 }
 async function repriceAll() {

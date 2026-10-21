@@ -1,10 +1,11 @@
-// Renders brand/logo.svg (pin + steaming bowl) to every size the app, Play Store and website need.
+// Renders brand/logo.svg (K monogram with steam) to every size the app, Play Store and website need.
 // Usage: node scripts/make_logo_svg.js   (needs Playwright with Chromium on the build machine)
 const fs = require("fs");
 const path = require("path");
 const { chromium } = require(process.env.PLAYWRIGHT || "/opt/node-tools/node_modules/playwright");
 const root = path.join(__dirname, ".."), svg = fs.readFileSync(path.join(root, "brand/logo.svg"), "utf8");
 const mark = svg.match(/<g id="mark">[\s\S]*?<\/g>\s*<\/g>/)[0];
+const markOn = (k, steam) => mark.replace('fill="#fff"', `fill="${k}"`).replace('stroke="#f5b829"', `stroke="${steam}"`);
 const font = "data:font/woff2;base64," + fs.readFileSync(path.join(root, "..", "styles/fonts/Fraunces-800.woff2")).toString("base64");
 const grad = `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b6e3d"/><stop offset="1" stop-color="#1fb066"/></linearGradient></defs>`;
 const page = (body, w, h, bg = "transparent") => `<!doctype html><html><head><style>@font-face{font-family:F;src:url(${font})}html,body{margin:0;width:${w}px;height:${h}px;background:${bg};overflow:hidden}</style></head><body>${body}</body></html>`;
@@ -12,12 +13,12 @@ const tile = (r = 0) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10
 const OUT = [
   ["assets/icon-only.png", 1024, 1024, tile(0)],
   ["assets/icon-background.png", 1024, 1024, `<svg viewBox="0 0 100 100" width="100%" height="100%">${grad}<rect width="100" height="100" fill="url(#g)"/></svg>`],
-  ["assets/icon-foreground.png", 1024, 1024, `<svg viewBox="-22 -22 144 144" width="100%" height="100%">${mark}</svg>`, true],
+  ["assets/icon-foreground.png", 1024, 1024, `<svg viewBox="-20 -20 140 140" width="100%" height="100%">${mark}</svg>`, true],
   ["assets/store-icon-512.png", 512, 512, tile(0)],
   ["assets/logo-2048-square.png", 2048, 2048, tile(0)],
   ["assets/logo-2048-rounded.png", 2048, 2048, tile(22), true],
-  // for light backgrounds: green pin, white bowl, saffron steam
-  ["assets/logo-2048-transparent.png", 2048, 2048, `<svg viewBox="16 6 68 88" width="100%" height="100%">${mark.replace(/fill="#fff"/, 'fill="#PIN"').replace(/fill="#0f8a4f"/g, 'fill="#fff"').replace('#PIN', '#0f8a4f')}</svg>`, true],
+  // for light backgrounds: green K, saffron steam
+  ["assets/logo-2048-transparent.png", 2048, 2048, `<svg viewBox="8 4 88 88" width="100%" height="100%">${markOn("#0f8a4f", "#e8a317")}</svg>`, true],
   ["www/img/logo.png", 256, 256, tile(22), true],
   ["www/img/icons/icon-192.png", 192, 192, tile(0)],
   ["www/img/icons/icon-512.png", 512, 512, tile(0)],

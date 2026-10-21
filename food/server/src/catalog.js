@@ -17,6 +17,19 @@ function pubRest(r, lat, lon) {
   };
 }
 
+/** Today's specials of a restaurant (or of all visible ones), with the dish they're for. */
+async function specials(restaurantId) {
+  return db.many(`SELECT o.id, o.restaurant_id, o.item_id, o.v, o.title, o.note, o.price, o.ends_at, i.name item, i.photo, i.veg, i.price item_price, i.variants,
+      r.name restaurant, r.photo restaurant_photo
+    FROM offers o JOIN restaurants r ON r.id = o.restaurant_id LEFT JOIN menu_items i ON i.id = o.item_id
+    WHERE o.ends_at > now() AND ${visible} ${restaurantId ? "AND o.restaurant_id = $1" : ""} AND (o.item_id IS NULL OR i.in_stock)
+    ORDER BY o.created_at DESC LIMIT 30`, restaurantId ? [restaurantId] : []).then(rows => rows.map(o => {
+      const size = Array.isArray(o.variants) && o.v !== null && o.variants[o.v] ? o.variants[o.v] : null;
+      return { id: o.id, restaurant_id: o.restaurant_id, restaurant: o.restaurant, item_id: o.item_id, v: o.v, size: size ? size.n : null, title: o.title, note: o.note,
+        item: o.item, veg: o.veg, photo: o.photo || o.restaurant_photo, price: o.price, was: size ? size.p : o.item_price, ends_at: o.ends_at };
+    }));
+}
+
 /** New-customer offer: free delivery on a customer's first order(s) up to a food value (Kezia pays the fee). */
 async function promoFor(user, itemTotal, fee) {
   if (!user || !fee) return null;
@@ -34,6 +47,8 @@ async function quote(r, items, lat, lon, user) {
   if (!ids.length) throw bad("Your cart is empty");
   const rows = await db.many("SELECT * FROM menu_items WHERE restaurant_id = $1 AND id = ANY($2::int[])", [r.id, ids.map(i => i[0])]);
   const by = new Map(rows.map(x => [x.id, x]));
+  const offers = await db.many("SELECT item_id, v, price FROM offers WHERE restaurant_id = $1 AND ends_at > now() AND item_id = ANY($2::int[]) AND price IS NOT NULL", [r.id, ids.map(i => i[0])]);
+  const special = (id, v) => offers.find(o => o.item_id === id && (o.v ?? null) === (v ?? null));
   const lines = [];
   for (const [id, qty, vi] of ids) {
     const it = by.get(id);
@@ -43,8 +58,9 @@ async function quote(r, items, lat, lon, user) {
     if (sizes) {
       const v = sizes[vi ?? -1];
       if (!v) throw bad(`Choose a size for ${it.name}`);
-      lines.push({ id, v: vi, size: v.n, name: `${it.name} (${v.n})`, price: v.p, qty, veg: it.veg });
-    } else lines.push({ id, name: it.name, price: it.price, qty, veg: it.veg });
+      const sp = special(id, vi);
+      lines.push({ id, v: vi, size: v.n, name: `${it.name} (${v.n})`, price: sp ? sp.price : v.p, qty, veg: it.veg, ...(sp ? { special: true } : {}) });
+    } else { const sp = special(id, null); lines.push({ id, name: it.name, price: sp ? sp.price : it.price, qty, veg: it.veg, ...(sp ? { special: true } : {}) }); }
   }
   const itemTotal = lines.reduce((s, l) => s + l.price * l.qty, 0);
   const km = Math.round(roadKm(lat, lon, r.lat, r.lon) * 10) / 10;
@@ -69,7 +85,7 @@ function routes(app) {
     ]);
     const tags = await db.many(`SELECT restaurant_id, array_agg(DISTINCT s.name) secs FROM menu_sections s GROUP BY 1`);
     const secs = new Map(tags.map(t => [t.restaurant_id, t.secs]));
-    return { restaurants: rs.map(r => ({ ...pubRest(r, lat, lon), sections: secs.get(r.id) || [] })), banners };
+    return { restaurants: rs.map(r => ({ ...pubRest(r, lat, lon), sections: secs.get(r.id) || [] })), banners, specials: await specials() };
   });
 
   app.get("/v1/restaurants/:id", async (req) => {
@@ -79,7 +95,7 @@ function routes(app) {
       db.many("SELECT id, name FROM menu_sections WHERE restaurant_id = $1 ORDER BY sort, id", [r.id]),
       db.many("SELECT id, section_id, name, description, price, veg, photo, in_stock, bestseller, (SELECT jsonb_agg(jsonb_build_object('n', v->'n', 'p', v->'p')) FROM jsonb_array_elements(variants) v) variants FROM menu_items WHERE restaurant_id = $1 ORDER BY sort, id", [r.id]),
     ]);
-    return { restaurant: pubRest(r, Number(req.query.lat), Number(req.query.lon)), sections, items };
+    return { restaurant: pubRest(r, Number(req.query.lat), Number(req.query.lon)), sections, items, specials: await specials(r.id) };
   });
 
   app.post("/v1/quote", async (req) => {
@@ -114,4 +130,4 @@ function routes(app) {
   });
 }
 
-module.exports = { routes, quote, pubRest, setting, visible };
+module.exports = { routes, quote, pubRest, setting, visible, specials };

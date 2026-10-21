@@ -101,3 +101,23 @@ test("hand a restaurant to its owner by phone", async () => {
   assert.equal(p.done, "pending", "not yet a user: becomes theirs when they log in");
   await db.query("UPDATE restaurants SET owner_id = NULL, pending_owner_phone = NULL WHERE id = 'chunk-city'");
 });
+
+test("today's specials: a dish on a special price, shown to customers and used in the order", async () => {
+  const admin = { "x-admin-token": process.env.ADMIN_TOKEN || "admintest" };
+  const items = (await call("GET", "/v1/restaurants/80-degrees")).items, blast = items.find(i => i.name === "Chicken Blast");
+  const tooHigh = await call("POST", "/v1/restaurant/80-degrees/offers", { item_id: blast.id, v: 2, net_price: 600 }, null, admin);
+  assert.equal(tooHigh.status, 401, "restaurant login needed");
+  const kitchenToken = await login("9000000101");
+  await db.query("UPDATE restaurants SET owner_id = (SELECT id FROM users WHERE phone = '+919000000101') WHERE id = '80-degrees'");
+  assert.equal((await call("POST", "/v1/restaurant/80-degrees/offers", { item_id: blast.id, v: 2, net_price: 600 }, kitchenToken)).status, 400, "must be cheaper than usual");
+  const o = (await call("POST", "/v1/restaurant/80-degrees/offers", { item_id: blast.id, v: 2, net_price: 450, title: "Weekend Large" }, kitchenToken)).offer;
+  assert.equal(o.price, 459, "₹450 to the restaurant at 2% → ₹459 (2% of 459 rounds to 9)");
+  const r = await call("GET", "/v1/restaurants/80-degrees");
+  assert.ok(r.specials.some(s => s.id === o.id && s.size === "Large" && s.was === 561));
+  assert.ok((await call("GET", "/v1/home")).specials.some(s => s.id === o.id), "on the home screen");
+  const q = await call("POST", "/v1/quote", { restaurant_id: "80-degrees", items: [{ id: blast.id, qty: 1, v: 2 }, { id: blast.id, qty: 1, v: 0 }], lat: 33.6431, lon: 75.0172 });
+  assert.equal(q.lines[0].price, 459); assert.equal(q.lines[0].special, true); assert.equal(q.lines[1].price, 245, "other sizes unchanged");
+  await call("DELETE", `/v1/restaurant/80-degrees/offers/${o.id}`, null, kitchenToken);
+  assert.ok(!(await call("GET", "/v1/restaurants/80-degrees")).specials.length, "removed");
+  await db.query("UPDATE restaurants SET owner_id = NULL WHERE id = '80-degrees'");
+});

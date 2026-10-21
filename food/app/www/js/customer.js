@@ -173,6 +173,13 @@
   const cartbar = () => cartCount() ? `<button class="cartbar" data-a="cart"><span><b>${plural(cartCount(), "item")} · ${rs(cartTotal())}</b><small>${esc(S.cart.rname)} · plus delivery</small></span>
     <span class="row" style="gap:6px;font-weight:800">View cart ${I("chevron-right", "sm")}</span></button>` : "";
 
+  // Today's special card (home screen and restaurant page)
+  const spCard = (sp, showRest = true) => `<button class="sp" data-a="special" data-r="${esc(sp.restaurant_id)}" data-item="${sp.item_id || ""}">
+      <span class="im" ${bg(sp.photo)}><em>${I("flame", "xs")} ${esc(sp.title)}</em></span>
+      <span class="bd"><b class="ell">${esc(sp.item || sp.title)}${sp.size ? ` <span class="muted">(${esc(sp.size)})</span>` : ""}</b>
+        ${sp.price ? `<span class="pr"><b>${rs(sp.price)}</b>${sp.was ? ` <s>${rs(sp.was)}</s>` : ""}</span>` : ""}
+        ${sp.note ? `<small class="ell">${esc(sp.note)}</small>` : ""}${showRest ? `<small class="ell">${esc(sp.restaurant)}</small>` : ""}</span></button>`;
+
   // ---------- home ----------
   const home = { el: null, data: null, cat: null, slide: null };
   function rcard(r, i = 0) {
@@ -200,6 +207,7 @@
         : `<div class="bans"><div class="ban skel"></div></div>`}
       <div class="sec"><h2>What's on your mind?</h2>${home.cat ? `<button data-a="allcats">Clear</button>` : ""}</div>
       <div class="cats">${CATS.map((c, i) => `<button class="cat" data-a="cat" data-i="${i}" aria-pressed="${home.cat === c}"><i style="background-image:url('img/food/${c[1]}.jpg')"></i>${c[0]}</button>`).join("")}</div>
+      ${d && d.specials && d.specials.length ? `<div class="sec"><h2>${I("flame", "sm")} Today's specials</h2></div><div class="specials">${d.specials.map(sp => spCard(sp)).join("")}</div>` : ""}
       <div class="sec"><h2>${home.cat ? esc(home.cat[0]) + " in Kulgam" : "Restaurants in Kulgam"}</h2>${list ? `<span class="muted small">${plural(list.length, "place")}</span>` : ""}</div>
       <div class="stagger">${!list ? skelCards(2) : list.length ? list.map(rcard).join("") : empty("utensils", home.cat ? `No ${home.cat[0].toLowerCase()} yet` : "No restaurants yet",
         home.cat ? "Try another dish. More Kulgam kitchens are joining soon." : "Kulgam's kitchens are joining soon. Pull back in a little while.")}</div>
@@ -234,6 +242,7 @@
       search: () => KF.tab("search"),
       rest: b => openRestaurant(b.dataset.id),
       ban: b => b.dataset.id && openRestaurant(b.dataset.id),
+      special: b => openRestaurant(b.dataset.r, b.dataset.item ? { item: Number(b.dataset.item) } : {}),
       cat: b => { const c = CATS[b.dataset.i]; home.cat = home.cat === c ? null : c; haptic(); renderHome(); $(".sec + .cats", el).scrollIntoView({ block: "start", behavior: "smooth" }); },
       allcats: () => { home.cat = null; renderHome(); },
       retry: () => { renderHome(); loadHome(); },
@@ -302,12 +311,20 @@
       if (!scr.alive) return;
       const r = j.restaurant; let veg = false;
       const items = new Map(j.items.map(i => [i.id, i]));
+      // Today's specials: the special price replaces the usual one (the server charges the same)
+      (j.specials || []).forEach(sp => {
+        const it = items.get(sp.item_id); if (!it || !sp.price) return;
+        it.special = sp.title;
+        if (sp.v !== null && it.variants && it.variants[sp.v]) { const v = it.variants[sp.v]; v.was = v.p; v.p = sp.price; it.price = Math.min(...it.variants.map(x => x.p)); }
+        else { it.was = it.price; it.price = sp.price; }
+      });
       const secs = j.sections.filter(s => j.items.some(i => i.section_id === s.id));
       const loose = j.items.filter(i => !j.sections.some(s => s.id === i.section_id));
       if (loose.length) secs.push({ id: 0, name: "More" });
       const fee = r.fee === null ? `<b class="red">Too far</b><span>within ${r.rules.max_km} km</span>` : `<b>${r.fee ? rs(r.fee) : "Free"}</b><span>delivery${r.km !== null ? " · " + r.km + " km" : ""}</span>`;
       const itemHTML = it => `<div class="item ${it.in_stock ? "" : "off"}" data-item="${it.id}"><div>${vegMark(it.veg)}${it.bestseller ? `<span class="best">${I("star", "xs")} Bestseller</span>` : ""}
-          <b>${esc(it.name)}</b><div class="p">${it.variants && it.variants.length ? `${rs(it.price)} <span class="muted small" style="font-weight:600">onwards · ${it.variants.map(v => esc(v.n)).join(" / ")}</span>` : rs(it.price)}</div>${it.description ? `<div class="d">${esc(it.description)}</div>` : ""}</div>
+          ${it.special ? `<span class="spbadge">${I("flame", "xs")} ${esc(it.special)}</span>` : ""}
+          <b>${esc(it.name)}</b><div class="p">${it.variants && it.variants.length ? `${rs(it.price)} <span class="muted small" style="font-weight:600">onwards · ${it.variants.map(v => esc(v.n)).join(" / ")}</span>` : `${rs(it.price)}${it.was ? ` <s class="muted" style="font-weight:600">${rs(it.was)}</s>` : ""}`}</div>${it.description ? `<div class="d">${esc(it.description)}</div>` : ""}</div>
           <div class="pic" ${bg(it.photo)}>${it.photo ? "" : I("utensils", "lg")}<span data-addbox="${it.id}">${addHTML(it)}</span></div></div>`;
       const menuHTML = () => secs.map(s => {
         const list = (s.id ? j.items.filter(i => i.section_id === s.id) : loose).filter(i => !veg || i.veg);
@@ -324,6 +341,7 @@
             <div class="own">${I("bike", "sm")} Delivered by ${esc(r.name)}'s own rider · ${r.rules.per_km ? `then ${rs(r.rules.per_km)}/km after ${r.rules.base_km} km` : "flat fee"}</div>
             ${r.status === "test" ? `<div class="warn" style="margin-top:12px">${I("info", "sm")} This is a test restaurant for trying the app. Orders are not real.</div>` : ""}
             ${r.is_open ? "" : `<div class="warn red" style="margin-top:12px">${I("moon", "sm")} Closed right now${r.hours ? ` · Opens ${esc(r.hours)}` : ""}. You can still look at the menu.</div>`}</div>
+          ${(j.specials || []).length ? `<div class="sec" style="margin-top:16px"><h2>${I("flame", "sm")} Today's specials</h2></div><div class="specials">${j.specials.map(sp => spCard(sp, false)).join("")}</div>` : ""}
           <div class="menutabs" style="top:calc(var(--sat) + 58px)"><div class="chips"><button class="chip" data-a="veg" aria-pressed="false">${vegMark(true)} Veg only</button>
             ${secs.map(s => `<button class="chip" data-a="jump" data-sec="${s.id}">${esc(s.name)}</button>`).join("")}</div></div>
           <div data-menu>${menuHTML()}</div><div style="height:110px"></div>
@@ -351,7 +369,7 @@
           const s = sheet(`<h2>${esc(it.name)}</h2><p class="sub">${esc(it.description || "Choose a size")}</p><div data-sz></div><button class="btn" data-done style="margin-top:14px">Done</button>`,
             { onClose: () => { refreshItem(it.id); refreshBar(); } });
           const fill = () => { $("[data-sz]", s).innerHTML = it.variants.map((v, i) => `<div class="opt" style="grid-template-columns:1fr auto auto;cursor:default">
-              <span><b>${esc(v.n)}</b></span><b style="margin-right:6px">${rs(v.p)}</b>
+              <span><b>${esc(v.n)}</b>${v.was ? `<span class="spbadge" style="margin-left:6px">${I("flame", "xs")} Special</span>` : ""}</span><b style="margin-right:6px">${rs(v.p)}${v.was ? ` <s class="muted" style="font-weight:600;font-size:12px">${rs(v.was)}</s>` : ""}</b>
               ${sizeQty(it.id, i) ? `<div class="qty"><button data-a="szdec" data-v="${i}">−</button><span>${sizeQty(it.id, i)}</span><button data-a="szinc" data-v="${i}">+</button></div>`
                 : `<button class="btn soft sm" data-a="szinc" data-v="${i}">Add</button>`}</div>`).join(""); };
           fill();
@@ -365,6 +383,7 @@
         veg: b => { veg = !veg; b.setAttribute("aria-pressed", veg); $("[data-menu]", el).innerHTML = menuHTML(); haptic(); },
         jump: b => { const s = $(`.msec[data-sec="${b.dataset.sec}"]`, el); if (s) sc.scrollTo({ top: s.offsetTop - 110, behavior: "smooth" }); },
         cart: () => openCart(),
+        special: b => { const d = b.dataset.item && $(`[data-item="${b.dataset.item}"]`, el); if (d) { sc.scrollTo({ top: d.offsetTop - 140, behavior: "smooth" }); d.classList.remove("flash"); void d.offsetWidth; d.classList.add("flash"); } },
       });
       if (opts.item) setTimeout(() => { const it = $(`[data-item="${opts.item}"]`, el); if (it) { sc.scrollTo({ top: it.offsetTop - 140, behavior: "smooth" }); it.classList.add("flash"); } }, 350);
     });
