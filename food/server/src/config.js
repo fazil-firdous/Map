@@ -27,7 +27,7 @@ module.exports = {
   // Optional demo login for Play Store reviewers: fixed code, can browse and check out, but its orders never reach a restaurant.
   review: { phone: env.REVIEW_PHONE || "", code: env.REVIEW_CODE || "" },
   // Login SMS cost money: at most this many a day in total (stops anyone draining the SMS balance), and per network per hour.
-  smsDailyMax: Number(env.SMS_DAILY_MAX || 400),
+  smsDailyMax: Number(env.SMS_DAILY_MAX || 1000),
   smsPerIpHour: Number(env.SMS_PER_IP_HOUR || 25),
   // Kulgam district (orders only within this box)
   bbox: { minLat: 33.52, maxLat: 33.75, minLon: 74.80, maxLon: 75.15 },
