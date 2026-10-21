@@ -1,5 +1,5 @@
-// Seeds the test restaurant (KF-TEST) with a full menu and banners. Safe to run again: it doesn't duplicate anything.
-// Photos marked "asset:" ship inside the app; restaurants' own photos are uploads.
+// Platform settings (support number, Kezia's UPI ID). With SEED_TEST_RESTAURANT=1 (local tests only) it also adds the
+// test restaurant (KF-TEST) with a menu and banners. Safe to run again: it doesn't duplicate anything.
 const db = require("../src/db");
 
 const MENU = [
@@ -15,7 +15,7 @@ const MENU = [
   ["Sides & Drinks", [["Peri Peri Fries", 119, true, "Large", "asset:fries.jpg"], ["Cold Coffee", 129, true, "With ice cream", "asset:coffee.jpg"], ["Chocolate Cake Slice", 99, true, "", "asset:cake.jpg"]]],
 ];
 
-(async () => {
+async function testRestaurant() {
   await db.q(`INSERT INTO restaurants (id, name, phone, area, address, lat, lon, cuisines, photo, status, is_open, upi_id, upi_name, cod, prep_min)
     VALUES ('KF-TEST', 'Kezia''s Test Kitchen', $1, 'Kulgam town', 'Near Ghanta Ghar, Kulgam', 33.6463, 75.0193, 'Pizza · Wazwan · Chinese · Biryani', 'asset:pizza-3.jpg',
             'test', true, 'kezias.test@upi', 'Kezia''s Test Kitchen', true, 20)
@@ -29,12 +29,16 @@ const MENU = [
           [s.id, name, price, veg, desc || null, photo, !!best, j]);
     }
   }
-  const b = await db.one("SELECT count(*)::int n FROM banners");
+  const b = await db.one("SELECT count(*)::int n FROM banners WHERE restaurant_id = 'KF-TEST'");
   if (!b.n) {
     await db.q(`INSERT INTO banners (kicker, title, subtitle, photo, restaurant_id, sort) VALUES
       ('WAZWAN NIGHTS', 'Kezia''s Test Kitchen', 'Trami for 2 from ₹1,199', 'asset:banner-wazwan.jpg', 'KF-TEST', 1),
       ('PIZZA TIME', 'Hot pizza in 30 min', 'From ₹199 · Kulgam town', 'asset:banner-pizza.jpg', 'KF-TEST', 2)`);
   }
+}
+
+(async () => {
+  if (process.env.SEED_TEST_RESTAURANT === "1") await testRestaurant();
   // Contact number shown in the app's Help: the owner's number unless one is already set
   const support = process.env.SUPPORT_PHONE || process.env.OWNER_PHONE;
   if (support) await db.q("UPDATE settings SET value = $1 WHERE key = 'support_phone' AND value = '\"\"'", [JSON.stringify("+91" + support.replace(/\D/g, "").slice(-10))]);

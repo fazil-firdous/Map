@@ -1,0 +1,857 @@
+{
+ "id": "panda-cafe",
+ "name": "Panda Cafe",
+ "phone": "+919541153829",
+ "area": "Degree College Road, Kulgam",
+ "address": "Opposite Govt Degree College, Degree College Road, Kulgam",
+ "lat": 33.6473,
+ "lon": 75.0102,
+ "cuisines": "Pizza · Momos · Chinese · Burgers · Shakes",
+ "photo": "/img/lib/pz-chicken-4-wide.jpg",
+ "commission_pct": 2,
+ "cod": true,
+ "prep_min": 25,
+ "note": "Menu from the restaurant's Instagram menu post. Prices are what the restaurant receives. Check with the owner: Kurkure Momos (marked non-veg; menu doesn't say); Afghani Momos (marked non-veg; menu doesn't say)",
+ "sections": [
+  {
+   "name": "Pizza Non-Veg",
+   "items": [
+    {
+     "name": "Roast Chicken Pizza",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Regular",
+       "net": 220
+      },
+      {
+       "n": "Medium",
+       "net": 360
+      },
+      {
+       "n": "Large",
+       "net": 500
+      }
+     ],
+     "description": "Non spicy roasted chicken",
+     "photo": null
+    },
+    {
+     "name": "Chicken Blast Pizza",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Regular",
+       "net": 220
+      },
+      {
+       "n": "Medium",
+       "net": 380
+      },
+      {
+       "n": "Large",
+       "net": 500
+      }
+     ],
+     "description": "Spicy hot chicken",
+     "photo": null
+    },
+    {
+     "name": "Butter Chicken Pizza",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Regular",
+       "net": 220
+      },
+      {
+       "n": "Medium",
+       "net": 450
+      },
+      {
+       "n": "Large",
+       "net": 560
+      }
+     ],
+     "description": "Chicken and coriander",
+     "photo": "/img/lib/pz-chicken-4.jpg"
+    },
+    {
+     "name": "Chicken & Corn Pizza",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Regular",
+       "net": 240
+      },
+      {
+       "n": "Medium",
+       "net": 440
+      },
+      {
+       "n": "Large",
+       "net": 560
+      }
+     ],
+     "description": "Chicken and corn",
+     "photo": null
+    },
+    {
+     "name": "Chilli Chicken Pizza",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Regular",
+       "net": 240
+      },
+      {
+       "n": "Medium",
+       "net": 400
+      },
+      {
+       "n": "Large",
+       "net": 550
+      }
+     ],
+     "description": "Chilli sauce chicken",
+     "photo": "/img/lib/pz-chicken-5.jpg"
+    },
+    {
+     "name": "Mexican Bite Pizza",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Regular",
+       "net": 280
+      },
+      {
+       "n": "Medium",
+       "net": 460
+      },
+      {
+       "n": "Large",
+       "net": 550
+      }
+     ],
+     "description": "Chicken salami, mushroom, capsicum",
+     "photo": "/img/lib/pz-chicken-7.jpg"
+    },
+    {
+     "name": "Schezwan Chicken Pizza",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Regular",
+       "net": 250
+      },
+      {
+       "n": "Medium",
+       "net": 400
+      },
+      {
+       "n": "Large",
+       "net": 550
+      }
+     ],
+     "description": "Hot chicken and onion",
+     "photo": null
+    },
+    {
+     "name": "Panda Special Pizza",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Regular",
+       "net": 300
+      },
+      {
+       "n": "Medium",
+       "net": 480
+      },
+      {
+       "n": "Large",
+       "net": 560
+      }
+     ],
+     "description": "Hot chicken, mushroom, black olives, tomato, capsicum, oregano & sausage",
+     "photo": null
+    }
+   ]
+  },
+  {
+   "name": "Pizza Veg",
+   "items": [
+    {
+     "name": "Simple Veg Pizza",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Regular",
+       "net": 180
+      },
+      {
+       "n": "Medium",
+       "net": 280
+      },
+      {
+       "n": "Large",
+       "net": 400
+      }
+     ],
+     "description": "Tomato & onion",
+     "photo": null
+    },
+    {
+     "name": "Schezwan Veg Pizza",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Regular",
+       "net": 200
+      },
+      {
+       "n": "Medium",
+       "net": 300
+      },
+      {
+       "n": "Large",
+       "net": 400
+      }
+     ],
+     "description": "Corn, capsicum & mushroom",
+     "photo": null
+    },
+    {
+     "name": "Cheese & Corn Pizza",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Regular",
+       "net": 220
+      },
+      {
+       "n": "Medium",
+       "net": 320
+      },
+      {
+       "n": "Large",
+       "net": 420
+      }
+     ],
+     "description": "Corn and blended cheese",
+     "photo": null
+    },
+    {
+     "name": "Mix Veg Pizza",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Regular",
+       "net": 200
+      },
+      {
+       "n": "Medium",
+       "net": 300
+      },
+      {
+       "n": "Large",
+       "net": 400
+      }
+     ],
+     "description": "Onion, mushroom & capsicum",
+     "photo": null
+    },
+    {
+     "name": "Cheese Burst Pizza",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Regular",
+       "net": 200
+      },
+      {
+       "n": "Medium",
+       "net": 350
+      },
+      {
+       "n": "Large",
+       "net": 500
+      }
+     ],
+     "description": "Double cheese",
+     "photo": null
+    },
+    {
+     "name": "Margherita Pizza",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Regular",
+       "net": 200
+      },
+      {
+       "n": "Medium",
+       "net": 280
+      },
+      {
+       "n": "Large",
+       "net": 400
+      }
+     ],
+     "description": "Onion, mushroom & capsicum",
+     "photo": "/img/lib/pz-cheese-3.jpg"
+    },
+    {
+     "name": "Farmhouse Pizza",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Regular",
+       "net": 300
+      },
+      {
+       "n": "Medium",
+       "net": 400
+      },
+      {
+       "n": "Large",
+       "net": 500
+      }
+     ],
+     "description": "Black olives, corn, mushroom, capsicum & onion",
+     "photo": null
+    }
+   ]
+  },
+  {
+   "name": "Momos",
+   "items": [
+    {
+     "name": "Steamed Chicken (Momos)",
+     "veg": false,
+     "net": 100,
+     "photo": "/img/lib/momos-3.jpg"
+    },
+    {
+     "name": "Fried Chicken Momos",
+     "veg": false,
+     "net": 100,
+     "photo": null
+    },
+    {
+     "name": "Chilli Chicken Momos",
+     "veg": false,
+     "net": 150,
+     "photo": null
+    },
+    {
+     "name": "Kurkure Momos",
+     "veg": false,
+     "net": 150,
+     "photo": null
+    },
+    {
+     "name": "Schezwan Chicken Momos",
+     "veg": false,
+     "net": 150,
+     "photo": null
+    },
+    {
+     "name": "Afghani Momos",
+     "veg": false,
+     "net": 180,
+     "photo": null
+    }
+   ]
+  },
+  {
+   "name": "Rice",
+   "items": [
+    {
+     "name": "Chicken Biryani",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 120
+      },
+      {
+       "n": "Full",
+       "net": 220
+      }
+     ],
+     "photo": "/img/lib/biryani-3.jpg"
+    },
+    {
+     "name": "Chicken Fried Rice",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 140
+      },
+      {
+       "n": "Full",
+       "net": 240
+      }
+     ],
+     "photo": null
+    },
+    {
+     "name": "Veg. Fried Rice",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 120
+      },
+      {
+       "n": "Full",
+       "net": 220
+      }
+     ],
+     "photo": null
+    },
+    {
+     "name": "Schezwan Chicken Fried Rice",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 150
+      },
+      {
+       "n": "Full",
+       "net": 280
+      }
+     ],
+     "photo": null
+    },
+    {
+     "name": "Schezwan Veg Fried Rice",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 140
+      },
+      {
+       "n": "Full",
+       "net": 260
+      }
+     ],
+     "photo": null
+    }
+   ]
+  },
+  {
+   "name": "Rolls",
+   "items": [
+    {
+     "name": "Crispy Chicken Roll",
+     "veg": false,
+     "net": 130,
+     "photo": null
+    },
+    {
+     "name": "Chicken Roll",
+     "veg": false,
+     "net": 150,
+     "photo": "/img/lib/shawarma-2.jpg"
+    },
+    {
+     "name": "Cheesy Chicken Roll",
+     "veg": false,
+     "net": 170,
+     "photo": null
+    }
+   ]
+  },
+  {
+   "name": "Chowmin",
+   "items": [
+    {
+     "name": "Veg Chowmin",
+     "veg": true,
+     "net": 120,
+     "photo": null
+    },
+    {
+     "name": "Chicken Chowmin",
+     "veg": false,
+     "net": 150,
+     "photo": null
+    },
+    {
+     "name": "Veg Schezwan Chowmin",
+     "veg": true,
+     "net": 150,
+     "photo": null
+    },
+    {
+     "name": "Chicken Schezwan Chowmin",
+     "veg": false,
+     "net": 170,
+     "photo": null
+    }
+   ]
+  },
+  {
+   "name": "Chicken Special",
+   "items": [
+    {
+     "name": "Chicken Kanti",
+     "veg": false,
+     "variants": [
+      {
+       "n": "8 pcs",
+       "net": 260
+      },
+      {
+       "n": "16 pcs",
+       "net": 500
+      }
+     ],
+     "photo": null
+    },
+    {
+     "name": "Chilli Chicken",
+     "veg": false,
+     "variants": [
+      {
+       "n": "8 pcs",
+       "net": 300
+      },
+      {
+       "n": "16 pcs",
+       "net": 550
+      }
+     ],
+     "photo": null
+    },
+    {
+     "name": "Schezwan Chicken",
+     "veg": false,
+     "variants": [
+      {
+       "n": "8 pcs",
+       "net": 300
+      },
+      {
+       "n": "16 pcs",
+       "net": 550
+      }
+     ],
+     "photo": null
+    },
+    {
+     "name": "Butter Chicken Boneless",
+     "veg": false,
+     "variants": [
+      {
+       "n": "8 pcs",
+       "net": 340
+      },
+      {
+       "n": "16 pcs",
+       "net": 620
+      }
+     ],
+     "photo": "/img/lib/butterchicken-0.jpg"
+    },
+    {
+     "name": "Tawa Chicken",
+     "veg": false,
+     "variants": [
+      {
+       "n": "8 pcs",
+       "net": 300
+      },
+      {
+       "n": "16 pcs",
+       "net": 580
+      }
+     ],
+     "photo": null
+    }
+   ]
+  },
+  {
+   "name": "Naan",
+   "items": [
+    {
+     "name": "Rumali Roti",
+     "veg": true,
+     "net": 20,
+     "photo": null
+    },
+    {
+     "name": "Kadayi Naan",
+     "veg": true,
+     "net": 40,
+     "photo": null
+    }
+   ]
+  },
+  {
+   "name": "Veg Burgers",
+   "items": [
+    {
+     "name": "Popular Veg Burger",
+     "veg": true,
+     "net": 100,
+     "photo": null
+    },
+    {
+     "name": "Cheezy Veg Burger",
+     "veg": true,
+     "net": 140,
+     "photo": null
+    }
+   ]
+  },
+  {
+   "name": "Non-Veg Burgers",
+   "items": [
+    {
+     "name": "Chicken Burst",
+     "veg": false,
+     "net": 120,
+     "photo": null
+    },
+    {
+     "name": "Chicken Zinger",
+     "veg": false,
+     "net": 140,
+     "photo": null
+    },
+    {
+     "name": "Mexican Chicken",
+     "veg": false,
+     "net": 150,
+     "photo": null
+    }
+   ]
+  },
+  {
+   "name": "Crispy Chicken Special",
+   "items": [
+    {
+     "name": "Chicken Popcorn",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Regular",
+       "net": 120
+      },
+      {
+       "n": "Medium",
+       "net": 180
+      },
+      {
+       "n": "Large",
+       "net": 260
+      }
+     ],
+     "photo": null
+    },
+    {
+     "name": "Boneless Strips (3 pcs)",
+     "veg": false,
+     "net": 120,
+     "photo": null
+    },
+    {
+     "name": "Boneless Strips (6 pcs)",
+     "veg": false,
+     "net": 240,
+     "photo": null
+    },
+    {
+     "name": "Spicy Boneless Strips (3 pcs)",
+     "veg": false,
+     "net": 140,
+     "photo": null
+    },
+    {
+     "name": "Spicy Boneless Strips (6 pcs)",
+     "veg": false,
+     "net": 280,
+     "photo": null
+    },
+    {
+     "name": "Chicken Nuggets (8 pcs)",
+     "veg": false,
+     "net": 220,
+     "photo": null
+    },
+    {
+     "name": "Spicy Chicken Nuggets (8 pcs)",
+     "veg": false,
+     "net": 240,
+     "photo": null
+    }
+   ]
+  },
+  {
+   "name": "Desserts/Fries",
+   "items": [
+    {
+     "name": "Choco Lava",
+     "veg": true,
+     "net": 80,
+     "photo": "/img/lib/brownie-1.jpg"
+    },
+    {
+     "name": "Chocolate Brownie",
+     "veg": true,
+     "net": 100,
+     "photo": null
+    },
+    {
+     "name": "Chocolate Brownie (with Ice Cream)",
+     "veg": true,
+     "net": 120,
+     "photo": null
+    },
+    {
+     "name": "French Fries",
+     "veg": true,
+     "net": 100,
+     "photo": "/img/lib/fries-3.jpg"
+    },
+    {
+     "name": "Chilli Potato",
+     "veg": true,
+     "net": 120,
+     "photo": null
+    }
+   ]
+  },
+  {
+   "name": "Panda Bucket",
+   "items": [
+    {
+     "name": "Solo Bucket",
+     "veg": false,
+     "net": 420,
+     "description": "Chicken Blast pizza (R), Strips (3 pc), Fries (1), Pepsi (250 ml)",
+     "photo": null
+    },
+    {
+     "name": "Friends Bucket",
+     "veg": false,
+     "net": 740,
+     "description": "Chicken Blast pizza (M), Strips (6 pc), Fries (1), Pepsi (250 ml)",
+     "photo": null
+    },
+    {
+     "name": "Family Bucket",
+     "veg": false,
+     "net": 840,
+     "description": "Chicken Blast pizza (L), Nuggets (1), Fries (1), Pepsi (250 ml)",
+     "photo": null
+    }
+   ]
+  },
+  {
+   "name": "Shakes & Ice Cream",
+   "items": [
+    {
+     "name": "Cold Coffee",
+     "veg": true,
+     "net": 120,
+     "photo": null
+    },
+    {
+     "name": "Vanilla Shake",
+     "veg": true,
+     "net": 120,
+     "photo": null
+    },
+    {
+     "name": "Chocolate Shake",
+     "veg": true,
+     "net": 120,
+     "photo": null
+    },
+    {
+     "name": "Strawberry Shake",
+     "veg": true,
+     "net": 120,
+     "photo": null
+    },
+    {
+     "name": "Oreo Shake",
+     "veg": true,
+     "net": 140,
+     "photo": null
+    },
+    {
+     "name": "KitKat Shake",
+     "veg": true,
+     "net": 140,
+     "photo": null
+    }
+   ]
+  },
+  {
+   "name": "Mojitos",
+   "items": [
+    {
+     "name": "Mint Mojito",
+     "veg": true,
+     "net": 100,
+     "photo": "/img/lib/mojito-0.jpg"
+    },
+    {
+     "name": "Watermelon Mojito",
+     "veg": true,
+     "net": 100,
+     "photo": null
+    },
+    {
+     "name": "Green Apple Mojito",
+     "veg": true,
+     "net": 100,
+     "photo": null
+    },
+    {
+     "name": "Blueberry Mojito",
+     "veg": true,
+     "net": 100,
+     "photo": null
+    },
+    {
+     "name": "Peach Mojito",
+     "veg": true,
+     "net": 100,
+     "photo": null
+    }
+   ]
+  },
+  {
+   "name": "Hot Beverages",
+   "items": [
+    {
+     "name": "Hot Coffee",
+     "veg": true,
+     "net": 50,
+     "photo": null
+    },
+    {
+     "name": "Hazelnut Coffee",
+     "veg": true,
+     "net": 60,
+     "photo": null
+    },
+    {
+     "name": "Chocolate Coffee",
+     "veg": true,
+     "net": 70,
+     "photo": null
+    }
+   ]
+  }
+ ]
+}

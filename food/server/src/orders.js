@@ -8,7 +8,7 @@
 // Customers cancel free before paying, and for a short window after payment is confirmed; then the kitchen starts.
 const db = require("./db");
 const config = require("./config");
-const { needUser, roleAt } = require("./auth");
+const { needUser, roleAt, isReview } = require("./auth");
 const { quote, setting, visible } = require("./catalog");
 const { bad, forbidden, notFound, str } = require("./util");
 
@@ -58,6 +58,7 @@ function routes(app) {
   // ---- Customer ----
   app.post("/v1/orders", { preHandler: needUser, config: { rateLimit: { max: 20, timeWindow: "1 hour" } } }, async (req) => {
     const b = req.body || {};
+    if (isReview(req.user.phone)) throw forbidden("This is a demo account for app review, so orders aren't sent to restaurants");
     const r = await db.one(`SELECT r.* FROM restaurants r WHERE r.id = $1 AND ${visible}`, [b.restaurant_id]);
     if (!r) throw notFound("Restaurant not found");
     const a = b.address_id ? await db.one("SELECT * FROM addresses WHERE id = $1 AND user_id = $2", [Number(b.address_id), req.user.id]) : null;

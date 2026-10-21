@@ -23,6 +23,8 @@
   .btn.ghost { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1px var(--line), 0 1px 3px rgb(0 0 0 / .05); }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
   .note { font-size: 12.5px; color: var(--ink3); margin-top: 8px; text-align: center; }
+  .play { display: flex; gap: 12px; align-items: flex-start; margin: 16px 0 4px; padding: 14px 16px; border-radius: 16px; background: #fff7e0; box-shadow: inset 0 0 0 1px #f3dfa2; font-size: 14px; color: #5c4a12; }
+  .play i { font-style: normal; font-size: 20px; line-height: 1.2; } .play b { display: block; color: #3d300a; }
   h2 { font-size: 19px; margin: 28px 0 12px; letter-spacing: -.01em; }
   .shots { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x mandatory; }
   .shots img { height: 420px; border-radius: 18px; box-shadow: 0 10px 24px -12px rgb(0 0 0 / .35); scroll-snap-align: start; flex: none; background: #eee; }
@@ -48,6 +50,7 @@
   <a class="btn" id="install" href="/kezias-food.apk">⬇ Install the app</a>
   <div class="two"><a class="btn ghost" href="/app/">Open in browser</a><button class="btn ghost" id="iphone"> iPhone</button></div>
   <p class="note" id="hint">Android: download, open the file and allow "Install unknown apps" once.</p>
+  <div class="play"><i>⏳</i><span><b>Coming soon to the Play Store</b>Kezia's Food isn't on the Play Store yet because of a few issues on our side. It will be there soon. Until then, install it from here: it's the same app, and it updates the same way.</span></div>
 
   <h2>Screenshots</h2>
   <div class="shots"><img src="/img/shots/1.jpg" alt="Home" loading="lazy"><img src="/img/shots/2.jpg" alt="Menu" loading="lazy"><img src="/img/shots/3.jpg" alt="Pay by UPI" loading="lazy"><img src="/img/shots/4.jpg" alt="Live tracking" loading="lazy"><img src="/img/shots/5.jpg" alt="Restaurant mode" loading="lazy"></div>

@@ -19,7 +19,7 @@
     {
      "name": "Roast Chicken",
      "veg": false,
-     "photo": "/img/r/chunk-city/pizza-2.jpg",
+     "photo": "/img/r/chunk-city/roast-chicken.jpg",
      "variants": [
       {
        "n": "Regular",
@@ -43,7 +43,7 @@
     {
      "name": "Chicken Blast",
      "veg": false,
-     "photo": "/img/r/chunk-city/pizza-4.jpg",
+     "photo": "/img/r/chunk-city/chicken-blast.jpg",
      "variants": [
       {
        "n": "Regular",
@@ -68,7 +68,7 @@
     {
      "name": "Chicken Tikka Pizza",
      "veg": false,
-     "photo": "/img/r/chunk-city/pizza-5.jpg",
+     "photo": "/img/lib/pz-tikka-2.jpg",
      "variants": [
       {
        "n": "Regular",
@@ -92,7 +92,7 @@
     {
      "name": "Chicken Salami Pizza",
      "veg": false,
-     "photo": "/img/r/chunk-city/pizza-salami.jpg",
+     "photo": "/img/r/chunk-city/chicken-salami-pizza.jpg",
      "variants": [
       {
        "n": "Regular",
@@ -116,7 +116,7 @@
     {
      "name": "Chicken Lovers",
      "veg": false,
-     "photo": "/img/r/chunk-city/pizza-4.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -140,7 +140,7 @@
     {
      "name": "Chicken Peri Peri",
      "veg": false,
-     "photo": "/img/r/chunk-city/pizza-6.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -164,7 +164,7 @@
     {
      "name": "Butter Chicken Pizza",
      "veg": false,
-     "photo": "/img/r/chunk-city/pizza-2.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -188,7 +188,7 @@
     {
      "name": "Kid's Special Chicken Pizza",
      "veg": false,
-     "photo": "asset:pizza-4.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -212,7 +212,7 @@
     {
      "name": "Dry Fruit Lovers (Chicken)",
      "veg": false,
-     "photo": "asset:pizza-1.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -236,7 +236,7 @@
     {
      "name": "Chicken & Corn Pizza",
      "veg": false,
-     "photo": "/img/r/chunk-city/pizza-corn.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -260,7 +260,7 @@
     {
      "name": "Mutton Kabab Pizza",
      "veg": false,
-     "photo": "/img/r/chunk-city/pizza-5.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -284,7 +284,7 @@
     {
      "name": "Mexican Bite",
      "veg": false,
-     "photo": "/img/r/chunk-city/pizza-6.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -308,7 +308,7 @@
     {
      "name": "Chunk City Special Pizza",
      "veg": false,
-     "photo": "/img/r/chunk-city/pizza-salami.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -338,7 +338,7 @@
     {
      "name": "Plain Cheese",
      "veg": true,
-     "photo": "/img/r/chunk-city/pizza-7.jpg",
+     "photo": "/img/r/chunk-city/plain-cheese.jpg",
      "variants": [
       {
        "n": "Regular",
@@ -362,7 +362,7 @@
     {
      "name": "Paneer Pizza",
      "veg": true,
-     "photo": "asset:pizza-4.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -386,7 +386,7 @@
     {
      "name": "Veg Blast",
      "veg": true,
-     "photo": "asset:pizza-1.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -410,7 +410,7 @@
     {
      "name": "Margherita",
      "veg": true,
-     "photo": "/img/r/chunk-city/pizza-7.jpg",
+     "photo": "/img/lib/pz-cheese-2.jpg",
      "variants": [
       {
        "n": "Regular",
@@ -434,7 +434,7 @@
     {
      "name": "Cheese & Corn",
      "veg": true,
-     "photo": "asset:pizza-3.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -458,7 +458,7 @@
     {
      "name": "Mix Veg Pizza",
      "veg": true,
-     "photo": "asset:pizza-4.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -482,7 +482,7 @@
     {
      "name": "Cheese Burst Pizza",
      "veg": true,
-     "photo": "/img/r/chunk-city/pizza-8.jpg",
+     "photo": "/img/r/chunk-city/cheese-burst-pizza.jpg",
      "variants": [
       {
        "n": "Regular",
@@ -506,7 +506,7 @@
     {
      "name": "Nirvana Pizza",
      "veg": true,
-     "photo": "asset:pizza-2.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -530,7 +530,7 @@
     {
      "name": "Dry Fruit Lovers (Veg)",
      "veg": true,
-     "photo": "asset:pizza-3.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -554,7 +554,7 @@
     {
      "name": "Country Feast Pizza",
      "veg": true,
-     "photo": "asset:pizza-4.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -578,7 +578,7 @@
     {
      "name": "Premium Veg Pizza",
      "veg": true,
-     "photo": "asset:pizza-1.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -602,7 +602,7 @@
     {
      "name": "Chunk City Special (Veg)",
      "veg": true,
-     "photo": "asset:pizza-2.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -631,7 +631,7 @@
     {
      "name": "Extra Cheese",
      "veg": true,
-     "photo": "/img/r/chunk-city/pizza-8.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -655,7 +655,7 @@
     {
      "name": "Chicken Salami",
      "veg": false,
-     "photo": "/img/r/chunk-city/pizza-salami.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -679,7 +679,7 @@
     {
      "name": "Exotic Toppings",
      "veg": true,
-     "photo": "asset:pizza-3.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -703,7 +703,7 @@
     {
      "name": "Extra Veg Toppings",
      "veg": true,
-     "photo": "asset:pizza-3.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Regular",
@@ -732,44 +732,44 @@
     {
      "name": "Chicken Patti Burger",
      "veg": false,
-     "photo": "asset:burger.jpg",
+     "photo": null,
      "net": 100
     },
     {
      "name": "Zinger Burger",
      "veg": false,
-     "photo": "asset:burger-2.jpg",
+     "photo": null,
      "net": 120,
      "bestseller": true
     },
     {
      "name": "Zinger Cheese Burger",
      "veg": false,
-     "photo": "asset:burger-2.jpg",
+     "photo": null,
      "net": 150
     },
     {
      "name": "Big Daddy Burger",
      "veg": false,
-     "photo": "asset:burger.jpg",
+     "photo": null,
      "net": 180
     },
     {
      "name": "Veg Patti Burger",
      "veg": true,
-     "photo": "asset:burger.jpg",
+     "photo": null,
      "net": 100
     },
     {
      "name": "Crispy Paneer Burger",
      "veg": true,
-     "photo": "asset:burger-2.jpg",
+     "photo": null,
      "net": 120
     },
     {
      "name": "Veg Cheesy Burger",
      "veg": true,
-     "photo": "asset:burger.jpg",
+     "photo": null,
      "net": 150
     }
    ]
@@ -780,38 +780,38 @@
     {
      "name": "French Fries",
      "veg": true,
-     "photo": "asset:fries.jpg",
+     "photo": "/img/lib/fries-1.jpg",
      "net": 100
     },
     {
      "name": "Cheesy Fries",
      "veg": true,
-     "photo": "asset:fries-2.jpg",
+     "photo": null,
      "net": 120
     },
     {
      "name": "Crispy Fried Fish (8 pcs)",
      "veg": false,
-     "photo": "asset:fried-chicken.jpg",
+     "photo": null,
      "net": 200
     },
     {
      "name": "Crispy Fried Chicken (8 pcs)",
      "veg": false,
-     "photo": "asset:fried-chicken.jpg",
+     "photo": null,
      "net": 220,
      "bestseller": true
     },
     {
      "name": "Chicken Popcorn",
      "veg": false,
-     "photo": "asset:fried-chicken.jpg",
+     "photo": null,
      "net": 149
     },
     {
      "name": "Chicken Boneless Strips (8 pcs)",
      "veg": false,
-     "photo": "asset:fried-chicken.jpg",
+     "photo": null,
      "net": 220
     }
    ]
@@ -822,31 +822,31 @@
     {
      "name": "Alfredo Veg Pasta",
      "veg": true,
-     "photo": "asset:pasta.jpg",
+     "photo": "/img/lib/pasta-3.jpg",
      "net": 160
     },
     {
      "name": "Alfredo Chicken Pasta",
      "veg": false,
-     "photo": "asset:pasta.jpg",
+     "photo": "/img/lib/pasta-1.jpg",
      "net": 200
     },
     {
      "name": "Red Arrabbiata Veg",
      "veg": true,
-     "photo": "asset:pasta.jpg",
+     "photo": null,
      "net": 180
     },
     {
      "name": "Red Arrabbiata Chicken",
      "veg": false,
-     "photo": "asset:pasta.jpg",
+     "photo": null,
      "net": 220
     },
     {
      "name": "Pink Sauce Pasta",
      "veg": true,
-     "photo": "asset:pasta.jpg",
+     "photo": "/img/lib/pasta-2.jpg",
      "net": 230
     }
    ]
@@ -857,21 +857,21 @@
     {
      "name": "Kashmiri Zafrani Harisa (Mutton)",
      "veg": false,
-     "photo": "/img/r/chunk-city/harisa.jpg",
+     "photo": "/img/r/chunk-city/kashmiri-zafrani-harisa-mutton.jpg",
      "net": 200,
      "description": "Per plate · winter season"
     },
     {
      "name": "Kashmiri Zafrani Harisa (1 kg)",
      "veg": false,
-     "photo": "/img/r/chunk-city/harisa.jpg",
+     "photo": "/img/r/chunk-city/kashmiri-zafrani-harisa-mutton.jpg",
      "net": 1100,
      "description": "Winter season"
     },
     {
      "name": "Kashmiri Wazwan Pulao",
      "veg": false,
-     "photo": "asset:biryani-2.jpg",
+     "photo": null,
      "net": 350,
      "description": "Per plate",
      "bestseller": true
@@ -879,7 +879,7 @@
     {
      "name": "Kashmiri Dry Fruit Pulao",
      "veg": true,
-     "photo": "asset:rice.jpg",
+     "photo": null,
      "net": 320,
      "description": "Per plate"
     }
@@ -891,7 +891,7 @@
     {
      "name": "Veg Biryani",
      "veg": true,
-     "photo": "asset:biryani-2.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -906,7 +906,7 @@
     {
      "name": "Chicken Biryani",
      "veg": false,
-     "photo": "/img/r/chunk-city/biryani.jpg",
+     "photo": "/img/r/chunk-city/chicken-biryani.jpg",
      "variants": [
       {
        "n": "Half",
@@ -921,7 +921,7 @@
     {
      "name": "Chunk City's Special Biryani",
      "veg": false,
-     "photo": "/img/r/chunk-city/biryani.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -937,7 +937,7 @@
     {
      "name": "Chicken Kanti",
      "veg": false,
-     "photo": "asset:kebab.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half (8 pcs)",
@@ -952,7 +952,7 @@
     {
      "name": "Butter Chicken (Boneless)",
      "veg": false,
-     "photo": "/img/r/chunk-city/butter-chicken.jpg",
+     "photo": "/img/r/chunk-city/butter-chicken-boneless.jpg",
      "variants": [
       {
        "n": "Half",
@@ -967,7 +967,7 @@
     {
      "name": "Butter Chicken (With Bone)",
      "veg": false,
-     "photo": "/img/r/chunk-city/curry.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -982,7 +982,7 @@
     {
      "name": "Fried Chicken (Dry Fry)",
      "veg": false,
-     "photo": "asset:fried-chicken.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -997,7 +997,7 @@
     {
      "name": "Fried Chicken (With Onion)",
      "veg": false,
-     "photo": "asset:fried-chicken.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1012,7 +1012,7 @@
     {
      "name": "Chicken Kabab Kanti",
      "veg": false,
-     "photo": "asset:kebab.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1027,7 +1027,7 @@
     {
      "name": "Mutton Kabab Kanti",
      "veg": false,
-     "photo": "asset:kebab.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1042,7 +1042,7 @@
     {
      "name": "Kadai Chicken (Boneless)",
      "veg": false,
-     "photo": "/img/r/chunk-city/curry-2.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1057,7 +1057,7 @@
     {
      "name": "Kadai Chicken (With Bone)",
      "veg": false,
-     "photo": "asset:butter-chicken.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1072,7 +1072,7 @@
     {
      "name": "Masala Chicken",
      "veg": false,
-     "photo": "/img/r/chunk-city/curry.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1087,7 +1087,7 @@
     {
      "name": "Chicken Mughlai",
      "veg": false,
-     "photo": "/img/r/chunk-city/curry-2.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1102,7 +1102,7 @@
     {
      "name": "Chicken Curry",
      "veg": false,
-     "photo": "/img/r/chunk-city/curry-2.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1117,7 +1117,7 @@
     {
      "name": "Afghani Chicken (Gravy)",
      "veg": false,
-     "photo": "/img/r/chunk-city/butter-chicken.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1132,7 +1132,7 @@
     {
      "name": "Special Kashmiri Pulao",
      "veg": false,
-     "photo": "asset:biryani-2.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1153,7 +1153,7 @@
     {
      "name": "Fried Boneless Fish",
      "veg": false,
-     "photo": "asset:fried-chicken.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Plate",
@@ -1168,13 +1168,13 @@
     {
      "name": "Crispy Fish (8 pcs)",
      "veg": false,
-     "photo": "asset:fried-chicken.jpg",
+     "photo": null,
      "net": 230
     },
     {
      "name": "Trout Fish",
      "veg": false,
-     "photo": "asset:fried-chicken.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1189,7 +1189,7 @@
     {
      "name": "Fish Kanti",
      "veg": false,
-     "photo": "asset:fried-chicken.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1204,7 +1204,7 @@
     {
      "name": "Fish Curry",
      "veg": false,
-     "photo": "asset:butter-chicken.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1224,7 +1224,7 @@
     {
      "name": "Tandoori Chicken",
      "veg": false,
-     "photo": "/img/r/chunk-city/tandoori.jpg",
+     "photo": "/img/r/chunk-city/tandoori-chicken.jpg",
      "variants": [
       {
        "n": "Half",
@@ -1240,7 +1240,7 @@
     {
      "name": "Afghani Chicken",
      "veg": false,
-     "photo": "/img/r/chunk-city/tandoori.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1255,7 +1255,7 @@
     {
      "name": "Chicken Tikka",
      "veg": false,
-     "photo": "/img/r/chunk-city/tikka.jpg",
+     "photo": "/img/r/chunk-city/chicken-tikka.jpg",
      "variants": [
       {
        "n": "8 pcs",
@@ -1270,14 +1270,14 @@
     {
      "name": "Tandoori Chicken (Whole)",
      "veg": false,
-     "photo": "/img/r/chunk-city/tandoori.jpg",
+     "photo": "/img/lib/tandoori-4.jpg",
      "net": 650,
      "description": "Pre-order"
     },
     {
      "name": "Tandoori Raan",
      "veg": false,
-     "photo": "asset:tandoori.jpg",
+     "photo": null,
      "net": 2999,
      "description": "Pre-order"
     }
@@ -1289,7 +1289,7 @@
     {
      "name": "Veg Fried Rice",
      "veg": true,
-     "photo": "asset:fried-rice.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1304,7 +1304,7 @@
     {
      "name": "Zeera Fried Rice",
      "veg": true,
-     "photo": "asset:rice.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1319,7 +1319,7 @@
     {
      "name": "Chicken Fried Rice",
      "veg": false,
-     "photo": "asset:fried-rice.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1334,7 +1334,7 @@
     {
      "name": "Schezwan Chicken Fried Rice",
      "veg": false,
-     "photo": "asset:fried-rice.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1349,7 +1349,7 @@
     {
      "name": "Egg Fried Rice",
      "veg": false,
-     "photo": "asset:fried-rice.jpg",
+     "photo": "/img/lib/friedrice-5.jpg",
      "variants": [
       {
        "n": "Half",
@@ -1364,7 +1364,7 @@
     {
      "name": "Chilly Chicken",
      "veg": false,
-     "photo": "asset:chilli-chicken.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "8 pcs",
@@ -1379,7 +1379,7 @@
     {
      "name": "Chicken Manchurian",
      "veg": false,
-     "photo": "asset:chilli-chicken.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "8 pcs",
@@ -1394,7 +1394,7 @@
     {
      "name": "Potato Manchurian",
      "veg": true,
-     "photo": "asset:chilli-paneer.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "Half",
@@ -1409,7 +1409,7 @@
     {
      "name": "Garlic Chicken",
      "veg": false,
-     "photo": "asset:chilli-chicken.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "8 pcs",
@@ -1424,7 +1424,7 @@
     {
      "name": "Lemon Chicken",
      "veg": false,
-     "photo": "asset:chilli-chicken.jpg",
+     "photo": null,
      "variants": [
       {
        "n": "8 pcs",
@@ -1444,49 +1444,49 @@
     {
      "name": "Veg Chowmein",
      "veg": true,
-     "photo": "asset:noodles.jpg",
+     "photo": null,
      "net": 120
     },
     {
      "name": "Egg Chowmein",
      "veg": false,
-     "photo": "asset:noodles-2.jpg",
+     "photo": null,
      "net": 130
     },
     {
      "name": "Chicken Chowmein",
      "veg": false,
-     "photo": "asset:noodles-2.jpg",
+     "photo": null,
      "net": 160
     },
     {
      "name": "Schezwan Chicken Chowmein",
      "veg": false,
-     "photo": "asset:noodles-2.jpg",
+     "photo": null,
      "net": 180
     },
     {
      "name": "Steamed Momos",
      "veg": false,
-     "photo": "/img/r/chunk-city/momos.jpg",
+     "photo": "/img/r/chunk-city/steamed-momos.jpg",
      "net": 100
     },
     {
      "name": "Fried Momos",
      "veg": false,
-     "photo": "/img/r/chunk-city/momos-fried.jpg",
+     "photo": null,
      "net": 120
     },
     {
      "name": "Schezwan Momos",
      "veg": false,
-     "photo": "/img/r/chunk-city/momos-chutney.jpg",
+     "photo": null,
      "net": 160
     },
     {
      "name": "Malai Momos",
      "veg": false,
-     "photo": "/img/r/chunk-city/momos-malai.jpg",
+     "photo": null,
      "net": 200
     }
    ]
@@ -1497,38 +1497,38 @@
     {
      "name": "Chicken Shawarma",
      "veg": false,
-     "photo": "asset:rolls.jpg",
+     "photo": "/img/lib/shawarma-1.jpg",
      "net": 190,
      "bestseller": true
     },
     {
      "name": "Chicken Tikka Roll",
      "veg": false,
-     "photo": "/img/r/chunk-city/tikka-2.jpg",
+     "photo": null,
      "net": 170
     },
     {
      "name": "Kathi Roll",
      "veg": false,
-     "photo": "asset:rolls.jpg",
+     "photo": null,
      "net": 170
     },
     {
      "name": "Mutton Kabab Jumbo Roll",
      "veg": false,
-     "photo": "asset:rolls.jpg",
+     "photo": null,
      "net": 220
     },
     {
      "name": "Veggie Wrap",
      "veg": true,
-     "photo": "asset:wrap.jpg",
+     "photo": null,
      "net": 90
     },
     {
      "name": "Chicken Twist",
      "veg": false,
-     "photo": "asset:wrap.jpg",
+     "photo": "/img/lib/wrap-5.jpg",
      "net": 120
     }
    ]
@@ -1539,19 +1539,19 @@
     {
      "name": "Clear Soup (Veg / Chicken)",
      "veg": false,
-     "photo": "asset:soup.jpg",
+     "photo": "/img/lib/soup-3.jpg",
      "net": 80
     },
     {
      "name": "Chicken Sweet Corn Soup",
      "veg": false,
-     "photo": "asset:soup.jpg",
+     "photo": null,
      "net": 90
     },
     {
      "name": "Chicken Hot & Sour Soup",
      "veg": false,
-     "photo": "asset:soup.jpg",
+     "photo": null,
      "net": 90
     }
    ]
@@ -1562,37 +1562,37 @@
     {
      "name": "Plain Naan",
      "veg": true,
-     "photo": "asset:naan.jpg",
+     "photo": null,
      "net": 50
     },
     {
      "name": "Butter Naan",
      "veg": true,
-     "photo": "asset:naan.jpg",
+     "photo": null,
      "net": 70
     },
     {
      "name": "Garlic Naan",
      "veg": true,
-     "photo": "asset:naan.jpg",
+     "photo": null,
      "net": 70
     },
     {
      "name": "Tandoori Roti",
      "veg": true,
-     "photo": "asset:naan.jpg",
+     "photo": null,
      "net": 30
     },
     {
      "name": "Green Salad",
      "veg": true,
-     "photo": "/img/r/chunk-city/salad.jpg",
+     "photo": "/img/r/chunk-city/green-salad.jpg",
      "net": 50
     },
     {
      "name": "Finger Salad",
      "veg": true,
-     "photo": "/img/r/chunk-city/salad.jpg",
+     "photo": null,
      "net": 70
     }
    ]
@@ -1602,6 +1602,6 @@
   "kicker": "NOW ON KEZIA",
   "title": "Chunk City",
   "subtitle": "Pizza, momos & Kashmiri harisa · Ghanta Ghar",
-  "photo": "/img/r/chunk-city/pizza-salami.jpg"
+  "photo": "/img/r/chunk-city/banner.jpg"
  }
 }

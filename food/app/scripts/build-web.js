@@ -8,6 +8,7 @@ const cp = (from, to) => { fs.mkdirSync(path.dirname(to), { recursive: true }); 
 cp(path.join(root, "node_modules/leaflet/dist/leaflet.js"), path.join(www, "vendor/leaflet/leaflet.js"));
 cp(path.join(root, "node_modules/leaflet/dist/leaflet.css"), path.join(www, "vendor/leaflet/leaflet.css"));
 cp(path.join(root, "node_modules/qrcode-generator/dist/qrcode.js"), path.join(www, "vendor/qrcode.js"));
+cp(path.join(root, "node_modules/@capacitor/core/dist/capacitor.js"), path.join(www, "vendor/capacitor.js")); // registerPlugin for native features
 for (const w of ["500", "600", "700", "800"]) cp(path.join(repo, `mobile/www/fonts/PJS-${w}.woff2`), path.join(www, `fonts/PJS-${w}.woff2`));
 cp(path.join(repo, "food/styles/fonts/Fraunces-800.woff2"), path.join(www, "fonts/Fraunces-800.woff2"));
 cp(path.join(repo, "food/data/kulgam_basemap.json"), path.join(www, "data/kulgam_basemap.json"));

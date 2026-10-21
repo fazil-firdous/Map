@@ -1,6 +1,7 @@
 // Adds the real restaurants in data/restaurants/*.json. Safe to run on every install: a restaurant that already exists
 // is left alone, and a menu is only added while the restaurant has no dishes, so nothing a restaurant edits is ever
-// overwritten. The one exception: a stock picture (asset:…) gets replaced by the restaurant's real photo once there is one.
+// overwritten. The one exception is pictures we ship (stock asset:… and /img/… files): they follow the file, so a better
+// or corrected photo reaches existing dishes. Photos a restaurant uploaded itself (/uploads/…) are never touched.
 // New restaurants start hidden ("pending"): the owner makes them live from the dashboard.
 // Menu prices in the files are what the restaurant receives; the customer price adds the restaurant's commission.
 const fs = require("fs");
@@ -33,15 +34,14 @@ const { ratePct, priced } = require("../src/pricing");
       });
     }
     let photos = 0;
-    if (!added && r.photo && r.photo.startsWith("/img/"))
-      await db.q("UPDATE restaurants SET photo = $2 WHERE id = $1 AND (photo IS NULL OR photo LIKE 'asset:%')", [r.id, r.photo]);
-    if (has.n) for (const it of (r.sections || []).flatMap(s => s.items)) {
-      if (!it.photo || !it.photo.startsWith("/img/")) continue;
-      photos += (await db.q("UPDATE menu_items SET photo = $3 WHERE restaurant_id = $1 AND name = $2 AND (photo IS NULL OR photo LIKE 'asset:%')", [r.id, it.name, it.photo])).rowCount;
-    }
+    const shipped = "(photo IS NULL OR photo LIKE 'asset:%' OR photo LIKE '/img/%')";
+    if (!added && r.photo) await db.q(`UPDATE restaurants SET photo = $2 WHERE id = $1 AND ${shipped} AND photo IS DISTINCT FROM $2`, [r.id, r.photo]);
+    if (has.n) for (const it of (r.sections || []).flatMap(s => s.items))
+      photos += (await db.q(`UPDATE menu_items SET photo = $3 WHERE restaurant_id = $1 AND name = $2 AND ${shipped} AND photo IS DISTINCT FROM $3`, [r.id, it.name, it.photo || null])).rowCount;
+    if (r.banner) await db.q(`UPDATE banners SET photo = $2, subtitle = $3 WHERE restaurant_id = $1 AND photo LIKE '/img/%' AND (photo, subtitle) IS DISTINCT FROM ($2, $3)`, [r.id, r.banner.photo, r.banner.subtitle]);
     if (r.banner && !(await db.one("SELECT 1 FROM banners WHERE restaurant_id = $1", [r.id])))
       await db.q("INSERT INTO banners (kicker, title, subtitle, photo, restaurant_id, sort) VALUES ($1, $2, $3, $4, $5, 0)", [r.banner.kicker, r.banner.title, r.banner.subtitle, r.banner.photo, r.id]);
-    console.log(`${r.name}: ${added ? "added" : "already there"}${dishes ? `, ${dishes} dishes` : ""}${photos ? `, ${photos} real photos` : ""}`);
+    console.log(`${r.name}: ${added ? "added" : "already there"}${dishes ? `, ${dishes} dishes` : ""}${photos ? `, ${photos} photos updated` : ""}`);
   }
   await db.pool.end();
 })().catch(e => { console.error(e); process.exit(1); });

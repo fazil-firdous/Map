@@ -1,1 +1,1 @@
-window.KF_CONFIG = {"api":"","version":"1.4.0"};
+window.KF_CONFIG = {"api":"","version":"1.5.0"};

@@ -163,6 +163,8 @@ textarea.input { min-height: 84px; resize: none; line-height: 1.45; }
 .item b { font-size: 16px; display: block; margin-top: 4px; } .item .p { margin-top: 4px; font-weight: 800; font-size: 15px; } .item .d { margin-top: 6px; font-size: 12.5px; color: var(--ink-3); line-height: 1.4; }
 .item .best { display: inline-flex; gap: 3px; align-items: center; margin-left: 6px; font-size: 11px; font-weight: 800; color: var(--gold-ink); }
 .item .pic { width: 118px; height: 110px; border-radius: 18px; background-size: cover; background-position: center; background-color: var(--g-soft); position: relative; box-shadow: var(--e1); display: grid; place-items: center; color: var(--g); }
+/* a dish without a photo: just the ADD button, no empty picture box */
+.item .pic.nopic { height: 40px; align-self: center; background: none; box-shadow: none; } .item .pic.nopic .add { bottom: 2px; }
 .add { position: absolute; left: 50%; bottom: -14px; transform: translateX(-50%); min-width: 92px; height: 36px; border-radius: 12px; background: #fff; color: var(--g); font-weight: 800; font-size: 14px; box-shadow: var(--e2), inset 0 0 0 1px var(--g-tint);
   display: flex; align-items: center; justify-content: center; }
 .add.on { background: var(--grad); color: #fff; justify-content: space-between; box-shadow: var(--glow); }

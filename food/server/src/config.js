@@ -20,10 +20,15 @@ module.exports = {
     renflairKey: env.RENFLAIR_API_KEY || "",
     devReturnCode: env.DEV_RETURN_OTP === "1",       // testing only: returns the OTP in the API response
   },
-  // Test accounts with a fixed code and no SMS: the test restaurant's owner, and a test customer.
+  // Test accounts with a fixed code and no SMS (local tests only; not set on the live server).
   test: { ownerPhone: env.TEST_OWNER_PHONE || "", customerPhone: env.TEST_CUSTOMER_PHONE || "", code: env.TEST_CODE || "" },
-  // The platform owner: admin, owns the test restaurant, logs in with a fixed code (works before SMS is live).
+  // The platform owner: admin, sees everything. Logs in by SMS like everyone else (a fixed code only if OWNER_CODE is set).
   owner: { phone: env.OWNER_PHONE || "", code: env.OWNER_CODE || "" },
+  // Optional demo login for Play Store reviewers: fixed code, can browse and check out, but its orders never reach a restaurant.
+  review: { phone: env.REVIEW_PHONE || "", code: env.REVIEW_CODE || "" },
+  // Login SMS cost money: at most this many a day in total (stops anyone draining the SMS balance), and per network per hour.
+  smsDailyMax: Number(env.SMS_DAILY_MAX || 400),
+  smsPerIpHour: Number(env.SMS_PER_IP_HOUR || 25),
   // Kulgam district (orders only within this box)
   bbox: { minLat: 33.52, maxLat: 33.75, minLon: 74.80, maxLon: 75.15 },
 };

@@ -31,12 +31,22 @@ const OUT = [
      <div><div style="font:800 86px F,serif;letter-spacing:-2px;line-height:1">Kezia's Food</div>
      <div style="font:600 34px system-ui,sans-serif;margin-top:20px;opacity:.95">Kulgam's own food app</div>
      <div style="font:600 25px system-ui,sans-serif;margin-top:14px;color:#ffd25e">Order · Pay the restaurant · Track live</div></div></div>`],
+  // Instagram: profile picture (the K sits inside the round crop) and a launch post
+  ["brand/instagram/profile-1080.png", 1080, 1080, `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 -14 128 128" width="100%" height="100%">${grad}<rect x="-14" y="-14" width="128" height="128" fill="url(#g)"/>${mark}</svg>`],
+  ["brand/instagram/post-launch-1080.png", 1080, 1350, `<div style="width:1080px;height:1350px;background:linear-gradient(160deg,#0b6e3d,#1fb066);color:#fff;font-family:F,serif;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:34px">
+     <div style="width:330px;height:330px;border-radius:78px;overflow:hidden;box-shadow:0 40px 80px -24px rgba(0,0,0,.5);outline:8px solid rgba(255,255,255,.22)">${tile(0)}</div>
+     <div style="font:800 118px F,serif;letter-spacing:-3px;line-height:1">Kezia's Food</div>
+     <div style="font:700 46px system-ui,sans-serif">Kulgam's own food app</div>
+     <div style="font:600 34px system-ui,sans-serif;color:#ffd25e;max-width:820px;line-height:1.35">Order from Kulgam's best restaurants · pay the restaurant by UPI or cash · watch your rider live</div>
+     <div style="margin-top:20px;background:#fff;color:#0b6e3d;font:800 40px system-ui,sans-serif;padding:26px 56px;border-radius:999px">Link in bio to install</div></div>`],
 ];
+const only = process.argv[2]; // e.g. "instagram" renders just those files
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROMIUM || "/opt/pw-browsers/chromium" });
-  for (const [file, w, h, body, alpha] of OUT) {
+  for (const [file, w, h, body, alpha] of OUT.filter(o => !only || o[0].includes(only))) {
     const p = await b.newPage({ viewport: { width: w, height: h } });
     await p.setContent(page(body, w, h)); await p.evaluate(() => document.fonts.ready); await p.waitForTimeout(150);
+    fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true });
     await p.screenshot({ path: path.join(root, file), omitBackground: !!alpha });
     await p.close(); console.log("wrote", file);
   }

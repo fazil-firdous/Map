@@ -4,7 +4,9 @@
   const API = KF_CONFIG.api.replace(/\/$/, "");
   const cap = window.Capacitor;
   const native = !!(cap && cap.isNativePlatform && cap.isNativePlatform());
-  const plugin = name => (native && cap.registerPlugin ? cap.registerPlugin(name) : null);
+  // Native features (back button, notifications, GPS, UPI apps) go through Capacitor's plugins; vendor/capacitor.js adds registerPlugin
+  const plugins = {};
+  const plugin = name => (native && cap.registerPlugin ? (plugins[name] = plugins[name] || cap.registerPlugin(name)) : null);
 
   // ---- tiny helpers ----
   const $ = (s, el = document) => el.querySelector(s);
@@ -88,8 +90,10 @@
     const G = plugin("Geolocation");
     if (G) {
       try { await G.requestPermissions(); } catch {}
-      const p = await G.getCurrentPosition({ enableHighAccuracy: true, timeout: 12000 });
-      return { lat: p.coords.latitude, lon: p.coords.longitude };
+      try {
+        const p = await G.getCurrentPosition({ enableHighAccuracy: true, timeout: 12000 });
+        return { lat: p.coords.latitude, lon: p.coords.longitude };
+      } catch { throw new Error("Turn on location (and allow it for Kezia's Food) to use this"); }
     }
     return new Promise((res, rej) => navigator.geolocation ? navigator.geolocation.getCurrentPosition(
       p => res({ lat: p.coords.latitude, lon: p.coords.longitude }), () => rej(new Error("Turn on location to use this")), { enableHighAccuracy: true, timeout: 12000 })
@@ -154,6 +158,17 @@
   // ---- screens ----
   const app = () => $("#app");
   const stack = [];
+  // In a browser, each pushed screen or sheet adds a history entry, so the phone's back button closes it instead of
+  // leaving the app. (In the Android app the back button comes through the App plugin, see main.js.)
+  const hist = { depth: 0, skip: 0, fromBack: false };
+  const histOpen = () => { if (native) return; history.pushState({ kf: Date.now() }, ""); hist.depth++; };
+  const histClose = () => { if (native || !hist.depth) return; hist.depth--; if (!hist.fromBack) { hist.skip++; history.back(); } };
+  if (!native) addEventListener("popstate", () => {
+    if (hist.skip) { hist.skip--; return; }
+    if (!hist.depth) return;
+    hist.fromBack = true; // the close below counts itself off without going back again
+    try { const s = topSheet(); if (s) s.close(); else pop(); } finally { hist.fromBack = false; }
+  });
   /** Push a full screen. build(el, scr) renders into it; scr.onClose(fn) registers cleanup. */
   function push(build) {
     const el = h(`<div class="layer full pushed enter"></div>`);
@@ -162,7 +177,7 @@
     if (under) under.classList.add("behind");
     app().append(el);
     const scr = { el, under, alive: true, closers: [], onClose(fn) { this.closers.push(fn); }, close: () => pop(scr) };
-    stack.push(scr);
+    stack.push(scr); histOpen();
     haptic();
     Promise.resolve(build(el, scr)).catch(e => { console.error(e); toast(e.message, "circle-alert"); });
     return scr;
@@ -171,7 +186,7 @@
     const scr = which || stack[stack.length - 1];
     if (!scr || !scr.alive) return false;
     stack.splice(stack.indexOf(scr), 1);
-    scr.alive = false; scr.closers.forEach(fn => { try { fn(); } catch {} });
+    scr.alive = false; scr.closers.forEach(fn => { try { fn(); } catch {} }); histClose();
     scr.el.classList.remove("enter"); scr.el.classList.add("leave");
     if (scr.under) scr.under.classList.remove("behind");
     setTimeout(() => scr.el.remove(), 240);
@@ -183,9 +198,9 @@
   /** Bottom sheet. Returns the element; el.close() closes it. */
   function sheet(html, opts = {}) {
     const el = h(`<div class="sheet"><div class="dim"></div><div class="panel"><div class="grab"></div>${html}</div></div>`);
-    app().append(el);
+    app().append(el); histOpen();
     let done = false;
-    el.close = () => { if (done) return; done = true; el.classList.add("closing"); setTimeout(() => el.remove(), 200); opts.onClose && opts.onClose(); };
+    el.close = () => { if (done) return; done = true; histClose(); el.classList.add("closing"); setTimeout(() => el.remove(), 200); opts.onClose && opts.onClose(); };
     $(".dim", el).onclick = () => !opts.sticky && el.close();
     return el;
   }

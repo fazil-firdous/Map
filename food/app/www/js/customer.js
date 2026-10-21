@@ -325,7 +325,7 @@
       const itemHTML = it => `<div class="item ${it.in_stock ? "" : "off"}" data-item="${it.id}"><div>${vegMark(it.veg)}${it.bestseller ? `<span class="best">${I("star", "xs")} Bestseller</span>` : ""}
           ${it.special ? `<span class="spbadge">${I("flame", "xs")} ${esc(it.special)}</span>` : ""}
           <b>${esc(it.name)}</b><div class="p">${it.variants && it.variants.length ? `${rs(it.price)} <span class="muted small" style="font-weight:600">onwards · ${it.variants.map(v => esc(v.n)).join(" / ")}</span>` : `${rs(it.price)}${it.was ? ` <s class="muted" style="font-weight:600">${rs(it.was)}</s>` : ""}`}</div>${it.description ? `<div class="d">${esc(it.description)}</div>` : ""}</div>
-          <div class="pic" ${bg(it.photo)}>${it.photo ? "" : I("utensils", "lg")}<span data-addbox="${it.id}">${addHTML(it)}</span></div></div>`;
+          <div class="pic ${it.photo ? "" : "nopic"}" ${bg(it.photo)}><span data-addbox="${it.id}">${addHTML(it)}</span></div></div>`;
       const menuHTML = () => secs.map(s => {
         const list = (s.id ? j.items.filter(i => i.section_id === s.id) : loose).filter(i => !veg || i.veg);
         return list.length ? `<div class="msec" data-sec="${s.id}"><h3>${esc(s.name)} <span class="muted small">${list.length}</span></h3>${list.map(itemHTML).join("")}</div>` : "";
@@ -753,9 +753,11 @@
       terms: () => openExternal(KF.API + "/terms.html"),
       privacy: () => openExternal(KF.API + "/privacy.html"),
       credits: async () => {
-        const c = await fetch("img/food/credits.json").then(r => r.json()).catch(() => ({}));
-        sheet(`<h2>Photo credits</h2><p class="sub">Food photos are openly licensed. Thank you to the photographers.</p><div class="list">${Object.entries(c).map(([k, v]) => `<div class="li" style="grid-template-columns:40px 1fr">
-          <span class="tile" style="background:url('img/food/${esc(k)}.jpg') center/cover"></span><span class="small"><b>${esc(v.title)}</b><br>by ${esc(v.by)} · ${esc(v.license)}<br><span class="muted selectable" style="word-break:break-all">${esc(v.source)}</span></span></div>`).join("")}</div>`);
+        // photos bundled in the app, and the dish photos on the server (restaurants' own photos need no credit)
+        const [c, lib] = await Promise.all([fetch("img/food/credits.json"), fetch(KF.img("/img/lib/credits.json"))].map(p => p.then(r => r.json()).catch(() => ({}))));
+        const all = [...Object.entries(c).map(([k, v]) => [`img/food/${k}.jpg`, v]), ...Object.entries(lib).map(([k, v]) => [KF.img(`/img/lib/${k}.jpg`), v])];
+        sheet(`<h2>Photo credits</h2><p class="sub">Food photos are openly licensed. Thank you to the photographers.</p><div class="list">${all.map(([u, v]) => `<div class="li" style="grid-template-columns:40px 1fr">
+          <span class="tile" style="background:url('${esc(u)}') center/cover"></span><span class="small"><b>${esc(v.title)}</b><br>by ${esc(v.by)} · ${esc(v.license)}<br><span class="muted selectable" style="word-break:break-all">${esc(v.source)}</span></span></div>`).join("")}</div>`);
       },
       logout: async () => { if (!(await confirm("Log out?", "Your cart stays on this phone.", "Log out"))) return; try { await KF.post("/v1/auth/logout"); } catch {} S.clearAuth(); emit("auth"); emit("places"); draw(); toast("Logged out"); },
       delete: async () => {

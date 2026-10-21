@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # Srinagar Bazaar: one-time VPS setup (Ubuntu 22.04/24.04, run as root).
-#   bash install.sh --domain api.45-92-1-150.sslip.io --review-phone 9XXXXXXXXX [--kezia-owner 9XXXXXXXXX] [--kezia-sms-key KEY]
+#   bash install.sh --domain api.45-92-1-150.sslip.io [--kezia-owner 9XXXXXXXXX] [--kezia-sms-key KEY]
+#     [--kezia-review 9XXXXXXXXX]   demo login for Play Store reviewers (fixed code; its orders never reach a restaurant)
+#     [--kezia-clean-start]         ONE TIME before going live: backup, then delete all orders, the test restaurant and test logins
 # Safe to run again: it updates the code and keeps your existing passwords and data.
 set -euo pipefail
 
-DOMAIN=""; REVIEW_PHONE=""; KEZIA_OWNER=""; KEZIA_SMS_KEY=""; BRANCH="ccr-cade9a1c-6u8263"; DIR=/opt/srinagar-bazaar
+DOMAIN=""; REVIEW_PHONE=""; KEZIA_OWNER=""; KEZIA_SMS_KEY=""; KEZIA_REVIEW=""; KEZIA_CLEAN=0; BRANCH="ccr-cade9a1c-6u8263"; DIR=/opt/srinagar-bazaar
 REPO="https://github.com/fazil-mastu/Map.git"
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -12,6 +14,8 @@ while [ $# -gt 0 ]; do
     --review-phone) REVIEW_PHONE="$2"; shift 2 ;;
     --kezia-owner) KEZIA_OWNER="$2"; shift 2 ;;
     --kezia-sms-key) KEZIA_SMS_KEY="$2"; shift 2 ;;
+    --kezia-review) KEZIA_REVIEW="$2"; shift 2 ;;
+    --kezia-clean-start) KEZIA_CLEAN=1; shift ;;
     --branch) BRANCH="$2"; shift 2 ;;
     *) echo "Unknown option $1"; exit 1 ;;
   esac
@@ -57,18 +61,23 @@ if ! grep -q '^KEZIA_SECRET=' "$ENV"; then
     echo "KEZIA_DOMAIN=${KEZIA_DOMAIN:-kezia.${DOMAIN#api.}}"
     echo "KEZIA_SECRET=$(rnd)"
     echo "KEZIA_ADMIN_TOKEN=$(rnd)"
-    echo "KEZIA_TEST_OWNER_PHONE=9000000101"
-    echo "KEZIA_TEST_CUSTOMER_PHONE=9000000102"
-    echo "KEZIA_TEST_CODE=$(printf '%06d' $(( $(od -An -N4 -tu4 /dev/urandom) % 1000000 )))"
     echo "KEZIA_PLATFORM_UPI="
   } >> "$ENV"
 fi
+# Live now: no test logins, and the owner logs in by SMS like everyone else.
+sed -i '/^KEZIA_TEST_OWNER_PHONE=/d; /^KEZIA_TEST_CUSTOMER_PHONE=/d; /^KEZIA_TEST_CODE=/d; /^KEZIA_OWNER_CODE=/d' "$ENV"
 
-# Kezia's Food owner: admin account with a fixed login code (works before SMS is set up). Kept only in .env.
+# Kezia's Food owner: the admin account (sees everything). Kept only in .env.
 if [ -n "$KEZIA_OWNER" ]; then
   sed -i '/^KEZIA_OWNER_PHONE=/d' "$ENV"
   echo "KEZIA_OWNER_PHONE=$KEZIA_OWNER" >> "$ENV"
-  grep -q '^KEZIA_OWNER_CODE=' "$ENV" || echo "KEZIA_OWNER_CODE=$(printf '%06d' $(( $(od -An -N4 -tu4 /dev/urandom) % 1000000 )))" >> "$ENV"
+fi
+
+# Demo login for Play Store review
+if [ -n "$KEZIA_REVIEW" ]; then
+  sed -i '/^KEZIA_REVIEW_PHONE=/d' "$ENV"
+  echo "KEZIA_REVIEW_PHONE=$KEZIA_REVIEW" >> "$ENV"
+  grep -q '^KEZIA_REVIEW_CODE=' "$ENV" || echo "KEZIA_REVIEW_CODE=$(printf '%06d' $(( $(od -An -N4 -tu4 /dev/urandom) % 1000000 )))" >> "$ENV"
 fi
 
 # Kezia's Food login SMS through renflair (key kept only in .env)
@@ -88,6 +97,11 @@ for i in $(seq 1 60); do $COMPOSE exec -T api wget -qO- http://localhost:8080/v1
 $COMPOSE exec -T api node scripts/seed.js
 for i in $(seq 1 40); do $COMPOSE exec -T kezia wget -qO- http://localhost:8090/v1/health >/dev/null 2>&1 && break; sleep 3; done
 $COMPOSE exec -T kezia node scripts/seed.js
+if [ "$KEZIA_CLEAN" = 1 ]; then
+  echo "==> Clean start: backup first, then removing all orders, the test restaurant and test logins"
+  chmod +x server/scripts/backup.sh && server/scripts/backup.sh
+  $COMPOSE exec -T kezia node scripts/clean_start.js
+fi
 $COMPOSE exec -T kezia node scripts/import_restaurants.js
 
 echo "==> Nightly backups at 02:30"
@@ -112,9 +126,8 @@ Kezia's Food is running.
   API health:     https://$KEZIA_DOMAIN/v1/health
   Admin page:     https://$KEZIA_DOMAIN/admin/   (token: $KEZIA_ADMIN_TOKEN)
   Privacy, terms: https://$KEZIA_DOMAIN/privacy.html  https://$KEZIA_DOMAIN/terms.html
-  Owner login (sees everything): ${KEZIA_OWNER_PHONE:-not set, add --kezia-owner}${KEZIA_OWNER_CODE:+, code $KEZIA_OWNER_CODE}
-  Test restaurant login: $KEZIA_TEST_OWNER_PHONE, code $KEZIA_TEST_CODE
-  Test customer login:         $KEZIA_TEST_CUSTOMER_PHONE, code $KEZIA_TEST_CODE
+  Owner login (sees everything): ${KEZIA_OWNER_PHONE:-not set, add --kezia-owner} (code by SMS)
+  Play Store demo login: ${KEZIA_REVIEW_PHONE:-not set (add --kezia-review 9XXXXXXXXX when you submit to Play)}${KEZIA_REVIEW_CODE:+, code $KEZIA_REVIEW_CODE}
 Keep these private. They are stored in $DIR/$ENV
 Kezia login SMS: ${KEZIA_SMS_PROVIDER:-console (codes only in: $COMPOSE logs kezia | grep OTP)}
 EOF

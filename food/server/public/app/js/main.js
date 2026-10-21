@@ -84,6 +84,7 @@
   function back() {
     const s = topSheet(); if (s) { s.close(); return; }
     if (pop()) return;
+    if (P.overriding()) { P.setOverride(null); tab("a:rest"); return; } // owner managing a restaurant: back to the dashboard
     if (current !== KF.firstTab()) { tab(KF.firstTab()); return; }
     const A = plugin("App"); if (A) A.exitApp();
   }

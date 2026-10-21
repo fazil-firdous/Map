@@ -42,8 +42,9 @@ Made in Kulgam, for Kulgam.
 
 ## App content (Policy → App content)
 - **App access:** "All or some functionality is restricted". Add the reviewer login:
-  phone `9000000102`, code = `KEZIA_TEST_CODE` from the VPS `.env` (no SMS needed for this number).
-  Instructions: "Enter the phone number, tap Send code, type the code. Browse 80 Degrees and place an order."
+  first run install.sh with `--kezia-review 9XXXXXXXXX` (any spare number); it prints the demo code (no SMS needed).
+  Instructions: "Enter the phone number, tap Send code, type the code. Browse any restaurant and go to checkout. This is a
+  demo account, so orders aren't sent to the restaurant."
 - **Ads:** No ads.
 - **Content rating:** fill the questionnaire: category "Food & Drink / everything else", no violence, no user-generated
   public content, no gambling. Users can't chat with each other. Expected rating: Everyone / 3+.
@@ -59,7 +60,7 @@ Made in Kulgam, for Kulgam.
 - **Permissions:** location (delivery address, rider tracking), notifications (order alerts).
 
 ## Release
-1. **Testing → Internal testing → Create release**, upload `kezias-food-1.4.0.aab`, add yourself and helpers by
+1. **Testing → Internal testing → Create release**, upload `kezias-food-1.5.0.aab`, add yourself and helpers by
    Gmail. Live in minutes, no review wait.
 2. **Testing → Closed testing**: same AAB, add at least **12 testers** (Gmail addresses) who opt in and use the app
    for **14 days in a row**. Required for new personal accounts before production.

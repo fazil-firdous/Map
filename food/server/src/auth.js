@@ -1,5 +1,5 @@
 // Login is by phone number and a one-time SMS code (needed to place orders; browsing is open).
-// The test owner and test customer numbers get a fixed code and no SMS.
+// The test numbers (local tests) and the Play Store demo number get a fixed code and no SMS.
 const db = require("./db");
 const config = require("./config");
 const { sha256, hmac, token, otpCode, normPhone, isMobile, bad, forbidden, HttpError, str } = require("./util");
@@ -7,9 +7,10 @@ const { sendOtp } = require("./sms");
 
 const SESSION_DAYS = 365;
 const testCode = phone => config.test.code && [config.test.ownerPhone, config.test.customerPhone].filter(Boolean).map(normPhone).includes(phone) ? config.test.code : null;
-const isOwner = phone => !!(config.owner.phone && config.owner.code && phone === normPhone(config.owner.phone));
-/** Accounts that log in with a fixed code instead of an SMS (owner and test numbers). */
-const fixedCode = phone => (isOwner(phone) ? config.owner.code : testCode(phone));
+const isOwner = phone => !!(config.owner.phone && phone === normPhone(config.owner.phone));
+const isReview = phone => !!(config.review.phone && config.review.code && phone === normPhone(config.review.phone));
+/** Accounts that log in with a fixed code instead of an SMS. */
+const fixedCode = phone => (isOwner(phone) && config.owner.code) || (isReview(phone) && config.review.code) || testCode(phone);
 // Login limits count per phone number, not per network: mobile networks put many phones behind one IP.
 // (They run as preHandler hooks so the phone number in the body has been parsed.)
 const phoneKey = req => "otp:" + (normPhone(req.body?.phone) || req.ip);
@@ -69,10 +70,16 @@ function routes(app) {
     const fixed = fixedCode(phone);
     const prev = !fixed && await db.one("SELECT sent_at FROM otps WHERE phone = $1", [phone]);
     if (prev && Date.now() - new Date(prev.sent_at).getTime() < 60_000) throw new HttpError(429, "Wait a minute before asking for another code");
+    if (!fixed) {
+      const n = await db.one("SELECT count(*)::int today, count(*) FILTER (WHERE ip = $1 AND sent_at > now() - interval '1 hour')::int this_ip FROM sms_log WHERE sent_at > now() - interval '1 day'", [req.ip]);
+      if (n.today >= config.smsDailyMax) { req.log.error({ today: n.today }, "daily login SMS limit reached"); throw new HttpError(503, "Too many logins today. Please try again in a few hours"); }
+      if (n.this_ip >= config.smsPerIpHour) throw new HttpError(429, "Too many codes from this network. Try again in an hour");
+    }
     const code = fixed || otpCode();
     await db.q(`INSERT INTO otps (phone, code_hash, expires_at) VALUES ($1, $2, now() + interval '10 minutes')
       ON CONFLICT (phone) DO UPDATE SET code_hash = EXCLUDED.code_hash, attempts = 0, sent_at = now(), expires_at = EXCLUDED.expires_at`, [phone, hmac(phone + ":" + code)]);
     if (!fixed) {
+      await db.q("INSERT INTO sms_log (phone, ip) VALUES ($1, $2)", [phone, req.ip]);
       try { await sendOtp(phone, code, req.log); }
       catch (e) { await db.q("DELETE FROM otps WHERE phone = $1", [phone]); req.log.error(e); throw new HttpError(502, "We couldn't send the SMS. Please try again in a minute"); }
     }
@@ -93,14 +100,8 @@ function routes(app) {
     // A restaurant the owner handed to this number becomes theirs now
     await db.q("UPDATE restaurants SET owner_id = $1, pending_owner_phone = NULL WHERE pending_owner_phone = $2", [user.id, phone]);
     // The platform owner is the admin: sees every restaurant, order and user, and runs no restaurant itself.
-    // (An earlier version gave them the test restaurant; hand it back to the test owner number.)
-    if (isOwner(phone)) {
-      user = await db.one("UPDATE users SET role = 'admin', banned = false WHERE id = $1 RETURNING *", [user.id]);
-      const testOwner = config.test.ownerPhone ? normPhone(config.test.ownerPhone) : null;
-      await db.q("UPDATE restaurants SET owner_id = (SELECT id FROM users WHERE phone = $2) WHERE id = 'KF-TEST' AND owner_id = $1", [user.id, testOwner]);
-      if (testOwner) await db.q("DELETE FROM staff WHERE restaurant_id = 'KF-TEST' AND phone = $1 AND role = 'manager'", [testOwner]);
-    }
-    // The test owner manages the test restaurant.
+    if (isOwner(phone)) user = await db.one("UPDATE users SET role = 'admin', banned = false WHERE id = $1 RETURNING *", [user.id]);
+    // The test owner manages the test restaurant (local tests).
     if (config.test.ownerPhone && phone === normPhone(config.test.ownerPhone)) await db.q("UPDATE restaurants SET owner_id = $1 WHERE id = 'KF-TEST' AND owner_id IS NULL", [user.id]);
     const places = await myPlaces(user);
     return { token: await sessionFor(user.id), user: publicUser(user), places, support: await supportFor(user, places) };
@@ -155,4 +156,4 @@ function routes(app) {
   });
 }
 
-module.exports = { routes, loadUser, needUser, needAdmin, needRole, roleAt, myPlaces, publicUser };
+module.exports = { routes, isReview, loadUser, needUser, needAdmin, needRole, roleAt, myPlaces, publicUser };
