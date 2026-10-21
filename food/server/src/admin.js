@@ -1,7 +1,8 @@
 // Admin (x-admin-token on the web page, or the owner's login in the app): approve restaurants, commission rates, confirm commission payments, banners, block users.
 const db = require("./db");
 const { needAdmin } = require("./auth");
-const { bad, notFound, str } = require("./util");
+const { bad, notFound, str, normPhone, isMobile } = require("./util");
+const { reprice, repriceAll } = require("./pricing");
 
 function routes(app) {
   app.get("/v1/admin/overview", { preHandler: needAdmin }, async () => {
@@ -55,14 +56,16 @@ function routes(app) {
       db.many(`SELECT s.*, r.name restaurant FROM settlements s JOIN restaurants r ON r.id = s.restaurant_id WHERE s.status = 'claimed' ORDER BY s.created_at`),
       db.many("SELECT key, value FROM settings"),
     ]);
-    return { totals, users, places, days, top, active, claims, settings: Object.fromEntries(settings.map(x => [x.key, x.value])), now: new Date() };
+    const extra = await db.one(`SELECT (SELECT count(*)::int FROM suggestions WHERE status = 'new') suggestions_new,
+      (SELECT COALESCE(sum(promo_amount), 0)::int FROM orders WHERE status = 'delivered') promo_cost`);
+    return { totals: { ...totals, ...extra }, users, places, days, top, active, claims, settings: Object.fromEntries(settings.map(x => [x.key, x.value])), now: new Date() };
   });
 
   // Every restaurant with its numbers: sales, orders, the platform's commission (earned, due, received)
   app.get("/v1/admin/restaurants", { preHandler: needAdmin }, async () => {
     const pct = Number((await db.one("SELECT value FROM settings WHERE key = 'commission_pct'"))?.value) || 0;
     const rows = await db.many(`SELECT r.id, r.name, r.area, r.address, r.cuisines, r.photo, r.status, r.is_open, r.phone, r.upi_id, r.cod, r.commission_pct, r.created_at, r.lat, r.lon,
-        r.rating_sum, r.rating_count, u.phone owner_phone, u.name owner_name,
+        r.rating_sum, r.rating_count, r.pending_owner_phone, u.phone owner_phone, u.name owner_name,
         count(o.*) FILTER (WHERE o.status = 'delivered')::int delivered,
         count(o.*)::int orders,
         count(o.*) FILTER (WHERE o.status IN ('rejected', 'expired'))::int missed,
@@ -104,13 +107,41 @@ function routes(app) {
     return { users: rows };
   });
 
+  // Add a restaurant yourself (it stays hidden until you make it live), then hand it to its owner by phone
+  app.post("/v1/admin/restaurants", { preHandler: needAdmin }, async (req) => {
+    const b = req.body || {}, name = str(b.name, 60), lat = Number(b.lat), lon = Number(b.lon);
+    if (!name || !Number.isFinite(lat) || !Number.isFinite(lon)) throw bad("Add a name and the location");
+    let id = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 30) || "restaurant";
+    if (await db.one("SELECT 1 FROM restaurants WHERE id = $1", [id])) id += "-" + Math.random().toString(36).slice(2, 6);
+    const r = await db.one(`INSERT INTO restaurants (id, name, phone, area, address, lat, lon, cuisines, status, commission_pct) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending', $9) RETURNING *`,
+      [id, name, normPhone(b.phone) || null, str(b.area, 60), str(b.address, 160), lat, lon, str(b.cuisines, 80), b.commission_pct === "" || b.commission_pct === undefined ? null : Number(b.commission_pct)]);
+    return { restaurant: r };
+  });
+  app.post("/v1/admin/restaurants/:id/owner", { preHandler: needAdmin }, async (req) => {
+    const phone = normPhone(req.body?.phone);
+    if (!isMobile(phone)) throw bad("Enter the owner's 10-digit mobile number");
+    const u = await db.one("SELECT id FROM users WHERE phone = $1", [phone]);
+    const r = u ? await db.one("UPDATE restaurants SET owner_id = $2, pending_owner_phone = NULL, phone = COALESCE(phone, $3) WHERE id = $1 RETURNING id, name", [req.params.id, u.id, phone])
+      : await db.one("UPDATE restaurants SET pending_owner_phone = $2, phone = COALESCE(phone, $2) WHERE id = $1 RETURNING id, name", [req.params.id, phone]);
+    if (!r) throw notFound();
+    return { done: u ? "owner" : "pending", phone };
+  });
+
+  app.get("/v1/admin/suggestions", { preHandler: needAdmin }, async () => ({ suggestions: await db.many("SELECT * FROM suggestions ORDER BY status = 'new' DESC, created_at DESC LIMIT 200") }));
+  app.patch("/v1/admin/suggestions/:id", { preHandler: needAdmin }, async (req) => {
+    const s = await db.one("UPDATE suggestions SET status = $2 WHERE id = $1 RETURNING *", [Number(req.params.id), req.body?.status === "new" ? "new" : "done"]);
+    if (!s) throw notFound(); return { suggestion: s };
+  });
+
   app.patch("/v1/admin/restaurants/:id", { preHandler: needAdmin }, async (req) => {
     const b = req.body || {}, set = [], vals = [req.params.id];
     if (b.status) { if (!["pending", "active", "suspended", "test"].includes(b.status)) throw bad("Bad status"); vals.push(b.status); set.push(`status = $${vals.length}`); }
     if ("commission_pct" in b) { const v = b.commission_pct === "" || b.commission_pct === null ? null : Number(b.commission_pct); if (v !== null && !(v >= 0 && v <= 50)) throw bad("Commission must be 0–50%"); vals.push(v); set.push(`commission_pct = $${vals.length}`); }
     if (!set.length) throw bad("Nothing to change");
     const r = await db.one(`UPDATE restaurants SET ${set.join(", ")} WHERE id = $1 RETURNING id, status, commission_pct`, vals);
-    if (!r) throw notFound(); return { restaurant: r };
+    if (!r) throw notFound();
+    if ("commission_pct" in b) await reprice(r.id); // dishes priced by what the restaurant receives get new customer prices
+    return { restaurant: r };
   });
   app.post("/v1/admin/settlements/:id/:action", { preHandler: needAdmin }, async (req) => {
     const ok = req.params.action === "paid";
@@ -123,7 +154,8 @@ function routes(app) {
   });
   app.put("/v1/admin/settings", { preHandler: needAdmin }, async (req) => {
     const b = req.body || {};
-    if ("commission_pct" in b) { const v = Number(b.commission_pct); if (!(v >= 0 && v <= 50)) throw bad("Commission must be 0–50%"); await db.q("UPDATE settings SET value = $1 WHERE key = 'commission_pct'", [JSON.stringify(v)]); }
+    if ("commission_pct" in b) { const v = Number(b.commission_pct); if (!(v >= 0 && v <= 50)) throw bad("Commission must be 0–50%"); await db.q("UPDATE settings SET value = $1 WHERE key = 'commission_pct'", [JSON.stringify(v)]); await repriceAll(); }
+    for (const k of ["promo_new_orders", "promo_new_max"]) if (k in b) { const v = Math.max(0, Math.round(Number(b[k]) || 0)); await db.q("INSERT INTO settings VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [k, JSON.stringify(v)]); }
     for (const k of ["platform_upi", "platform_name", "support_phone"]) if (k in b) await db.q("UPDATE settings SET value = $2 WHERE key = $1", [k, JSON.stringify(str(b[k], 80) || "")]);
     return { ok: true };
   });

@@ -23,8 +23,13 @@ async function sessionFor(userId) {
 async function loadUser(req) {
   const h = req.headers.authorization || "";
   if (!h.startsWith("Bearer ")) return;
-  const u = await db.one(`SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = $1 AND s.expires_at > now() AND NOT u.banned`, [sha256(h.slice(7))]);
-  if (u) req.user = u;
+  const hash = sha256(h.slice(7));
+  const u = await db.one(`SELECT u.*, s.expires_at session_expires FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = $1 AND s.expires_at > now() AND NOT u.banned`, [hash]);
+  if (!u) return;
+  req.user = u;
+  // Logins renew themselves while the app is used, so people never have to log in (and pay for an SMS) again
+  if (new Date(u.session_expires) < new Date(Date.now() + (SESSION_DAYS - 30) * 86400000))
+    db.q("UPDATE sessions SET expires_at = now() + $2::interval WHERE token_hash = $1", [hash, `${SESSION_DAYS} days`]).catch(() => {});
 }
 const needUser = async (req) => { if (!req.user) throw new HttpError(401, "Please log in first"); };
 const needAdmin = async (req) => {
@@ -63,11 +68,14 @@ function routes(app) {
     if (!isMobile(phone)) throw bad("Enter a 10-digit mobile number");
     const fixed = fixedCode(phone);
     const prev = !fixed && await db.one("SELECT sent_at FROM otps WHERE phone = $1", [phone]);
-    if (prev && Date.now() - new Date(prev.sent_at).getTime() < 30_000) throw new HttpError(429, "Wait a few seconds before asking for another code");
+    if (prev && Date.now() - new Date(prev.sent_at).getTime() < 60_000) throw new HttpError(429, "Wait a minute before asking for another code");
     const code = fixed || otpCode();
     await db.q(`INSERT INTO otps (phone, code_hash, expires_at) VALUES ($1, $2, now() + interval '10 minutes')
       ON CONFLICT (phone) DO UPDATE SET code_hash = EXCLUDED.code_hash, attempts = 0, sent_at = now(), expires_at = EXCLUDED.expires_at`, [phone, hmac(phone + ":" + code)]);
-    if (!fixed) await sendOtp(phone, code, req.log);
+    if (!fixed) {
+      try { await sendOtp(phone, code, req.log); }
+      catch (e) { await db.q("DELETE FROM otps WHERE phone = $1", [phone]); req.log.error(e); throw new HttpError(502, "We couldn't send the SMS. Please try again in a minute"); }
+    }
     return { sent: true, phone, ...(config.sms.devReturnCode && !fixed ? { dev_code: code } : {}) };
   });
 
@@ -82,6 +90,8 @@ function routes(app) {
     const name = str(req.body?.name, 40);
     let user = await db.one(`INSERT INTO users (phone, name) VALUES ($1, $2) ON CONFLICT (phone) DO UPDATE SET name = COALESCE(users.name, EXCLUDED.name) RETURNING *`, [phone, name]);
     if (user.banned && !isOwner(phone)) throw forbidden("This number is blocked. Contact support");
+    // A restaurant the owner handed to this number becomes theirs now
+    await db.q("UPDATE restaurants SET owner_id = $1, pending_owner_phone = NULL WHERE pending_owner_phone = $2", [user.id, phone]);
     // The platform owner is the admin: sees every restaurant, order and user, and runs no restaurant itself.
     // (An earlier version gave them the test restaurant; hand it back to the test owner number.)
     if (isOwner(phone)) {
@@ -92,10 +102,29 @@ function routes(app) {
     }
     // The test owner manages the test restaurant.
     if (config.test.ownerPhone && phone === normPhone(config.test.ownerPhone)) await db.q("UPDATE restaurants SET owner_id = $1 WHERE id = 'KF-TEST' AND owner_id IS NULL", [user.id]);
-    return { token: await sessionFor(user.id), user: publicUser(user), places: await myPlaces(user) };
+    const places = await myPlaces(user);
+    return { token: await sessionFor(user.id), user: publicUser(user), places, support: await supportFor(user, places) };
   });
 
-  app.get("/v1/me", { preHandler: needUser }, async (req) => ({ user: publicUser(req.user), places: await myPlaces(req.user) }));
+  // The support WhatsApp number goes only to restaurant teams, riders and the owner, never to customers
+  const supportFor = async (user, places) => {
+    if (user.role !== "admin" && !places.length) return null;
+    const s = await db.one("SELECT value FROM settings WHERE key = 'support_phone'");
+    return (s && s.value) || null;
+  };
+  app.get("/v1/me", { preHandler: needUser }, async (req) => {
+    const places = await myPlaces(req.user);
+    return { user: publicUser(req.user), places, support: await supportFor(req.user, places) };
+  });
+  // Suggestions box (anyone logged in)
+  app.post("/v1/suggestions", { preHandler: needUser, config: { rateLimit: { max: 10, timeWindow: "1 hour" } } }, async (req) => {
+    const text = str(req.body?.text, 1000);
+    if (!text || text.length < 3) throw bad("Write your suggestion first");
+    const places = await myPlaces(req.user);
+    const kind = places.some(p => p.role === "owner" || p.role === "manager") ? "restaurant" : places.length ? "rider" : "customer";
+    await db.q("INSERT INTO suggestions (user_id, name, phone, kind, text) VALUES ($1, $2, $3, $4, $5)", [req.user.id, req.user.name, req.user.phone, kind, text]);
+    return { ok: true };
+  });
   app.patch("/v1/me", { preHandler: needUser }, async (req) => {
     const u = await db.one("UPDATE users SET name = COALESCE($2, name) WHERE id = $1 RETURNING *", [req.user.id, str(req.body?.name, 40)]);
     return { user: publicUser(u) };

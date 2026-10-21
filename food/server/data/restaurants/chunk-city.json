@@ -1,0 +1,16 @@
+{
+ "id": "chunk-city",
+ "name": "Chunk City",
+ "phone": "+918899669994",
+ "area": "Ghanta Ghar, Kulgam",
+ "address": "Dar-us-Salaam Masjid lane, near Ghanta Ghar, Kulgam",
+ "lat": 33.64715,
+ "lon": 75.02186,
+ "cuisines": "Pizza · Burgers · Fast food",
+ "photo": "asset:pizza-4.jpg",
+ "commission_pct": 2,
+ "cod": true,
+ "prep_min": 25,
+ "note": "Menu to come",
+ "sections": []
+}

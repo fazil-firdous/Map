@@ -65,6 +65,11 @@
       <div class="card"><div class="row between"><h3 style="margin:0">Last 14 days</h3><div class="chips" style="padding:0">${[["food", "Sales"], ["orders", "Orders"], ["commission", "Yours"]].map(([k, l]) => `<button class="chip" style="height:30px" data-a="metric" data-m="${k}" aria-pressed="${metric === k}">${l}</button>`).join("")}</div></div>
         <div class="bars" style="margin-top:14px;height:110px">${days.map((x, i) => `<i style="height:${Math.max(4, x[metric] / max * 100)}%;animation-delay:${i * 30}ms;${x[metric] ? "" : "opacity:.25"}" data-a="day" data-i="${i}"></i>`).join("")}</div>
         <div class="row between muted small" style="margin-top:6px"><span>${days[0].dt.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span><span data-dayinfo>Tap a bar</span><span>Today</span></div></div>
+      <button class="card row" data-a="suggestions" style="width:calc(100% - 2*var(--gut));text-align:left"><span class="tile gold">${I("message-square", "sm")}</span>
+        <span class="grow"><b>Suggestions</b><br><span class="muted small">${t.suggestions_new ? `${plural(t.suggestions_new, "new suggestion")} to read` : "Ideas and problems people send from the app"}</span></span>
+        ${t.suggestions_new ? `<span class="pill solid">${t.suggestions_new}</span>` : I("chevron-right", "sm")}</button>
+      <div class="sec"><h2>Commission per restaurant</h2><button data-a="rates">${I("pencil", "xs")} Edit</button></div>
+      <div class="card" style="padding:4px 14px" data-rates><p class="note">Loading…</p></div>
       <div class="sec"><h2>Top restaurants · 30 days</h2><button data-a="goto" data-v="rest">All</button></div>
       <div class="card" style="padding:4px 14px">${d.top.length ? `<div class="list">${d.top.map((r, i) => `<div class="li"><span class="tile" ${bgc(r.photo)}>${r.photo ? "" : I("store", "sm")}</span>
           <span><b>${i + 1}. ${esc(r.name)}</b><br><span class="muted small">${plural(r.orders, "order")} · sales ${rs(r.food)}</span></span><b class="green">${rs(r.commission)}</b></div>`).join("")}</div>` : `<p class="note">No delivered orders in the last 30 days yet.</p>`}</div>
@@ -74,10 +79,16 @@
       <div class="sec"><h2>Platform settings</h2><button data-a="settings">${I("pencil", "xs")} Edit</button></div>
       <div class="card"><div class="line"><span>Commission</span><b>${esc(d.settings.commission_pct)}% of food value</b></div>
         <div class="line"><span>Your UPI (restaurants pay you)</span><b>${esc(d.settings.platform_upi || "not set")}</b></div>
-        <div class="line"><span>Support phone</span><b>${esc(d.settings.support_phone || "not set")}</b></div></div>
+        <div class="line"><span>Support WhatsApp (restaurants & riders only)</span><b>${esc(d.settings.support_phone || "not set")}</b></div>
+        <div class="line"><span>New customers: free delivery</span><b>${Number(d.settings.promo_new_orders) ? `first ${plural(Number(d.settings.promo_new_orders), "order")} up to ${rs(d.settings.promo_new_max)}` : "off"}</b></div>
+        <div class="line"><span>Free delivery you paid so far</span><b>${rs(t.promo_cost)}</b></div></div>
       <p class="note pad" style="text-align:center;margin-bottom:24px">Banners and more are on the web admin page: ${esc(KF.API.replace("https://", ""))}/admin/</p>`;
     b.scrollTop = sc; countUp(b);
     A.days = days;
+    // commission list (from the restaurants list)
+    get("/v1/admin/restaurants").then(j => { A.rest = j; const box = $("[data-rates]", b); if (!box) return;
+      box.innerHTML = `<div class="list">${j.restaurants.map(r => `<button class="li" style="width:100%;text-align:left" data-a="rate" data-id="${r.id}"><span class="tile ${r.commission_pct === null ? "" : "gold"}">${I("badge-percent", "sm")}</span>
+        <span><b>${esc(r.name)}</b><br><span class="muted small">${r.commission_pct === null ? `default ${j.default_pct}%` : "own rate"} · ${statusPill(r.status)}</span></span><b style="font-size:17px">${r.rate}%</b></button>`).join("")}</div>`; }).catch(() => {});
   }
 
   // ---------- restaurants ----------
@@ -90,18 +101,21 @@
     if (A.rfilter === "live") A.rfilter = count("pending") ? "pending" : "all";
     const list = all.filter(r => A.rfilter === "all" || r.status === A.rfilter);
     const f = [["pending", `Requests (${count("pending")})`], ["active", `Live (${count("active")})`], ["test", `Test (${count("test")})`], ["suspended", `Suspended (${count("suspended")})`], ["all", "All"]];
-    b.innerHTML = `<div class="chips pad" style="margin-bottom:12px">${f.map(([k, l]) => `<button class="chip" data-a="rfilter" data-f="${k}" aria-pressed="${A.rfilter === k}">${l}</button>`).join("")}</div>
+    b.innerHTML = `<div class="pad" style="margin-bottom:12px"><button class="btn sm" data-a="addrest" style="width:100%">${I("plus", "sm")} Add a restaurant</button></div>
+      <div class="chips pad" style="margin-bottom:12px">${f.map(([k, l]) => `<button class="chip" data-a="rfilter" data-f="${k}" aria-pressed="${A.rfilter === k}">${l}</button>`).join("")}</div>
       ${list.length ? list.map((r, i) => `<div class="ocard" style="animation-delay:${i * 45}ms">
         <div class="row"><span class="tile" ${bgc(r.photo, "width:52px;height:52px;border-radius:14px")}>${r.photo ? "" : I("store", "sm")}</span>
           <span class="grow" style="min-width:0"><b class="ell" style="display:block;font-size:16px">${esc(r.name)}</b><span class="muted small">${esc(r.area || "")}${r.cuisines ? " · " + esc(r.cuisines) : ""}</span></span>
           <span style="text-align:right">${statusPill(r.status)}<br><span class="small ${r.is_open ? "green" : "muted"}" style="font-weight:800">${r.is_open ? "● Open" : "○ Closed"}</span></span></div>
         <div class="mgrid"><div><b>${r.delivered}</b><span>delivered</span></div><div><b>${rs(r.food)}</b><span>sales</span></div><div><b class="green">${rs(r.commission)}</b><span>your ${r.rate}%</span></div>
           <div><b class="${r.due ? "red" : ""}">${rs(r.due)}</b><span>to collect</span></div><div><b>${rs(r.received)}</b><span>received</span></div><div><b>${r.rating ? r.rating + "★" : "–"}</b><span>${r.dishes} dishes</span></div></div>
-        <div class="muted small" style="margin-top:10px">${I("user", "xs")} ${esc(r.owner_name || "Owner")} ${esc(r.owner_phone || "")} · UPI ${esc(r.upi_id || "not set")} · ${r.cod ? "cash ok" : "UPI only"} · last order ${ago(r.last_order)}${r.missed ? ` · <span class="red">${r.missed} missed</span>` : ""}</div>
+        ${!r.owner_phone ? `<div class="warn" style="margin-top:10px">${I("key-round", "sm")} <span>${r.pending_owner_phone ? `Waiting for <b>${esc(r.pending_owner_phone)}</b> to log in: it becomes theirs then.` : "No owner yet: you manage it. Hand it over when the owner is ready."}</span></div>` : ""}
+        <div class="muted small" style="margin-top:10px">${I("user", "xs")} ${esc(r.owner_name || (r.owner_phone ? "Owner" : "You"))} ${esc(r.owner_phone || "")} · UPI ${esc(r.upi_id || "not set")} · ${r.cod ? "cash ok" : "UPI only"} · last order ${ago(r.last_order)}${r.missed ? ` · <span class="red">${r.missed} missed</span>` : ""}</div>
         <div class="two">${r.status === "pending" ? `<button class="btn danger" data-a="rstatus" data-id="${r.id}" data-s="suspended">Decline</button><button class="btn shine" data-a="rstatus" data-id="${r.id}" data-s="active">${I("check", "sm")} Approve</button>`
           : r.status === "active" ? `<button class="btn ghost" data-a="rorders" data-id="${r.id}">${I("receipt", "sm")} Orders</button><button class="btn soft" data-a="rate" data-id="${r.id}">${I("badge-percent", "sm")} Rate ${r.rate}%</button>`
           : r.status === "test" ? `<button class="btn ghost" data-a="rorders" data-id="${r.id}">${I("receipt", "sm")} Orders</button><button class="btn" data-a="rstatus" data-id="${r.id}" data-s="active">Make live</button>`
           : `<button class="btn ghost" data-a="rorders" data-id="${r.id}">${I("receipt", "sm")} Orders</button><button class="btn" data-a="rstatus" data-id="${r.id}" data-s="active">Re-activate</button>`}</div>
+        <div class="two"><button class="btn soft" data-a="manage" data-id="${r.id}">${I("utensils", "sm")} Menu & settings</button><button class="btn ghost" data-a="handover" data-id="${r.id}">${I("key-round", "sm")} ${r.owner_phone ? "Change owner" : "Hand over"}</button></div>
         <div class="row" style="margin-top:10px;gap:14px">${r.owner_phone ? `<button class="link small" data-a="callp" data-p="${esc(r.owner_phone)}">${I("phone", "xs")} Call owner</button>` : ""}
           ${r.status === "active" ? `<button class="link small" style="color:var(--red)" data-a="rstatus" data-id="${r.id}" data-s="suspended">Suspend</button>` : ""}
           ${r.status !== "pending" && r.status !== "active" ? "" : `<button class="link small" style="color:var(--ink-3)" data-a="rstatus" data-id="${r.id}" data-s="test">Mark as test</button>`}</div></div>`).join("")
@@ -187,6 +201,27 @@
     });
   }
 
+  // ---------- suggestions ----------
+  function openSuggestions() {
+    KF.push(async (el, scr) => {
+      el.innerHTML = `${KF.topbar("Suggestions")}<div class="scroll">${skelLines(4)}</div>`;
+      const draw = async () => {
+        let list; try { list = (await get("/v1/admin/suggestions")).suggestions; } catch (e) { $(".scroll", el).innerHTML = empty("circle-alert", "Couldn't load", e.message); return; }
+        $(".scroll", el).innerHTML = list.length ? list.map((x, i) => `<div class="ocard" style="animation-delay:${Math.min(i, 10) * 40}ms;${x.status === "done" ? "opacity:.6" : ""}">
+            <div class="hd"><b>${esc(x.name || "Someone")}</b><span class="pill ${x.kind === "customer" ? "" : "gold"}">${x.kind}</span></div>
+            <p style="margin:8px 0;line-height:1.5" class="selectable">${esc(x.text)}</p>
+            <div class="row between"><span class="muted small">${esc(x.phone || "")} · ${ago(x.created_at)}</span>
+              <span class="row" style="gap:8px">${x.phone ? `<button class="link small" data-a="callp" data-p="${esc(x.phone)}">${I("phone", "xs")} Call</button>` : ""}
+              <button class="btn ${x.status === "done" ? "ghost" : "soft"} sm" data-a="sdone" data-id="${x.id}" data-s="${x.status === "done" ? "new" : "done"}">${x.status === "done" ? "Mark new" : "Done"}</button></span></div></div>`).join("")
+          : empty("message-square", "No suggestions yet", "Customers, restaurants and riders can send ideas from Profile → Send a suggestion.");
+      };
+      bind(el, { back: () => KF.pop(scr), callp: b => call(b.dataset.p),
+        sdone: b => busy(b, async () => { await api("PATCH", `/v1/admin/suggestions/${b.dataset.id}`, { status: b.dataset.s }); await draw(); }) });
+      scr.onClose(() => drawHome());
+      draw();
+    });
+  }
+
   // ---------- wiring ----------
   function init(el) {
     A.el = el;
@@ -201,7 +236,9 @@
         const st = A.dash.settings;
         const v = await ask("Platform settings", "The commission applies to new orders. You can give a restaurant its own rate on its card.",
           [{ k: "commission_pct", label: "Commission (% of food value)", value: st.commission_pct, inputmode: "decimal" }, { k: "platform_upi", label: "Your UPI ID (restaurants pay your fee here)", value: st.platform_upi, placeholder: "you@ybl" },
-           { k: "support_phone", label: "Support phone (shown in Help)", value: st.support_phone, inputmode: "tel" }]);
+           { k: "support_phone", label: "Support WhatsApp number (only restaurants and riders see it)", value: st.support_phone, inputmode: "tel" },
+           { k: "promo_new_orders", label: "New customers: free delivery on their first … orders (0 = off)", value: st.promo_new_orders ?? 1, inputmode: "numeric" },
+           { k: "promo_new_max", label: "…when the food is up to ₹", value: st.promo_new_max ?? 400, inputmode: "numeric" }]);
         if (v) busy(null, async () => { await api("PUT", "/v1/admin/settings", v); toast("Saved"); drawHome(); });
       },
       rfilter: b => { A.rfilter = b.dataset.f; haptic(); drawRest(); },
@@ -214,9 +251,27 @@
       rate: async b => {
         const r = A.rest.restaurants.find(x => x.id === b.dataset.id);
         const v = await ask(`Commission for ${r.name}`, `Leave empty to use the default ${A.rest.default_pct}%. Applies to new orders.`, [{ k: "pct", label: "Commission %", value: r.commission_pct ?? "", inputmode: "decimal", placeholder: String(A.rest.default_pct) }]);
-        if (v) busy(null, async () => { await api("PATCH", `/v1/admin/restaurants/${r.id}`, { commission_pct: v.pct }); toast("Rate saved"); drawRest(); });
+        if (v) busy(null, async () => { await api("PATCH", `/v1/admin/restaurants/${r.id}`, { commission_pct: v.pct }); toast("Rate saved. Prices updated"); draw(); });
       },
       rorders: b => restOrders(A.rest.restaurants.find(x => x.id === b.dataset.id)),
+      manage: b => KF.manage(A.rest.restaurants.find(x => x.id === b.dataset.id)),
+      handover: async b => {
+        const r = A.rest.restaurants.find(x => x.id === b.dataset.id);
+        const v = await ask(`Hand ${r.name} to its owner`, "Enter the owner's mobile number. When they log in to Kezia's Food with it, the restaurant becomes theirs (orders, menu, earnings). You can still see everything.", [{ k: "phone", label: "Owner's mobile number", type: "tel", inputmode: "numeric", placeholder: "10-digit number", value: r.pending_owner_phone ? KF.phone10(r.pending_owner_phone) : "" }], "Hand over");
+        if (v && v.phone) busy(null, async () => { const j = await post(`/v1/admin/restaurants/${r.id}/owner`, { phone: v.phone }); haptic("success");
+          toast(j.done === "owner" ? "Done: it's theirs now" : "Saved: it becomes theirs when they log in"); drawRest(); });
+      },
+      addrest: async () => {
+        const v = await ask("Add a restaurant", "It stays hidden until you make it live. Next you pin it on the map.", [{ k: "name", label: "Name", placeholder: "e.g. Chunk City" }, { k: "area", label: "Area", placeholder: "e.g. Ghanta Ghar, Kulgam" },
+          { k: "address", label: "Address", placeholder: "Street, landmark" }, { k: "phone", label: "Restaurant phone", inputmode: "tel" }, { k: "cuisines", label: "What they serve", placeholder: "Pizza · Burgers" },
+          { k: "commission_pct", label: "Commission % (empty = default)", inputmode: "decimal" }], "Next: location");
+        if (!v || !v.name) return;
+        const p = await KF.customer.pickPlace({ save: false, title: "Where is it?", hint: "Put the pin on the restaurant's door." });
+        if (!p) return;
+        busy(null, async () => { const j = await post("/v1/admin/restaurants", { ...v, lat: p.lat, lon: p.lon }); toast("Added. Now add its menu"); A.rfilter = "pending"; await drawRest(); KF.manage(j.restaurant); });
+      },
+      rates: () => toast("Tap a restaurant to change its rate", "badge-percent"),
+      suggestions: () => openSuggestions(),
       ofilter: b => { A.ofilter = b.dataset.f; haptic(); drawOrders(); },
       order: b => orderSheet(A.orders.find(o => o.id === b.dataset.id)),
       usort: b => { A.usort = b.dataset.f; haptic(); drawUsers(); },

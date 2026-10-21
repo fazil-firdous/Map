@@ -1,0 +1,1712 @@
+{
+ "id": "80-degrees",
+ "name": "80 Degrees",
+ "phone": "+916006459362",
+ "area": "College Road, Kulgam",
+ "address": "Mir Complex, College Road, near HDFC Bank, Kulgam",
+ "lat": 33.64593,
+ "lon": 75.01231,
+ "cuisines": "Pizza · Chinese · Tandoori · Burgers · Shakes",
+ "photo": "/img/80-degrees-cover.jpg",
+ "commission_pct": 2,
+ "cod": true,
+ "prep_min": 25,
+ "banner": {
+  "kicker": "NOW ON KEZIA",
+  "title": "80 Degrees",
+  "subtitle": "Pizza, tandoori & shakes · College Road",
+  "photo": "/img/80-degrees-banner.jpg"
+ },
+ "note": "Menu from the maroon menu card (pages 1-13 of 80_Degrees_Kulgam_Menu.pdf). Prices are what the restaurant receives.",
+ "sections": [
+  {
+   "name": "Pizza (Non-Veg)",
+   "items": [
+    {
+     "name": "Chicken Blast",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 240
+      },
+      {
+       "n": "Medium",
+       "net": 400
+      },
+      {
+       "n": "Large",
+       "net": 550
+      }
+     ],
+     "description": "Spicy hot chicken",
+     "photo": "asset:pizza-1.jpg",
+     "bestseller": true
+    },
+    {
+     "name": "Schezwan Chicken",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 250
+      },
+      {
+       "n": "Medium",
+       "net": 420
+      },
+      {
+       "n": "Large",
+       "net": 570
+      }
+     ],
+     "description": "Chicken in hot Schezwan sauce with onion & capsicum",
+     "photo": "asset:pizza-2.jpg"
+    },
+    {
+     "name": "BBQ Chicken",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 260
+      },
+      {
+       "n": "Medium",
+       "net": 430
+      },
+      {
+       "n": "Large",
+       "net": 580
+      }
+     ],
+     "description": "BBQ-marinated chicken, onion & capsicum",
+     "photo": "asset:pizza-3.jpg"
+    },
+    {
+     "name": "Chilly Chicken",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 250
+      },
+      {
+       "n": "Medium",
+       "net": 440
+      },
+      {
+       "n": "Large",
+       "net": 560
+      }
+     ],
+     "description": "Chicken, onion & green chillies, Chinese style",
+     "photo": "asset:pizza-4.jpg"
+    },
+    {
+     "name": "Roast Chicken",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 240
+      },
+      {
+       "n": "Medium",
+       "net": 400
+      },
+      {
+       "n": "Large",
+       "net": 550
+      }
+     ],
+     "description": "Roasted chicken",
+     "photo": "asset:pizza-1.jpg"
+    },
+    {
+     "name": "Spicy Chicken Kebab",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 260
+      },
+      {
+       "n": "Medium",
+       "net": 440
+      },
+      {
+       "n": "Large",
+       "net": 600
+      }
+     ],
+     "description": "Kebab with onion, coriander & chilli flakes",
+     "photo": "asset:pizza-2.jpg"
+    },
+    {
+     "name": "Mexican Bite",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 350
+      },
+      {
+       "n": "Medium",
+       "net": 550
+      },
+      {
+       "n": "Large",
+       "net": 670
+      }
+     ],
+     "description": "Hot chicken, mushroom, jalapeños, capsicum & chicken salami",
+     "photo": "asset:pizza-3.jpg"
+    },
+    {
+     "name": "Chicken Fiesta",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 300
+      },
+      {
+       "n": "Medium",
+       "net": 490
+      },
+      {
+       "n": "Large",
+       "net": 620
+      }
+     ],
+     "description": "Hot chicken, roast chicken, red paprika & sweet corn",
+     "photo": "asset:pizza-4.jpg"
+    },
+    {
+     "name": "Chicken Tikka Pizza",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 250
+      },
+      {
+       "n": "Medium",
+       "net": 420
+      },
+      {
+       "n": "Large",
+       "net": 580
+      }
+     ],
+     "description": "Chicken tikka & capsicum",
+     "photo": "asset:pizza-1.jpg"
+    },
+    {
+     "name": "80 Degrees Special Pizza",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 380
+      },
+      {
+       "n": "Medium",
+       "net": 560
+      },
+      {
+       "n": "Large",
+       "net": 690
+      }
+     ],
+     "description": "Hot chicken, mushroom, American corn, onion, capsicum, sausage, jalapeño & black olives",
+     "photo": "asset:pizza-2.jpg",
+     "bestseller": true
+    }
+   ]
+  },
+  {
+   "name": "Pizza (Veg)",
+   "items": [
+    {
+     "name": "Cheese Burst",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 240
+      },
+      {
+       "n": "Medium",
+       "net": 410
+      },
+      {
+       "n": "Large",
+       "net": 560
+      }
+     ],
+     "description": "Three layers of cheese",
+     "photo": "asset:pizza-2.jpg"
+    },
+    {
+     "name": "Plain Cheese",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 190
+      },
+      {
+       "n": "Medium",
+       "net": 300
+      },
+      {
+       "n": "Large",
+       "net": 440
+      }
+     ],
+     "description": "Three kinds of cheese",
+     "photo": "asset:pizza-3.jpg"
+    },
+    {
+     "name": "Cheese & Corn",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 230
+      },
+      {
+       "n": "Medium",
+       "net": 350
+      },
+      {
+       "n": "Large",
+       "net": 480
+      }
+     ],
+     "description": "Cheese & sweet corn",
+     "photo": "asset:pizza-4.jpg"
+    },
+    {
+     "name": "Margherita",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 200
+      },
+      {
+       "n": "Medium",
+       "net": 320
+      },
+      {
+       "n": "Large",
+       "net": 440
+      }
+     ],
+     "description": "Oregano mix, tomato slices",
+     "photo": "asset:pizza-1.jpg"
+    },
+    {
+     "name": "Hot Veggie Supreme",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 240
+      },
+      {
+       "n": "Medium",
+       "net": 390
+      },
+      {
+       "n": "Large",
+       "net": 480
+      }
+     ],
+     "description": "Onion, capsicum & baby corn in Schezwan sauce",
+     "photo": "asset:pizza-2.jpg"
+    },
+    {
+     "name": "Farmhouse",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 270
+      },
+      {
+       "n": "Medium",
+       "net": 440
+      },
+      {
+       "n": "Large",
+       "net": 580
+      }
+     ],
+     "description": "Black olives, corn, onion, mushroom, jalapeño, capsicum",
+     "photo": "asset:pizza-3.jpg"
+    },
+    {
+     "name": "Deluxe Margherita",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 260
+      },
+      {
+       "n": "Medium",
+       "net": 380
+      },
+      {
+       "n": "Large",
+       "net": 560
+      }
+     ],
+     "description": "Extra cheese, mushroom, onion, basil",
+     "photo": "asset:pizza-4.jpg"
+    },
+    {
+     "name": "Veg Blast",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 230
+      },
+      {
+       "n": "Medium",
+       "net": 370
+      },
+      {
+       "n": "Large",
+       "net": 560
+      }
+     ],
+     "description": "Spicy onion, capsicum, mushroom",
+     "photo": "asset:pizza-1.jpg"
+    },
+    {
+     "name": "Simply Veg",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 210
+      },
+      {
+       "n": "Medium",
+       "net": 330
+      },
+      {
+       "n": "Large",
+       "net": 450
+      }
+     ],
+     "description": "Onion, tomato",
+     "photo": "asset:pizza-2.jpg"
+    },
+    {
+     "name": "Guest Choice",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 290
+      },
+      {
+       "n": "Medium",
+       "net": 470
+      },
+      {
+       "n": "Large",
+       "net": 630
+      }
+     ],
+     "description": "Any four veg toppings",
+     "photo": "asset:pizza-3.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Pizza Extras",
+   "items": [
+    {
+     "name": "Extra Veg Toppings",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 20
+      },
+      {
+       "n": "Medium",
+       "net": 30
+      },
+      {
+       "n": "Large",
+       "net": 40
+      }
+     ],
+     "description": "Sweet corn, mushroom or baby corn · pick your pizza size",
+     "photo": "asset:pizza-3.jpg"
+    },
+    {
+     "name": "Non-Veg Toppings",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 60
+      },
+      {
+       "n": "Medium",
+       "net": 90
+      },
+      {
+       "n": "Large",
+       "net": 110
+      }
+     ],
+     "description": "Extra salami or extra chicken · pick your pizza size",
+     "photo": "asset:pizza-3.jpg"
+    },
+    {
+     "name": "Extra Cheese",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 50
+      },
+      {
+       "n": "Medium",
+       "net": 70
+      },
+      {
+       "n": "Large",
+       "net": 90
+      }
+     ],
+     "description": "Pick your pizza size",
+     "photo": "asset:pizza-3.jpg"
+    },
+    {
+     "name": "Cheese Burst Base",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 70
+      },
+      {
+       "n": "Medium",
+       "net": 90
+      },
+      {
+       "n": "Large",
+       "net": 110
+      }
+     ],
+     "description": "Special base layered with creamy cheese",
+     "photo": "asset:pizza-3.jpg"
+    },
+    {
+     "name": "Stuffed Crust Cheese",
+     "veg": true,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 90
+      },
+      {
+       "n": "Medium",
+       "net": 110
+      },
+      {
+       "n": "Large",
+       "net": 130
+      }
+     ],
+     "description": "Pick your pizza size",
+     "photo": "asset:pizza-3.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Meals",
+   "items": [
+    {
+     "name": "Single Meal",
+     "veg": false,
+     "net": 490,
+     "description": "Chicken Blast pizza (S), French fries, chicken popcorn (S), cold drink 250 ml",
+     "photo": "asset:pizza-1.jpg"
+    },
+    {
+     "name": "Double Meal",
+     "veg": false,
+     "net": 670,
+     "description": "Chicken Blast pizza (M), French fries, chicken popcorn (S), cold drink 500 ml",
+     "photo": "asset:pizza-2.jpg"
+    },
+    {
+     "name": "Family Meal",
+     "veg": false,
+     "net": 990,
+     "description": "Chicken Blast pizza (L), peri peri fries, chicken strips 9 pcs, cold drink 500 ml",
+     "photo": "asset:pizza-4.jpg"
+    },
+    {
+     "name": "80 Degrees Special Meal",
+     "veg": false,
+     "net": 1190,
+     "description": "Chicken Blast pizza (L), French fries, spicy boneless strips 3 pcs, chicken popcorn (S), cold drink 1 L",
+     "photo": "asset:pizza-3.jpg",
+     "bestseller": true
+    }
+   ]
+  },
+  {
+   "name": "Burgers",
+   "items": [
+    {
+     "name": "Chicken Zinger",
+     "veg": false,
+     "net": 170,
+     "photo": "asset:burger.jpg",
+     "bestseller": true
+    },
+    {
+     "name": "Jumbo Burger",
+     "veg": false,
+     "net": 190,
+     "photo": "asset:burger-2.jpg"
+    },
+    {
+     "name": "Chicken Tikka Burger",
+     "veg": false,
+     "net": 190,
+     "photo": "asset:burger.jpg"
+    },
+    {
+     "name": "Grilled Chicken Burger",
+     "veg": false,
+     "net": 180,
+     "photo": "asset:burger-2.jpg"
+    },
+    {
+     "name": "Chicken Burst Burger",
+     "veg": false,
+     "net": 140,
+     "photo": "asset:burger.jpg"
+    },
+    {
+     "name": "Peri Peri Chicken Burger",
+     "veg": false,
+     "net": 140,
+     "photo": "asset:burger-2.jpg"
+    },
+    {
+     "name": "Crispy Chicken Burger",
+     "veg": false,
+     "net": 140,
+     "photo": "asset:burger.jpg"
+    },
+    {
+     "name": "Veg Deluxe Burger",
+     "veg": true,
+     "net": 130,
+     "photo": "asset:burger-2.jpg"
+    },
+    {
+     "name": "Veg Cheesy Burger",
+     "veg": true,
+     "net": 130,
+     "photo": "asset:burger.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Rolls",
+   "items": [
+    {
+     "name": "Shawarma",
+     "veg": false,
+     "net": 190,
+     "photo": "asset:rolls.jpg",
+     "bestseller": true
+    },
+    {
+     "name": "Single Kathi Roll",
+     "veg": false,
+     "net": 170,
+     "photo": "asset:rolls.jpg"
+    },
+    {
+     "name": "Double Kathi Roll",
+     "veg": false,
+     "net": 190,
+     "photo": "asset:rolls.jpg"
+    },
+    {
+     "name": "Chicken Kabab Roll",
+     "veg": false,
+     "net": 180,
+     "photo": "asset:rolls.jpg"
+    },
+    {
+     "name": "Mutton Kabab Roll",
+     "veg": false,
+     "net": 220,
+     "photo": "asset:rolls.jpg"
+    },
+    {
+     "name": "80 Degrees Special Roll",
+     "veg": false,
+     "net": 230,
+     "photo": "asset:rolls.jpg"
+    },
+    {
+     "name": "Veg Kathi Roll",
+     "veg": true,
+     "net": 130,
+     "photo": "asset:rolls.jpg"
+    },
+    {
+     "name": "Egg Roll",
+     "veg": false,
+     "net": 80,
+     "photo": "asset:rolls.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Wraps",
+   "items": [
+    {
+     "name": "Crispy Veg Wrap",
+     "veg": true,
+     "net": 130,
+     "photo": "asset:wrap.jpg"
+    },
+    {
+     "name": "Cheesy Crunch Veg Wrap",
+     "veg": true,
+     "net": 130,
+     "photo": "asset:wrap.jpg"
+    },
+    {
+     "name": "Chicken Twist Wrap",
+     "veg": false,
+     "net": 150,
+     "photo": "asset:wrap.jpg"
+    },
+    {
+     "name": "Peri Peri Twist Wrap",
+     "veg": false,
+     "net": 160,
+     "photo": "asset:wrap.jpg"
+    },
+    {
+     "name": "Fire Cracker Wrap",
+     "veg": false,
+     "net": 160,
+     "photo": "asset:wrap.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Crispy Chicken",
+   "items": [
+    {
+     "name": "Chicken Popcorn",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 140
+      },
+      {
+       "n": "Medium",
+       "net": 170
+      },
+      {
+       "n": "Large",
+       "net": 210
+      }
+     ],
+     "photo": "asset:fried-chicken.jpg"
+    },
+    {
+     "name": "Peri Peri Chicken Popcorn",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 150
+      },
+      {
+       "n": "Medium",
+       "net": 200
+      },
+      {
+       "n": "Large",
+       "net": 220
+      }
+     ],
+     "photo": "asset:fried-chicken.jpg"
+    },
+    {
+     "name": "Crispy Chicken Strips",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 110
+      },
+      {
+       "n": "Medium",
+       "net": 250
+      },
+      {
+       "n": "Large",
+       "net": 330
+      }
+     ],
+     "photo": "asset:fried-chicken.jpg"
+    },
+    {
+     "name": "Spicy Chicken Strips",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Small",
+       "net": 120
+      },
+      {
+       "n": "Medium",
+       "net": 260
+      },
+      {
+       "n": "Large",
+       "net": 340
+      }
+     ],
+     "photo": "asset:fried-chicken.jpg"
+    },
+    {
+     "name": "Nuggets",
+     "veg": false,
+     "net": 190,
+     "photo": "asset:fried-chicken.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Loaded Snacks & Fries",
+   "items": [
+    {
+     "name": "Fully Loaded Fries",
+     "veg": false,
+     "net": 140,
+     "photo": "asset:fries-2.jpg"
+    },
+    {
+     "name": "Fully Loaded Popcorn",
+     "veg": false,
+     "net": 220,
+     "photo": "asset:fried-chicken.jpg"
+    },
+    {
+     "name": "French Fries",
+     "veg": true,
+     "net": 100,
+     "photo": "asset:fries.jpg"
+    },
+    {
+     "name": "Peri Peri Fries",
+     "veg": true,
+     "net": 120,
+     "photo": "asset:fries-2.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Sandwiches",
+   "items": [
+    {
+     "name": "Veg Classic Cheese Sandwich",
+     "veg": true,
+     "net": 130,
+     "photo": "asset:sandwich.jpg"
+    },
+    {
+     "name": "Grilled Chicken Sandwich",
+     "veg": false,
+     "net": 140,
+     "photo": "asset:sandwich.jpg"
+    },
+    {
+     "name": "80 Degrees Special Sandwich",
+     "veg": false,
+     "net": 170,
+     "photo": "asset:sandwich.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Indian Fried Snacks",
+   "items": [
+    {
+     "name": "Chicken Pakora (10 pcs)",
+     "veg": false,
+     "net": 280,
+     "photo": "asset:fried-chicken.jpg"
+    },
+    {
+     "name": "Zeera Chicken (10 pcs)",
+     "veg": false,
+     "net": 290,
+     "photo": "asset:fried-chicken.jpg"
+    },
+    {
+     "name": "Fried Fish (10 pcs)",
+     "veg": false,
+     "net": 280,
+     "photo": "asset:fried-chicken.jpg"
+    },
+    {
+     "name": "80 Degrees Fried Chicken (8 pcs)",
+     "veg": false,
+     "net": 380,
+     "photo": "asset:fried-chicken.jpg",
+     "bestseller": true
+    }
+   ]
+  },
+  {
+   "name": "Tandoori",
+   "items": [
+    {
+     "name": "Tandoori Chicken",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 330
+      },
+      {
+       "n": "Full",
+       "net": 600
+      }
+     ],
+     "photo": "asset:tandoori.jpg",
+     "bestseller": true
+    },
+    {
+     "name": "Afghani Chicken",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 360
+      },
+      {
+       "n": "Full",
+       "net": 700
+      }
+     ],
+     "photo": "asset:tandoori.jpg"
+    },
+    {
+     "name": "Haryali Chicken",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 350
+      },
+      {
+       "n": "Full",
+       "net": 630
+      }
+     ],
+     "photo": "asset:tandoori.jpg"
+    },
+    {
+     "name": "Multani Chicken",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 350
+      },
+      {
+       "n": "Full",
+       "net": 630
+      }
+     ],
+     "photo": "asset:tandoori.jpg"
+    },
+    {
+     "name": "Chicken Tikka",
+     "veg": false,
+     "net": 270,
+     "photo": "asset:tikka.jpg"
+    },
+    {
+     "name": "Malai Tikka",
+     "veg": false,
+     "net": 290,
+     "photo": "asset:tikka.jpg"
+    },
+    {
+     "name": "Achari Tikka",
+     "veg": false,
+     "net": 280,
+     "photo": "asset:tikka.jpg"
+    },
+    {
+     "name": "Angari Tikka",
+     "veg": false,
+     "net": 270,
+     "photo": "asset:tikka.jpg"
+    },
+    {
+     "name": "Fish Tikka",
+     "veg": false,
+     "net": 290,
+     "photo": "asset:tikka.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Indian Main Course (Non-Veg)",
+   "items": [
+    {
+     "name": "Chicken Kanti",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Half (8 pcs)",
+       "net": 270
+      },
+      {
+       "n": "Full (16 pcs)",
+       "net": 490
+      }
+     ],
+     "photo": "asset:butter-chicken.jpg"
+    },
+    {
+     "name": "Chicken Kabab Kanti",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 250
+      },
+      {
+       "n": "Full",
+       "net": 470
+      }
+     ],
+     "photo": "asset:butter-chicken.jpg"
+    },
+    {
+     "name": "Mutton Kabab Kanti",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 280
+      },
+      {
+       "n": "Full",
+       "net": 520
+      }
+     ],
+     "photo": "asset:butter-chicken.jpg"
+    },
+    {
+     "name": "Butter Chicken (with bone)",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 360
+      },
+      {
+       "n": "Full",
+       "net": 640
+      }
+     ],
+     "photo": "asset:butter-chicken.jpg"
+    },
+    {
+     "name": "Butter Chicken (boneless)",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 380
+      },
+      {
+       "n": "Full",
+       "net": 650
+      }
+     ],
+     "photo": "asset:butter-chicken.jpg",
+     "bestseller": true
+    },
+    {
+     "name": "Masala Chicken",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 340
+      },
+      {
+       "n": "Full",
+       "net": 630
+      }
+     ],
+     "photo": "asset:butter-chicken.jpg"
+    },
+    {
+     "name": "Chicken Kadai",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 340
+      },
+      {
+       "n": "Full",
+       "net": 630
+      }
+     ],
+     "photo": "asset:butter-chicken.jpg"
+    },
+    {
+     "name": "Chicken Handi",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 340
+      },
+      {
+       "n": "Full",
+       "net": 630
+      }
+     ],
+     "photo": "asset:butter-chicken.jpg"
+    },
+    {
+     "name": "Shahi Chicken Korma",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 390
+      },
+      {
+       "n": "Full",
+       "net": 690
+      }
+     ],
+     "photo": "asset:butter-chicken.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Indian Main Course (Veg)",
+   "items": [
+    {
+     "name": "Mix Vegetable",
+     "veg": true,
+     "net": 250,
+     "photo": "asset:veg-curry.jpg"
+    },
+    {
+     "name": "Matar Mushroom",
+     "veg": true,
+     "net": 280,
+     "photo": "asset:veg-curry.jpg"
+    },
+    {
+     "name": "Paneer Do Piyaza",
+     "veg": true,
+     "net": 310,
+     "photo": "asset:paneer.jpg"
+    },
+    {
+     "name": "Paneer Butter Masala",
+     "veg": true,
+     "net": 310,
+     "photo": "asset:paneer.jpg"
+    },
+    {
+     "name": "Shahi Paneer",
+     "veg": true,
+     "net": 310,
+     "photo": "asset:paneer.jpg"
+    },
+    {
+     "name": "Kadai Paneer",
+     "veg": true,
+     "net": 310,
+     "photo": "asset:paneer.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Biryani & Pulao",
+   "items": [
+    {
+     "name": "Plain Rice",
+     "veg": true,
+     "net": 100,
+     "photo": "asset:rice.jpg"
+    },
+    {
+     "name": "Zeera Rice",
+     "veg": true,
+     "net": 120,
+     "photo": "asset:rice.jpg"
+    },
+    {
+     "name": "Paneer Veg Biryani",
+     "veg": true,
+     "net": 250,
+     "photo": "asset:biryani-2.jpg"
+    },
+    {
+     "name": "Chicken Biryani",
+     "veg": false,
+     "variants": [
+      {
+       "n": "Half",
+       "net": 150
+      },
+      {
+       "n": "Full",
+       "net": 290
+      }
+     ],
+     "photo": "asset:biryani.jpg"
+    },
+    {
+     "name": "Veg Pulao",
+     "veg": true,
+     "net": 300,
+     "photo": "asset:rice.jpg"
+    },
+    {
+     "name": "Chicken Pulao",
+     "veg": false,
+     "net": 350,
+     "photo": "asset:biryani-2.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Breads & Naan",
+   "items": [
+    {
+     "name": "Plain Naan",
+     "veg": true,
+     "net": 60,
+     "photo": "asset:naan.jpg"
+    },
+    {
+     "name": "Butter Naan",
+     "veg": true,
+     "net": 80,
+     "photo": "asset:naan.jpg"
+    },
+    {
+     "name": "Garlic Naan",
+     "veg": true,
+     "net": 90,
+     "photo": "asset:naan.jpg"
+    },
+    {
+     "name": "Tandoori Lacha",
+     "veg": true,
+     "net": 70,
+     "photo": "asset:naan.jpg"
+    },
+    {
+     "name": "Lacha Paratha",
+     "veg": true,
+     "net": 40,
+     "photo": "asset:naan.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Chinese Starters (Veg)",
+   "items": [
+    {
+     "name": "Honey Chilli Potato",
+     "veg": true,
+     "net": 190,
+     "photo": "asset:fries-2.jpg"
+    },
+    {
+     "name": "Chilli Mushroom Dry",
+     "veg": true,
+     "net": 280,
+     "photo": "asset:chilli-paneer.jpg"
+    },
+    {
+     "name": "Chilli Paneer Dry",
+     "veg": true,
+     "net": 290,
+     "photo": "asset:chilli-paneer.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Chinese Starters (Non-Veg)",
+   "items": [
+    {
+     "name": "Chilli Chicken Dry",
+     "veg": false,
+     "net": 340,
+     "photo": "asset:chilli-chicken.jpg"
+    },
+    {
+     "name": "Schezwan Chicken Dry",
+     "veg": false,
+     "net": 340,
+     "photo": "asset:chilli-chicken.jpg"
+    },
+    {
+     "name": "Chicken 65 (15 pcs)",
+     "veg": false,
+     "net": 400,
+     "photo": "asset:chilli-chicken.jpg"
+    },
+    {
+     "name": "Garlic Chicken Dry",
+     "veg": false,
+     "net": 340,
+     "photo": "asset:chilli-chicken.jpg"
+    },
+    {
+     "name": "Lemon Fish Dry",
+     "veg": false,
+     "net": 340,
+     "photo": "asset:chilli-chicken.jpg"
+    },
+    {
+     "name": "Fish Chilli Dry",
+     "veg": false,
+     "net": 340,
+     "photo": "asset:chilli-chicken.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Chinese Main Course",
+   "items": [
+    {
+     "name": "Chilli Paneer Gravy",
+     "veg": true,
+     "net": 310,
+     "photo": "asset:chilli-paneer.jpg"
+    },
+    {
+     "name": "Chilli Mushroom Gravy",
+     "veg": true,
+     "net": 320,
+     "photo": "asset:chilli-paneer.jpg"
+    },
+    {
+     "name": "Chilli Chicken Gravy",
+     "veg": false,
+     "net": 360,
+     "photo": "asset:chilli-chicken.jpg"
+    },
+    {
+     "name": "Lemon Chicken Gravy",
+     "veg": false,
+     "net": 360,
+     "photo": "asset:chilli-chicken.jpg"
+    },
+    {
+     "name": "Schezwan Chicken Gravy",
+     "veg": false,
+     "net": 360,
+     "photo": "asset:chilli-chicken.jpg"
+    },
+    {
+     "name": "Garlic Chicken Gravy",
+     "veg": false,
+     "net": 360,
+     "photo": "asset:chilli-chicken.jpg"
+    },
+    {
+     "name": "Lemon Fish Gravy",
+     "veg": false,
+     "net": 360,
+     "photo": "asset:chilli-chicken.jpg"
+    },
+    {
+     "name": "Fish Chilli Gravy",
+     "veg": false,
+     "net": 360,
+     "photo": "asset:chilli-chicken.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Noodles",
+   "items": [
+    {
+     "name": "Veg Noodles",
+     "veg": true,
+     "net": 160,
+     "photo": "asset:noodles.jpg"
+    },
+    {
+     "name": "Chicken Noodles",
+     "veg": false,
+     "net": 190,
+     "photo": "asset:noodles-2.jpg"
+    },
+    {
+     "name": "Schezwan Veg Noodles",
+     "veg": true,
+     "net": 180,
+     "photo": "asset:noodles.jpg"
+    },
+    {
+     "name": "Schezwan Chicken Noodles",
+     "veg": false,
+     "net": 210,
+     "photo": "asset:noodles-2.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Fried Rice",
+   "items": [
+    {
+     "name": "Veg Fried Rice",
+     "veg": true,
+     "net": 180,
+     "photo": "asset:fried-rice.jpg"
+    },
+    {
+     "name": "Schezwan Veg Fried Rice",
+     "veg": true,
+     "net": 190,
+     "photo": "asset:fried-rice.jpg"
+    },
+    {
+     "name": "Egg Fried Rice",
+     "veg": false,
+     "net": 160,
+     "photo": "asset:fried-rice.jpg"
+    },
+    {
+     "name": "Fish Fried Rice",
+     "veg": false,
+     "net": 200,
+     "photo": "asset:fried-rice.jpg"
+    },
+    {
+     "name": "Chicken Fried Rice",
+     "veg": false,
+     "net": 220,
+     "photo": "asset:fried-rice.jpg"
+    },
+    {
+     "name": "Schezwan Chicken Fried Rice",
+     "veg": false,
+     "net": 230,
+     "photo": "asset:fried-rice.jpg"
+    },
+    {
+     "name": "Chicken Kabab Fried Rice",
+     "veg": false,
+     "net": 270,
+     "photo": "asset:fried-rice.jpg"
+    },
+    {
+     "name": "Mutton Kabab Fried Rice",
+     "veg": false,
+     "net": 300,
+     "photo": "asset:fried-rice.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Soups",
+   "items": [
+    {
+     "name": "Hot & Sour Soup (Veg)",
+     "veg": true,
+     "net": 100,
+     "photo": "asset:soup.jpg"
+    },
+    {
+     "name": "Hot & Sour Soup (Chicken)",
+     "veg": false,
+     "net": 120,
+     "photo": "asset:soup.jpg"
+    },
+    {
+     "name": "Manchow Soup (Veg)",
+     "veg": true,
+     "net": 100,
+     "photo": "asset:soup.jpg"
+    },
+    {
+     "name": "Manchow Soup (Chicken)",
+     "veg": false,
+     "net": 120,
+     "photo": "asset:soup.jpg"
+    },
+    {
+     "name": "Sweet Corn Soup (Veg)",
+     "veg": true,
+     "net": 100,
+     "photo": "asset:soup.jpg"
+    },
+    {
+     "name": "Sweet Corn Soup (Chicken)",
+     "veg": false,
+     "net": 120,
+     "photo": "asset:soup.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Pasta",
+   "items": [
+    {
+     "name": "Creamy Chicken Pasta",
+     "veg": false,
+     "net": 270,
+     "photo": "asset:pasta.jpg"
+    },
+    {
+     "name": "Creamy Mushroom Pasta",
+     "veg": true,
+     "net": 240,
+     "photo": "asset:pasta.jpg"
+    },
+    {
+     "name": "Pink Sauce Pasta",
+     "veg": true,
+     "net": 280,
+     "photo": "asset:pasta.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Salads",
+   "items": [
+    {
+     "name": "Green Salad",
+     "veg": true,
+     "net": 70,
+     "photo": "asset:salad.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Mojitos & Sparklers",
+   "items": [
+    {
+     "name": "Virgin Mojito",
+     "veg": true,
+     "net": 140,
+     "photo": "asset:mojito.jpg"
+    },
+    {
+     "name": "Watermelon Mojito",
+     "veg": true,
+     "net": 160,
+     "photo": "asset:mojito.jpg"
+    },
+    {
+     "name": "Green Apple Mojito",
+     "veg": true,
+     "net": 160,
+     "photo": "asset:mojito.jpg"
+    },
+    {
+     "name": "Blue Lagoon Mojito",
+     "veg": true,
+     "net": 160,
+     "photo": "asset:mojito.jpg"
+    },
+    {
+     "name": "Strawberry Mojito",
+     "veg": true,
+     "net": 160,
+     "photo": "asset:mojito.jpg"
+    },
+    {
+     "name": "Peach Mojito",
+     "veg": true,
+     "net": 160,
+     "photo": "asset:mojito.jpg"
+    },
+    {
+     "name": "Kiwi Mojito",
+     "veg": true,
+     "net": 160,
+     "photo": "asset:mojito.jpg"
+    },
+    {
+     "name": "Fresh Lime Water",
+     "veg": true,
+     "net": 110,
+     "photo": "asset:lime-soda.jpg"
+    },
+    {
+     "name": "Fresh Lime Soda",
+     "veg": true,
+     "net": 120,
+     "photo": "asset:lime-soda.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Shakes",
+   "items": [
+    {
+     "name": "Mango Delight Shake",
+     "veg": true,
+     "net": 180,
+     "photo": "asset:shake.jpg"
+    },
+    {
+     "name": "Strawberry Shake",
+     "veg": true,
+     "net": 180,
+     "photo": "asset:shake.jpg"
+    },
+    {
+     "name": "Chocolate Shake",
+     "veg": true,
+     "net": 180,
+     "photo": "asset:shake.jpg"
+    },
+    {
+     "name": "Banana Shake",
+     "veg": true,
+     "net": 170,
+     "photo": "asset:shake.jpg"
+    },
+    {
+     "name": "Black Currant Shake",
+     "veg": true,
+     "net": 180,
+     "photo": "asset:shake.jpg"
+    },
+    {
+     "name": "Cold Coffee",
+     "veg": true,
+     "net": 180,
+     "photo": "asset:coffee.jpg",
+     "bestseller": true
+    },
+    {
+     "name": "Vanilla Shake",
+     "veg": true,
+     "net": 170,
+     "photo": "asset:shake.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Desserts & Ice Cream",
+   "items": [
+    {
+     "name": "Hot Chocolate Brownie",
+     "veg": true,
+     "net": 150,
+     "photo": "asset:brownie.jpg"
+    },
+    {
+     "name": "Sizzling Brownie with Vanilla Ice Cream",
+     "veg": true,
+     "net": 220,
+     "photo": "asset:brownie.jpg"
+    },
+    {
+     "name": "Mango Ice Cream",
+     "veg": true,
+     "net": 100,
+     "photo": "asset:ice-cream.jpg"
+    },
+    {
+     "name": "Strawberry Ice Cream",
+     "veg": true,
+     "net": 100,
+     "photo": "asset:ice-cream.jpg"
+    },
+    {
+     "name": "Chocolate Ice Cream",
+     "veg": true,
+     "net": 100,
+     "photo": "asset:ice-cream.jpg"
+    },
+    {
+     "name": "Black Currant Ice Cream",
+     "veg": true,
+     "net": 100,
+     "photo": "asset:ice-cream.jpg"
+    },
+    {
+     "name": "Vanilla Ice Cream",
+     "veg": true,
+     "net": 100,
+     "photo": "asset:ice-cream.jpg"
+    }
+   ]
+  },
+  {
+   "name": "Hot Beverages",
+   "items": [
+    {
+     "name": "Cappuccino",
+     "veg": true,
+     "net": 80,
+     "photo": "asset:coffee-2.jpg"
+    },
+    {
+     "name": "Green Tea",
+     "veg": true,
+     "net": 70,
+     "photo": "asset:coffee-2.jpg"
+    },
+    {
+     "name": "Lemon Tea",
+     "veg": true,
+     "net": 70,
+     "photo": "asset:coffee-2.jpg"
+    },
+    {
+     "name": "Black Tea",
+     "veg": true,
+     "net": 60,
+     "photo": "asset:coffee-2.jpg"
+    }
+   ]
+  }
+ ]
+}

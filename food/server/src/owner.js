@@ -10,6 +10,7 @@ const db = require("./db");
 const config = require("./config");
 const { needUser, needRole, myPlaces } = require("./auth");
 const { setting } = require("./catalog");
+const { ratePct, priced } = require("./pricing");
 const { bad, notFound, str, normPhone, isMobile } = require("./util");
 
 async function savePhoto(file) {
@@ -76,18 +77,38 @@ function routes(app) {
   app.delete("/v1/restaurant/:rid/sections/:id", { preHandler: mgr }, async (req) => {
     await db.q("DELETE FROM menu_sections WHERE id = $1 AND restaurant_id = $2", [Number(req.params.id), req.params.rid]); return { ok: true };
   });
-  const itemFields = b => ({ name: str(b.name, 60), description: str(b.description, 200), price: int(b.price, 1, 20000), veg: "veg" in b ? !!b.veg : undefined,
+  const sizes = v => {
+    if (v === null || (Array.isArray(v) && !v.length)) return null;
+    if (!Array.isArray(v) || v.length > 6) throw bad("Up to 6 sizes per dish");
+    return v.map(x => { const n = str(x.n, 20), net = int(x.net, 1, 20000); if (!n || !net) throw bad("Each size needs a name and a price"); return { n, net }; });
+  };
+  const itemFields = b => ({ name: str(b.name, 60), description: str(b.description, 200), price: int(b.price, 1, 20000), net_price: int(b.net_price, 1, 20000),
+    variants: "variants" in b ? sizes(b.variants) : undefined, veg: "veg" in b ? !!b.veg : undefined,
     in_stock: "in_stock" in b ? !!b.in_stock : undefined, bestseller: "bestseller" in b ? !!b.bestseller : undefined, section_id: b.section_id ? Number(b.section_id) : undefined });
+  /** Restaurants give what they want to receive (net, or per size); work out the customer price at their rate. */
+  async function withPrices(rid, f, b) {
+    if (f.variants || f.net_price) {
+      const p = priced({ net_price: f.net_price, variants: f.variants }, await ratePct(rid));
+      Object.assign(f, { price: p.price, net_price: p.net_price, variants: p.variants ? JSON.stringify(p.variants) : null });
+    } else if ("variants" in b) f.variants = null;
+    else if (f.price) f.net_price = null; // an old-style direct price: stop recalculating it
+    return f;
+  }
   app.post("/v1/restaurant/:rid/items", { preHandler: mgr }, async (req) => {
-    const f = itemFields(req.body || {});
+    const b = req.body || {}, f = await withPrices(req.params.rid, itemFields(b), b);
     if (!f.name || !f.price) throw bad("Add a name and a price");
-    return { item: await db.one(`INSERT INTO menu_items (restaurant_id, section_id, name, description, price, veg, bestseller, sort)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, (SELECT COALESCE(max(sort), 0) + 1 FROM menu_items WHERE restaurant_id = $1)) RETURNING *`,
-      [req.params.rid, f.section_id || null, f.name, f.description, f.price, !!f.veg, !!f.bestseller]) };
+    return { item: await db.one(`INSERT INTO menu_items (restaurant_id, section_id, name, description, price, net_price, variants, veg, bestseller, sort)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, (SELECT COALESCE(max(sort), 0) + 1 FROM menu_items WHERE restaurant_id = $1)) RETURNING *`,
+      [req.params.rid, f.section_id || null, f.name, f.description, f.price, f.net_price ?? null, f.variants ?? null, !!f.veg, !!f.bestseller]) };
   });
   app.patch("/v1/restaurant/:rid/items/:id", { preHandler: mgr }, async (req) => {
-    const f = itemFields(req.body || {}), set = [], vals = [Number(req.params.id), req.params.rid];
-    for (const [k, v] of Object.entries(f)) { if (v === undefined || (v === null && ["name", "price"].includes(k))) continue; if (k === "description" && !("description" in req.body)) continue; vals.push(v); set.push(`${k} = $${vals.length}`); }
+    const b = req.body || {}, f = await withPrices(req.params.rid, itemFields(b), b), set = [], vals = [Number(req.params.id), req.params.rid];
+    for (const [k, v] of Object.entries(f)) {
+      if (v === undefined || (v === null && ["name", "price"].includes(k))) continue;
+      if (k === "description" && !("description" in b)) continue;
+      if (k === "net_price" && v === null && !("price" in b)) continue;
+      vals.push(v); set.push(`${k} = $${vals.length}`);
+    }
     if (!set.length) throw bad("Nothing to save");
     const it = await db.one(`UPDATE menu_items SET ${set.join(", ")} WHERE id = $1 AND restaurant_id = $2 RETURNING *`, vals);
     if (!it) throw notFound(); return { item: it };

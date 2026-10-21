@@ -13,7 +13,7 @@
   const h = html => { const t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstElementChild; };
   const I = (n, cls = "") => `<svg class="ico ${cls}" viewBox="0 0 24 24" aria-hidden="true">${KFIcons[n] || ""}</svg>`;
   const rs = n => "₹" + Number(n || 0).toLocaleString("en-IN");
-  const img = p => !p ? "" : p.startsWith("asset:") ? "img/food/" + p.slice(6) : p.startsWith("/uploads/") ? API + p : p;
+  const img = p => !p ? "" : p.startsWith("asset:") ? "img/food/" + p.slice(6) : p.startsWith("/") ? API + p : p;
   const bg = p => p ? `style="background-image:url('${esc(img(p))}')"` : "";
   /** One style attribute with a cover photo plus extra rules (two style attributes on one element drop the second). */
   const bgc = (p, extra = "") => `style="${p ? `background:url('${esc(img(p))}') center/cover no-repeat;` : ""}${extra}"`;
@@ -32,14 +32,15 @@
   // ---- state kept on this phone ----
   const S = {
     token: ls.get("kf_token", null), user: ls.get("kf_user", null), places: ls.get("kf_places", []),
-    cart: ls.get("kf_cart", null), addrId: ls.get("kf_addr", null), addresses: [], here: ls.get("kf_here", null), support: null,
+    cart: ls.get("kf_cart", null), addrId: ls.get("kf_addr", null), addresses: [], here: ls.get("kf_here", null), support: ls.get("kf_support", null),
     skew: 0,
     saveCart() { ls.set("kf_cart", this.cart); },
     setAuth(j) {
       this.token = j.token || this.token; this.user = j.user; this.places = j.places || [];
       ls.set("kf_token", this.token); ls.set("kf_user", this.user); ls.set("kf_places", this.places);
+      if ("support" in j) { this.support = j.support || null; ls.set("kf_support", this.support); } // only restaurant teams, riders and the owner get it
     },
-    clearAuth() { this.token = null; this.user = null; this.places = []; this.addresses = []; this.addrId = null; ["kf_token", "kf_user", "kf_places", "kf_addr"].forEach(ls.del); },
+    clearAuth() { this.token = null; this.user = null; this.places = []; this.addresses = []; this.addrId = null; this.support = null; ["kf_token", "kf_user", "kf_places", "kf_addr", "kf_support"].forEach(ls.del); },
     get addr() { return this.addresses.find(a => a.id === this.addrId) || null; },
     /** Where to price delivery from: the chosen address, else this phone's position, else Kulgam town. */
     get point() { const a = this.addr; return a ? { lat: a.lat, lon: a.lon } : this.here || { lat: 33.6450, lon: 75.0190 }; },

@@ -8,7 +8,8 @@
   const K = { el: null, rid: KF.ls.get("kf_rid", null), view: "orders", live: [], hist: [], data: null, earn: null, seen: new Set(KF.ls.get("kf_rang", [])), scope: "live" };
   const pct = () => (K.data ? Number(K.data.restaurant.commission_pct) : 0);
   const keep = price => price - Math.round(price * pct() / 100);
-  const place = () => S.kitchens().find(p => p.id === K.rid) || S.kitchens()[0] || null;
+  // The owner of Kezia's Food can run any restaurant (e.g. before handing it over): K.override is that restaurant
+  const place = () => K.override || S.kitchens().find(p => p.id === K.rid) || S.kitchens()[0] || null;
   const isOwner = () => (place() || {}).role === "owner";
 
   // ---------- live GPS while this phone is delivering ----------
@@ -54,20 +55,22 @@
       if (!K.el.hidden && K.view === "rides" && !KF.topSheet()) drawRides();
     } catch {}
   }
-  async function refreshPlaces() { try { const j = await get("/v1/me"); S.setAuth({ user: j.user, places: j.places }); emit("places"); } catch {} }
+  async function refreshPlaces() { try { const j = await get("/v1/me"); S.setAuth({ user: j.user, places: j.places, support: j.support }); emit("places"); } catch {} }
   setInterval(() => { if (!S.token) return; pollKitchen(); pollRides(); }, 5000);
 
   // ---------- the tab ----------
   const TITLES = { orders: "Live orders", menu: "Your menu", money: "Earnings", settings: "Settings", rides: "Deliveries" };
   function frame() {
-    const p = S.kitchens().length ? place() : null;
+    const p = K.override || (S.kitchens().length ? place() : null);
     if (!p) K.view = "rides";
     const head = p ? `<div class="row between"><button class="row grow" data-a="switch" style="text-align:left;min-width:0"><span class="tile">${I("chef-hat", "sm")}</span>
         <span class="grow" style="min-width:0"><b class="ell" style="display:block;font-size:17px">${esc(p.name)}</b><span class="muted small">${p.role === "owner" ? "Owner" : "Manager"}${S.kitchens().length > 1 ? " · switch" : ""}${p.status === "test" ? " · test" : p.status === "pending" ? " · waiting for approval" : ""}</span></span></button>
         <button class="row" data-a="open" style="gap:8px;font-weight:800;font-size:13px;color:${K.open ? "var(--g)" : "var(--ink-3)"}">${K.open ? "Open" : "Closed"}<span class="switch" role="switch" aria-checked="${!!K.open}"></span></button></div>`
       : `<div class="row"><span class="tile">${I("bike", "sm")}</span><span><b style="font-size:17px">Deliveries</b><br><span class="muted small">${S.rides().map(r => esc(r.name)).join(", ")}</span></span></div>`;
     K.el.innerHTML = `<div class="layer-in page-grad fadein" style="display:flex;flex-direction:column;height:100%"><div class="rm-head">${head}
-      ${p ? `<div class="vtitle">${TITLES[K.view]}</div>` : ""}</div>
+      ${K.override ? `<button class="link small" data-a="unmanage" style="margin-top:10px">${I("arrow-left", "xs")} Back to owner dashboard</button>
+        <div class="seg" style="margin-top:10px">${[["orders", "Orders"], ["menu", "Menu"], ["money", "Earnings"], ["settings", "Settings"]].map(([k, l]) => `<button data-a="view" data-v="${k}" aria-pressed="${K.view === k}">${l}</button>`).join("")}</div>`
+        : p ? `<div class="vtitle">${TITLES[K.view]}</div>` : ""}</div>
       <div class="gpsbar" data-gps ${gps.on ? "" : "hidden"}>${I("navigation", "xs")} Sharing your live location with the customer. Keep the app open.</div>
       <div class="scroll" data-body></div></div>`;
     draw();
@@ -156,36 +159,60 @@
     const secs = [...d.sections, ...(d.items.some(i => !d.sections.some(s => s.id === i.section_id)) ? [{ id: 0, name: "No section" }] : [])];
     b.innerHTML = `<div class="card" style="padding:0;overflow:hidden"><div class="rcard" style="margin:0;width:100%;box-shadow:none;border-radius:0"><div class="im" ${bg(r.photo)}>
         <div class="tags"><span class="pill">${plural(d.items.length, "dish")}</span></div><button class="eta" data-a="cover">${I("camera", "xs")} Change cover</button></div></div></div>
-      <div class="warn green" style="margin:0 var(--gut) 14px">${I("badge-percent", "sm")} <span>Kezia's Food fee is <b>${pct()}%</b> of the food price on delivered orders. Delivery and packing charges are all yours. Set prices with that in mind: we show what you keep on each dish.</span></div>
+      <div class="warn green" style="margin:0 var(--gut) 14px">${I("badge-percent", "sm")} <span>Kezia's Food fee is <b>${pct()}%</b> of the food price on delivered orders. Delivery and packing charges are all yours. You type what you want to receive for each dish, and we add the ${pct()}% on top for the customer.</span></div>
       ${secs.map(s => { const list = d.items.filter(i => (s.id ? i.section_id === s.id : !d.sections.some(x => x.id === i.section_id)));
         return `<div class="sec" style="margin-top:14px"><h2>${esc(s.name)} <span class="muted small">${list.length}</span></h2>${s.id ? `<button data-a="sec" data-id="${s.id}">${I("pencil", "xs")} Edit</button>` : ""}</div>
         <div class="card" style="padding:4px 14px">${list.length ? list.map(it => `<div class="mitem"><button class="ph" ${bg(it.photo)} data-a="photo" data-id="${it.id}" aria-label="Photo">${it.photo ? "" : I("camera", "sm")}</button>
-          <button style="text-align:left;min-width:0" data-a="item" data-id="${it.id}">${vegMark(it.veg)} <b>${esc(it.name)}</b>${it.bestseller ? ` <span class="pill gold">${I("star", "xs")}</span>` : ""}<small>${rs(it.price)} · you keep ${rs(keep(it.price))}${it.in_stock ? "" : " · sold out"}</small></button>
+          <button style="text-align:left;min-width:0" data-a="item" data-id="${it.id}">${vegMark(it.veg)} <b>${esc(it.name)}</b>${it.bestseller ? ` <span class="pill gold">${I("star", "xs")}</span>` : ""}<small>${it.variants && it.variants.length ? it.variants.map(v => `${esc(v.n)} ${rs(v.net ?? keep(v.p))}`).join(" · ") + " · you get" : `you get ${rs(netOf(it))} · customer pays ${rs(it.price)}`}${it.in_stock ? "" : " · sold out"}</small></button>
           <span class="switch" role="switch" data-a="stock" data-id="${it.id}" aria-checked="${it.in_stock}" aria-label="In stock"></span></div>`).join("") : `<p class="note">No dishes yet.</p>`}</div>`; }).join("")}
       <div class="two pad" style="margin-bottom:24px"><button class="btn ghost" data-a="newsec">${I("plus", "sm")} Section</button><button class="btn" data-a="newitem">${I("plus", "sm")} Dish</button></div>
       <input type="file" accept="image/*" data-file hidden>`;
   }
+  // What the customer pays so the restaurant gets exactly `net` after Kezia's percentage (same rule as the server)
+  const custPrice = net => { const c = pct(); net = Math.round(net); if (!(c > 0) || !net) return net; let p = Math.ceil(net / (1 - c / 100));
+    while (p - Math.round(p * c / 100) < net) p++; while (p - 1 - Math.round((p - 1) * c / 100) >= net) p--; return p; };
+  const netOf = it => (it.net_price ?? keep(it.price));
   function itemSheet(it) {
     const d = K.data, isNew = !it;
     it = it || { name: "", description: "", price: "", veg: false, bestseller: false, in_stock: true, section_id: (d.sections[0] || {}).id };
+    let sizes = Array.isArray(it.variants) && it.variants.length ? it.variants.map(v => ({ n: v.n, net: v.net ?? keep(v.p) })) : [];
     const s = sheet(`<h2>${isNew ? "New dish" : "Edit dish"}</h2><div class="form" style="margin-top:12px">
       <label class="field">Name<input class="input" data-f="name" value="${esc(it.name)}" maxlength="60" placeholder="e.g. Chicken Tikka Pizza"></label>
-      <label class="field">Price (₹)<input class="input" data-f="price" inputmode="numeric" value="${esc(it.price)}" placeholder="249"><div class="keep" data-keep></div></label>
+      <div data-single><label class="field">You receive (₹)<input class="input" data-f="net" inputmode="numeric" value="${isNew ? "" : esc(netOf(it))}" placeholder="e.g. 240"><div class="keep" data-keep></div></label></div>
+      <div class="field">Sizes (optional: Small / Medium / Large, Half / Full)<div data-sizes class="form" style="gap:8px"></div>
+        <button class="btn ghost sm" data-a="addsize" style="width:100%">${I("plus", "xs")} Add a size</button></div>
       <label class="field">Description<input class="input" data-f="description" value="${esc(it.description || "")}" maxlength="200" placeholder="8 inch · tandoori chicken, onion"></label>
       <label class="field">Section<select class="input" data-f="section_id">${d.sections.map(x => `<option value="${x.id}" ${x.id === it.section_id ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select></label>
       <div class="row between"><span>${vegMark(true)} Vegetarian</span><span class="switch" role="switch" data-t="veg" aria-checked="${!!it.veg}"></span></div>
       <div class="row between"><span>${I("star", "xs")} Bestseller tag</span><span class="switch" role="switch" data-t="bestseller" aria-checked="${!!it.bestseller}"></span></div>
       <div class="row between"><span>In stock</span><span class="switch" role="switch" data-t="in_stock" aria-checked="${it.in_stock !== false}"></span></div>
       <button class="btn" data-a="save">${isNew ? "Add dish" : "Save"}</button>${isNew ? "" : `<button class="btn danger" data-a="del">Delete dish</button>`}</div>`);
-    const price = $("[data-f=price]", s);
-    const kp = () => { const v = Math.round(Number(price.value) || 0); $("[data-keep]", s).innerHTML = v ? `${I("wallet", "xs")} You keep <b>${rs(keep(v))}</b> of ${rs(v)} after Kezia's ${pct()}% fee (${rs(v - keep(v))})` : `Kezia's fee: ${pct()}% of the price`; };
-    price.oninput = () => { price.value = price.value.replace(/\D/g, "").slice(0, 5); kp(); }; kp();
+    const net = $("[data-f=net]", s), box = $("[data-sizes]", s);
+    const say = v => v ? `${I("wallet", "xs")} You get <b>${rs(v)}</b> · customers pay <b>${rs(custPrice(v))}</b> (Kezia's ${pct()}% included)` : `Type what you want to receive. We add Kezia's ${pct()}% for the customer price.`;
+    const drawSizes = () => {
+      $("[data-single]", s).hidden = sizes.length > 0;
+      box.innerHTML = sizes.map((z, i) => `<div><div class="row" style="gap:8px"><input class="input" data-zn="${i}" value="${esc(z.n)}" placeholder="Size" style="flex:1">
+          <input class="input" data-zp="${i}" inputmode="numeric" value="${esc(z.net || "")}" placeholder="You get ₹" style="flex:1">
+          <button class="iconbtn plain" data-a="delsize" data-i="${i}" aria-label="Remove size">${I("x", "sm")}</button></div>
+          <div class="keep" data-zk="${i}" style="margin-top:4px">${say(Number(z.net))}</div></div>`).join("");
+      $$("[data-zn]", box).forEach(x => { x.oninput = () => { sizes[x.dataset.zn].n = x.value; }; });
+      $$("[data-zp]", box).forEach(x => { x.oninput = () => { x.value = x.value.replace(/\D/g, "").slice(0, 5); sizes[x.dataset.zp].net = Number(x.value); $(`[data-zk="${x.dataset.zp}"]`, box).innerHTML = say(Number(x.value)); }; });
+    };
+    const kp = () => { $("[data-keep]", s).innerHTML = say(Math.round(Number(net.value) || 0)); };
+    net.oninput = () => { net.value = net.value.replace(/\D/g, "").slice(0, 5); kp(); }; kp(); drawSizes();
     $$(".switch[data-t]", s).forEach(sw => { sw.onclick = () => { sw.setAttribute("aria-checked", sw.getAttribute("aria-checked") !== "true"); haptic(); }; });
     bind(s, {
+      addsize: () => { if (sizes.length >= 6) return toast("Up to 6 sizes", "info");
+        sizes.push({ n: ["Small", "Medium", "Large", "Half", "Full", "Extra large"][sizes.length] || "", net: sizes.length ? 0 : Number(net.value) || 0 }); drawSizes(); },
+      delsize: b => { sizes.splice(Number(b.dataset.i), 1); drawSizes(); },
       save: b => busy(b, async () => {
-        const v = { name: $("[data-f=name]", s).value.trim(), price: Number(price.value), description: $("[data-f=description]", s).value.trim(), section_id: Number($("[data-f=section_id]", s).value) || null };
+        const v = { name: $("[data-f=name]", s).value.trim(), description: $("[data-f=description]", s).value.trim(), section_id: Number($("[data-f=section_id]", s).value) || null };
         $$(".switch[data-t]", s).forEach(sw => { v[sw.dataset.t] = sw.getAttribute("aria-checked") === "true"; });
-        if (!v.name || !v.price) throw new Error("Add a name and a price");
+        if (sizes.length) {
+          if (sizes.some(z => !String(z.n).trim() || !z.net)) throw new Error("Give every size a name and a price");
+          v.variants = sizes.map(z => ({ n: String(z.n).trim(), net: z.net }));
+        } else { v.net_price = Number(net.value); v.variants = null; }
+        if (!v.name || !(v.net_price || v.variants)) throw new Error("Add a name and what you want to receive");
         const p = place().id;
         if (isNew) { const j = await post(`/v1/restaurant/${p}/items`, v); if (!v.in_stock) await api("PATCH", `/v1/restaurant/${p}/items/${j.item.id}`, { in_stock: false }); }
         else await api("PATCH", `/v1/restaurant/${p}/items/${it.id}`, v);
@@ -386,6 +413,8 @@
   function init(el) {
     K.el = el;
     bind(el, {
+      view: b => { K.view = b.dataset.v; haptic(); $$("[data-a=view]", el).forEach(x => x.setAttribute("aria-pressed", x === b)); draw(); },
+      unmanage: () => { setOverride(null); KF.tab("a:rest"); },
       switch: () => { if (S.kitchens().length < 2) return;
         const s = sheet(`<h2>Your restaurants</h2>${S.kitchens().map(p => `<button class="opt" data-a="pickr" data-id="${esc(p.id)}" aria-checked="${p.id === place().id}"><span class="tile">${I("store", "sm")}</span><span><b>${esc(p.name)}</b><span>${p.role}</span></span><i class="radio"></i></button>`).join("")}`);
         bind(s, { pickr: b => { K.rid = b.dataset.id; KF.ls.set("kf_rid", K.rid); K.data = null; K.live = []; K.hist = []; s.close(); frame(); pollKitchen(); loadData().then(frame).catch(() => {}); } }); },
@@ -451,8 +480,12 @@
     on("places", () => { if (!S.kitchens().some(p => p.id === K.rid)) { K.rid = (S.kitchens()[0] || {}).id || null; K.data = null; } if (!el.hidden && S.places.length) frame(); });
     on("auth", () => { K.data = null; K.live = []; K.hist = []; bell.stop(); gps.sync([]); });
   }
+  function setOverride(r) {
+    K.override = r ? { id: r.id, name: r.name, role: "owner", status: r.status } : null;
+    K.data = null; K.live = []; K.hist = []; K.earn = null; K.open = r ? r.is_open : undefined;
+  }
   async function show(view) {
-    if (!S.places.length) return;
+    if (!S.places.length && !K.override) return;
     if (view) K.view = view;
     frame();
     if (S.kitchens().length) { pollKitchen(); if (!K.data) loadData().then(() => { if (!K.el.hidden) frame(); }).catch(fail); bell.awake(!!K.open); KF.askNotify(); }
@@ -460,5 +493,5 @@
   }
 
   // icons: arrow-right
-  KF.partner = { init, show, pollKitchen, pollRides };
+  KF.partner = { init, show, pollKitchen, pollRides, setOverride, overriding: () => !!K.override };
 })();

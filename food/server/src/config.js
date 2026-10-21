@@ -13,10 +13,11 @@ module.exports = {
   uploadsDir: env.UPLOADS_DIR || "/data/kezia-uploads",
   corsOrigins: (env.CORS_ORIGINS || "capacitor://localhost,http://localhost,https://localhost").split(",").map(s => s.trim()),
   sms: {
-    provider: env.SMS_PROVIDER || "console",         // console | msg91 | 2factor
+    provider: env.SMS_PROVIDER || "console",         // console | msg91 | 2factor | renflair
     msg91Key: env.MSG91_AUTH_KEY || "",
     msg91Template: env.MSG91_TEMPLATE_ID || "",
     twoFactorKey: env.TWOFACTOR_API_KEY || "",
+    renflairKey: env.RENFLAIR_API_KEY || "",
     devReturnCode: env.DEV_RETURN_OTP === "1",       // testing only: returns the OTP in the API response
   },
   // Test accounts with a fixed code and no SMS: the test restaurant's owner, and a test customer.

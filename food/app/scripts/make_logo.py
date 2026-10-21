@@ -99,3 +99,19 @@ f = ImageFont.truetype(os.path.join(FONTS, "Fraunces-800.ttf") if os.path.exists
 d.text((W // 2, W // 2 + 250), "Kezia's Food", font=f, fill=DEEP, anchor="mm")
 sp.convert("RGB").save(os.path.join(OUT, "splash.png"))
 print("logo written to", OUT)
+
+# HD logo files for printing, social media and the web app (2048 px), plus web-app icons
+N2 = 2048
+bg2 = gradient((N2, N2)).convert("RGBA")
+lay2 = Image.new("RGBA", (N2, N2), (0, 0, 0, 0))
+m3 = mark(int(N2 * .72))
+lay2.alpha_composite(m3, ((N2 - m3.size[0]) // 2, (N2 - m3.size[1]) // 2 - 16))
+full2 = shadowed(bg2, lay2, 28, 36)
+full2.convert("RGB").save(os.path.join(OUT, "logo-2048-square.png"))
+rounded(full2, 460).save(os.path.join(OUT, "logo-2048-rounded.png"))
+fg2 = Image.new("RGBA", (N2, N2), (0, 0, 0, 0)); fg2.alpha_composite(mark(int(N2 * .9)), (int(N2 * .05), int(N2 * .05) - 20))
+fg2.save(os.path.join(OUT, "logo-2048-transparent.png"))
+ICONS = os.path.join(ROOT, "www", "img", "icons"); os.makedirs(ICONS, exist_ok=True)
+for size, name in ((192, "icon-192.png"), (512, "icon-512.png"), (180, "apple-touch-icon.png")):
+    full2.convert("RGB").resize((size, size), Image.LANCZOS).save(os.path.join(ICONS, name), optimize=True)
+print("HD logo files written")

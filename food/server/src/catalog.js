@@ -17,18 +17,34 @@ function pubRest(r, lat, lon) {
   };
 }
 
+/** New-customer offer: free delivery on a customer's first order(s) up to a food value (Kezia pays the fee). */
+async function promoFor(user, itemTotal, fee) {
+  if (!user || !fee) return null;
+  const [n, max] = await Promise.all([setting("promo_new_orders"), setting("promo_new_max")]);
+  if (!(Number(n) > 0)) return null;
+  const done = await db.one("SELECT count(*)::int c FROM orders WHERE user_id = $1 AND status NOT IN ('rejected', 'expired', 'cancelled')", [user.id]);
+  if (done.c >= Number(n) || (Number(max) > 0 && itemTotal > Number(max))) return null;
+  return { code: "new_free_delivery", label: "Free delivery · new customer offer", amount: fee };
+}
+
 /** Price an order on the server: only in-stock items of this restaurant, at today's prices. */
-async function quote(r, items, lat, lon) {
-  const ids = (Array.isArray(items) ? items : []).map(i => [Number(i.id), Math.min(50, Math.max(0, Math.floor(Number(i.qty) || 0)))]).filter(([id, q]) => id > 0 && q > 0);
+async function quote(r, items, lat, lon, user) {
+  const ids = (Array.isArray(items) ? items : []).map(i => [Number(i.id), Math.min(50, Math.max(0, Math.floor(Number(i.qty) || 0))), i.v === undefined || i.v === null ? null : Math.floor(Number(i.v))])
+    .filter(([id, q]) => id > 0 && q > 0);
   if (!ids.length) throw bad("Your cart is empty");
   const rows = await db.many("SELECT * FROM menu_items WHERE restaurant_id = $1 AND id = ANY($2::int[])", [r.id, ids.map(i => i[0])]);
   const by = new Map(rows.map(x => [x.id, x]));
   const lines = [];
-  for (const [id, qty] of ids) {
+  for (const [id, qty, vi] of ids) {
     const it = by.get(id);
     if (!it) throw bad("An item in your cart is no longer on the menu");
     if (!it.in_stock) throw bad(`${it.name} is out of stock right now`);
-    lines.push({ id, name: it.name, price: it.price, qty, veg: it.veg });
+    const sizes = Array.isArray(it.variants) && it.variants.length ? it.variants : null;
+    if (sizes) {
+      const v = sizes[vi ?? -1];
+      if (!v) throw bad(`Choose a size for ${it.name}`);
+      lines.push({ id, v: vi, size: v.n, name: `${it.name} (${v.n})`, price: v.p, qty, veg: it.veg });
+    } else lines.push({ id, name: it.name, price: it.price, qty, veg: it.veg });
   }
   const itemTotal = lines.reduce((s, l) => s + l.price * l.qty, 0);
   const km = Math.round(roadKm(lat, lon, r.lat, r.lon) * 10) / 10;
@@ -37,7 +53,9 @@ async function quote(r, items, lat, lon) {
   if (fee === null) problems.push(`${r.name} delivers within ${Number(r.max_km)} km. You are ${km} km away by road`);
   if (itemTotal < r.min_order) problems.push(`Minimum order is ₹${r.min_order}. Add ₹${r.min_order - itemTotal} more`);
   if (!r.is_open) problems.push(`${r.name} is closed right now`);
-  return { lines, item_total: itemTotal, km, delivery_fee: fee ?? 0, packing: r.packing, total: itemTotal + (fee ?? 0) + r.packing, eta: etaMin(r, km), problems };
+  const promo = problems.length ? null : await promoFor(user, itemTotal, fee);
+  const off = promo ? promo.amount : 0;
+  return { lines, item_total: itemTotal, km, delivery_fee: fee ?? 0, packing: r.packing, promo, total: itemTotal + (fee ?? 0) - off + r.packing, eta: etaMin(r, km), problems };
 }
 
 function routes(app) {
@@ -51,7 +69,7 @@ function routes(app) {
     ]);
     const tags = await db.many(`SELECT restaurant_id, array_agg(DISTINCT s.name) secs FROM menu_sections s GROUP BY 1`);
     const secs = new Map(tags.map(t => [t.restaurant_id, t.secs]));
-    return { restaurants: rs.map(r => ({ ...pubRest(r, lat, lon), sections: secs.get(r.id) || [] })), banners, support: await setting("support_phone") };
+    return { restaurants: rs.map(r => ({ ...pubRest(r, lat, lon), sections: secs.get(r.id) || [] })), banners };
   });
 
   app.get("/v1/restaurants/:id", async (req) => {
@@ -59,7 +77,7 @@ function routes(app) {
     if (!r) throw notFound("Restaurant not found");
     const [sections, items] = await Promise.all([
       db.many("SELECT id, name FROM menu_sections WHERE restaurant_id = $1 ORDER BY sort, id", [r.id]),
-      db.many("SELECT id, section_id, name, description, price, veg, photo, in_stock, bestseller FROM menu_items WHERE restaurant_id = $1 ORDER BY sort, id", [r.id]),
+      db.many("SELECT id, section_id, name, description, price, veg, photo, in_stock, bestseller, (SELECT jsonb_agg(jsonb_build_object('n', v->'n', 'p', v->'p')) FROM jsonb_array_elements(variants) v) variants FROM menu_items WHERE restaurant_id = $1 ORDER BY sort, id", [r.id]),
     ]);
     return { restaurant: pubRest(r, Number(req.query.lat), Number(req.query.lon)), sections, items };
   });
@@ -70,7 +88,7 @@ function routes(app) {
     if (!r) throw notFound("Restaurant not found");
     const lat = Number(b.lat), lon = Number(b.lon);
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) throw bad("Choose where to deliver");
-    return quote(r, b.items, lat, lon);
+    return quote(r, b.items, lat, lon, req.user);
   });
 
   // Road route for the in-app maps (rider navigation, customer tracking). Logged-in users only.

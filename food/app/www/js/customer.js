@@ -145,19 +145,29 @@
   // ---------- cart ----------
   const cartCount = () => S.cart ? Object.values(S.cart.items).reduce((s, x) => s + x.qty, 0) : 0;
   const cartTotal = () => S.cart ? Object.values(S.cart.items).reduce((s, x) => s + x.qty * x.price, 0) : 0;
-  const qtyOf = id => (S.cart && S.cart.items[id] ? S.cart.items[id].qty : 0);
+  const qtyOf = id => (S.cart ? Object.values(S.cart.items).filter(l => l.id === id).reduce((s, l) => s + l.qty, 0) : 0);
+  const sizeQty = (id, v) => (S.cart && S.cart.items[`${id}:${v}`] ? S.cart.items[`${id}:${v}`].qty : 0);
+  /** A cart line for a dish, or for one size of it. */
+  const lineOf = (it, v = null) => v === null || !it.variants ? { key: String(it.id), id: it.id, v: null, name: it.name, price: it.price, veg: it.veg }
+    : { key: `${it.id}:${v}`, id: it.id, v, size: it.variants[v].n, name: `${it.name} (${it.variants[v].n})`, price: it.variants[v].p, veg: it.veg };
+  const keyOf = l => l.key || String(l.id);
+  const cartItems = () => Object.values(S.cart.items).map(l => ({ id: l.id, qty: l.qty, ...(l.v !== null && l.v !== undefined ? { v: l.v } : {}) }));
   async function setQty(r, it, q) {
     if (q > 0 && S.cart && S.cart.rid !== r.id && cartCount()) {
       if (!(await confirm("Start a new cart?", `Your cart has items from ${S.cart.rname}. Clear it and add from ${r.name}?`, "Start new"))) return false;
       S.cart = null;
     }
     if (!S.cart || S.cart.rid !== r.id) S.cart = { rid: r.id, rname: r.name, items: {} };
-    if (q <= 0) delete S.cart.items[it.id];
-    else S.cart.items[it.id] = { id: it.id, name: it.name, price: it.price, veg: it.veg, qty: Math.min(50, q) };
+    const line = it.key ? it : lineOf(it);
+    if (q <= 0) delete S.cart.items[keyOf(line)];
+    else S.cart.items[keyOf(line)] = { ...line, key: keyOf(line), qty: Math.min(50, q) };
     if (!cartCount()) S.cart = null;
     S.saveCart(); haptic(); emit("cart"); return true;
   }
-  const addHTML = it => !it.in_stock ? `<div class="add" style="color:var(--ink-3)">Sold out</div>`
+  const addHTML = it => it.in_stock && it.variants && it.variants.length ? (qtyOf(it.id)
+      ? `<div class="add on"><button data-a="sizes" data-id="${it.id}" aria-label="Less">−</button><span>${qtyOf(it.id)}</span><button data-a="sizes" data-id="${it.id}" aria-label="More">+</button></div>`
+      : `<button class="add" data-a="sizes" data-id="${it.id}">ADD <sup style="margin-left:2px">+</sup><small class="addsub">${it.variants.length} sizes</small></button>`)
+    : !it.in_stock ? `<div class="add" style="color:var(--ink-3)">Sold out</div>`
     : qtyOf(it.id) ? `<div class="add on"><button data-a="dec" data-id="${it.id}" aria-label="Less">−</button><span>${qtyOf(it.id)}</span><button data-a="inc" data-id="${it.id}" aria-label="More">+</button></div>`
     : `<button class="add" data-a="inc" data-id="${it.id}">ADD <sup style="margin-left:2px">+</sup></button>`;
   const cartbar = () => cartCount() ? `<button class="cartbar" data-a="cart"><span><b>${plural(cartCount(), "item")} · ${rs(cartTotal())}</b><small>${esc(S.cart.rname)} · plus delivery</small></span>
@@ -212,7 +222,7 @@
   async function loadHome() {
     const p = S.point;
     try {
-      home.data = await get(`/v1/home?lat=${p.lat}&lon=${p.lon}`); S.support = home.data.support; KF.ls.set("kf_home", home.data);
+      home.data = await get(`/v1/home?lat=${p.lat}&lon=${p.lon}`); KF.ls.set("kf_home", home.data);
     } catch (e) { if (!home.data) { home.el.innerHTML = `<div class="scroll page-grad safe">${empty("refresh-cw", "Can't reach Kezia's Food", e.message, `<button class="btn" data-a="retry">Try again</button>`)}</div>`; return; } fail(e); }
     renderHome();
   }
@@ -297,7 +307,7 @@
       if (loose.length) secs.push({ id: 0, name: "More" });
       const fee = r.fee === null ? `<b class="red">Too far</b><span>within ${r.rules.max_km} km</span>` : `<b>${r.fee ? rs(r.fee) : "Free"}</b><span>delivery${r.km !== null ? " · " + r.km + " km" : ""}</span>`;
       const itemHTML = it => `<div class="item ${it.in_stock ? "" : "off"}" data-item="${it.id}"><div>${vegMark(it.veg)}${it.bestseller ? `<span class="best">${I("star", "xs")} Bestseller</span>` : ""}
-          <b>${esc(it.name)}</b><div class="p">${rs(it.price)}</div>${it.description ? `<div class="d">${esc(it.description)}</div>` : ""}</div>
+          <b>${esc(it.name)}</b><div class="p">${it.variants && it.variants.length ? `${rs(it.price)} <span class="muted small" style="font-weight:600">onwards · ${it.variants.map(v => esc(v.n)).join(" / ")}</span>` : rs(it.price)}</div>${it.description ? `<div class="d">${esc(it.description)}</div>` : ""}</div>
           <div class="pic" ${bg(it.photo)}>${it.photo ? "" : I("utensils", "lg")}<span data-addbox="${it.id}">${addHTML(it)}</span></div></div>`;
       const menuHTML = () => secs.map(s => {
         const list = (s.id ? j.items.filter(i => i.section_id === s.id) : loose).filter(i => !veg || i.veg);
@@ -336,6 +346,21 @@
         back: () => pop(scr),
         callr: () => r.phone ? call(r.phone) : toast("No phone number listed", "info"),
         inc: async b => { const it = items.get(Number(b.dataset.id)); if (await setQty(r, it, qtyOf(it.id) + 1)) { refreshItem(it.id); refreshBar(); } },
+        sizes: b => {
+          const it = items.get(Number(b.dataset.id));
+          const s = sheet(`<h2>${esc(it.name)}</h2><p class="sub">${esc(it.description || "Choose a size")}</p><div data-sz></div><button class="btn" data-done style="margin-top:14px">Done</button>`,
+            { onClose: () => { refreshItem(it.id); refreshBar(); } });
+          const fill = () => { $("[data-sz]", s).innerHTML = it.variants.map((v, i) => `<div class="opt" style="grid-template-columns:1fr auto auto;cursor:default">
+              <span><b>${esc(v.n)}</b></span><b style="margin-right:6px">${rs(v.p)}</b>
+              ${sizeQty(it.id, i) ? `<div class="qty"><button data-a="szdec" data-v="${i}">−</button><span>${sizeQty(it.id, i)}</span><button data-a="szinc" data-v="${i}">+</button></div>`
+                : `<button class="btn soft sm" data-a="szinc" data-v="${i}">Add</button>`}</div>`).join(""); };
+          fill();
+          $("[data-done]", s).onclick = () => s.close();
+          bind(s, {
+            szinc: async x => { const v = Number(x.dataset.v); if (await setQty(r, lineOf(it, v), sizeQty(it.id, v) + 1)) fill(); },
+            szdec: async x => { const v = Number(x.dataset.v); await setQty(r, lineOf(it, v), sizeQty(it.id, v) - 1); fill(); },
+          });
+        },
         dec: async b => { const it = items.get(Number(b.dataset.id)); await setQty(r, it, qtyOf(it.id) - 1); refreshItem(it.id); refreshBar(); },
         veg: b => { veg = !veg; b.setAttribute("aria-pressed", veg); $("[data-menu]", el).innerHTML = menuHTML(); haptic(); },
         jump: b => { const s = $(`.msec[data-sec="${b.dataset.sec}"]`, el); if (s) sc.scrollTo({ top: s.offsetTop - 110, behavior: "smooth" }); },
@@ -357,7 +382,7 @@
         el.innerHTML = `${topbar("Your cart")}<div class="scroll" data-scroll>
           <div class="card fadein"><div class="row between"><h3 style="margin:0">${esc(S.cart.rname)}</h3><button class="link small" data-a="more">Add more</button></div>
             ${lines.map(l => `<div class="ci"><span>${vegMark(l.veg)} <b style="font-size:14.5px">${esc(l.name)}</b><br><span class="muted small">${rs(l.price)} each</span></span>
-              <div class="qty"><button data-a="dec" data-id="${l.id}">−</button><span>${l.qty}</span><button data-a="inc" data-id="${l.id}">+</button></div><b>${rs(l.price * l.qty)}</b></div>`).join("")}
+              <div class="qty"><button data-a="dec" data-id="${esc(keyOf(l))}">−</button><span>${l.qty}</span><button data-a="inc" data-id="${esc(keyOf(l))}">+</button></div><b>${rs(l.price * l.qty)}</b></div>`).join("")}
             <textarea class="input" data-note placeholder="Note for the kitchen (less spicy, no onion…)" maxlength="200" style="margin-top:10px;min-height:60px">${esc(note)}</textarea></div>
           <div class="card"><h3>Deliver to</h3>${a ? `<div class="addr"><span class="tile">${I(a.label === "Work" ? "store" : "house", "sm")}</span><span><b>${esc(a.label)}</b><br><span class="muted small">${esc(a.landmark)}</span></span>
               <button class="link small" data-a="addr">Change</button></div>` : `<button class="opt" data-a="addr"><span class="tile">${I("map-pin", "sm")}</span><span><b>Add delivery address</b><span>Pin your door on the map</span></span>${I("chevron-right", "sm")}</button>`}</div>
@@ -372,7 +397,8 @@
         $("[data-note]", el).oninput = e => { note = e.target.value; };
       };
       const billHTML = q => `<h3>Bill</h3><div class="line"><span>Items</span><b>${rs(q.item_total)}</b></div>
-        <div class="line"><span>Delivery<small>${q.km} km by road${r && r.rules.free_above ? ` · free over ${rs(r.rules.free_above)}` : ""}</small></span><b>${q.delivery_fee ? rs(q.delivery_fee) : "Free"}</b></div>
+        <div class="line"><span>Delivery<small>${q.km} km by road${r && r.rules.free_above ? ` · free over ${rs(r.rules.free_above)}` : ""}</small></span>${q.promo ? `<b><s class="muted" style="font-weight:600">${rs(q.delivery_fee)}</s> <span class="green">FREE</span></b>` : `<b>${q.delivery_fee ? rs(q.delivery_fee) : "Free"}</b>`}</div>
+        ${q.promo ? `<div class="warn green" style="margin:4px 0 6px">${I("party-popper", "sm")} <span>${esc(q.promo.label)}. Welcome to Kezia's Food!</span></div>` : ""}
         ${q.packing ? `<div class="line"><span>Packing</span><b>${rs(q.packing)}</b></div>` : ""}
         <div class="line total"><span>To pay</span><span>${rs(q.total)}</span></div>
         <div class="muted small" style="margin-top:6px">${I("clock", "xs")} Arrives in about ${q.eta} min</div>
@@ -382,7 +408,7 @@
         const my = ++seq, p = S.point;
         try {
           if (!r) r = (await get(`/v1/restaurants/${encodeURIComponent(S.cart.rid)}?lat=${p.lat}&lon=${p.lon}`)).restaurant;
-          const j = await post("/v1/quote", { restaurant_id: S.cart.rid, items: Object.values(S.cart.items).map(l => ({ id: l.id, qty: l.qty })), lat: p.lat, lon: p.lon });
+          const j = await post("/v1/quote", { restaurant_id: S.cart.rid, items: cartItems(), lat: p.lat, lon: p.lon });
           if (my !== seq || !scr.alive) return;
           q = j;
           if (!S.addr) q.problems = ["Add your delivery address to see the exact delivery fee", ...q.problems];
@@ -401,7 +427,7 @@
         place: b => busy(b, async () => {
           if (!(await login("Log in to place your order."))) return;
           if (!S.addr) { await (S.addresses.length ? chooseAddress() : pickPlace()); return; }
-          const j = await post("/v1/orders", { restaurant_id: S.cart.rid, items: Object.values(S.cart.items).map(l => ({ id: l.id, qty: l.qty })), address_id: S.addrId, pay_method: pay, note });
+          const j = await post("/v1/orders", { restaurant_id: S.cart.rid, items: cartItems(), address_id: S.addrId, pay_method: pay, note });
           S.cart = null; S.saveCart(); emit("cart"); haptic("success"); askNotify();
           popAll(); KF.tab("orders"); openOrder(j.order.id, j.order); emit("orders");
         }),
@@ -417,6 +443,7 @@
     return `<div class="card"><div class="row between"><h3 style="margin:0">Order ${esc(o.id)}</h3><span class="muted small">${when(o.times.created)}</span></div>
       ${o.items.map(l => `<div class="line"><span>${vegMark(l.veg)} ${l.qty} × ${esc(l.name)}</span><b>${rs(l.price * l.qty)}</b></div>`).join("")}
       <div class="line" style="border-top:1px dashed var(--line-2);margin-top:6px;padding-top:10px"><span>Delivery (${o.km} km)</span><b>${o.delivery_fee ? rs(o.delivery_fee) : "Free"}</b></div>
+      ${o.promo_amount ? `<div class="line green"><span>${esc(o.promo || "Offer")}</span><b class="green">−${rs(o.promo_amount)}</b></div>` : ""}
       ${o.packing ? `<div class="line"><span>Packing</span><b>${rs(o.packing)}</b></div>` : ""}
       <div class="line total"><span>Total</span><span>${rs(o.total)}</span></div>
       <div class="line"><span>Payment</span><b>${o.pay_method === "cod" ? "Cash on delivery" : "UPI to restaurant"}${o.utr ? ` · ref ${esc(o.utr)}` : ""}</b></div>
@@ -561,7 +588,7 @@
         back: () => pop(scr),
         callr: () => call(o.restaurant.phone),
         callrider: () => call(o.rider.phone),
-        help: () => call(S.support || "+916005648933"),
+        help: () => helpSheet(),
         copy: () => { navigator.clipboard && navigator.clipboard.writeText(o.pay.upi_id).then(() => toast("UPI ID copied"), () => {}); },
         upi: async b => { haptic(); const ok = await openExternal(upiLink(b.dataset.s, o)); if (!ok) toast("That app isn't installed. Try another or scan the QR", "info"); },
         paid: b => busy(b, async () => {
@@ -634,7 +661,23 @@
   }
 
   // ---------- profile ----------
-  const SUPPORT_PHONE = "+916005648933", SUPPORT_EMAIL = "fazil.mastu@gmail.com";
+  const SUPPORT_EMAIL = "fazil.mastu@gmail.com";
+  const whatsapp = (phone, text) => openExternal(`https://wa.me/${String(phone).replace(/\D/g, "").replace(/^(\d{10})$/, "91$1")}?text=${encodeURIComponent(text)}`);
+  const mail = () => openExternal("mailto:" + SUPPORT_EMAIL + "?subject=" + encodeURIComponent("Kezia's Food help"));
+  /** Suggestions box: anyone logged in can send ideas or problems to the Kezia team. */
+  async function suggest() {
+    if (!(await login("Log in to send a suggestion."))) return;
+    const v = await ask("Send a suggestion", "Tell us what to add or improve. The Kezia team reads every message.", [{ k: "text", label: "Your suggestion", type: "textarea", placeholder: "e.g. Please add more bakeries, or a problem you had" }], "Send");
+    if (!v || !v.text) return;
+    busy(null, async () => { await post("/v1/suggestions", { text: v.text }); haptic("success"); toast("Thank you! We got your suggestion", "heart"); });
+  }
+  /** Help for customers: email and suggestions (the team's number is only for restaurants and riders). */
+  function helpSheet() {
+    const s = sheet(`<h2>Need help?</h2><p class="sub">For an order, call the restaurant first: they can fix most things fastest. For anything else, write to us.</p>
+      <div class="menu-list" style="margin:0"><button data-a="m"><span class="tile">${I("mail", "sm")}</span><span>Email us<small>${SUPPORT_EMAIL}</small></span>${I("chevron-right", "sm")}</button>
+      <button data-a="s"><span class="tile gold">${I("message-square", "sm")}</span><span>Send a suggestion<small>Ideas, problems, requests</small></span>${I("chevron-right", "sm")}</button></div>`);
+    bind(s, { m: () => { s.close(); mail(); }, s: () => { s.close(); suggest(); } });
+  }
   function renderProfile(el) {
     const u = S.user, md = KF.mode ? KF.mode() : "customer", cust = md === "customer";
     const badge = { admin: ["sparkles", "Owner of Kezia's Food", "You see every restaurant, order and user"], kitchen: ["chef-hat", "Restaurant account", S.kitchens().map(p => esc(p.name)).join(", ")],
@@ -649,7 +692,8 @@
         <button data-a="orders"><span class="tile">${I("receipt", "sm")}</span><span>Your orders<small>Track, rate and refunds</small></span>${I("chevron-right", "sm")}</button></div>` : ""}
       ${cust ? `<div class="menu-list"><button data-a="partner"><span class="tile gold">${I("store", "sm")}</span><span>Own a restaurant in Kulgam?<small>List it free. Your riders, your prices, your UPI</small></span>${I("chevron-right", "sm")}</button>
         <button data-a="how"><span class="tile">${I("circle-help", "sm")}</span><span>How Kezia's Food works<small>Payments, cancellations, refunds</small></span>${I("chevron-right", "sm")}</button></div>` : ""}
-      <div class="menu-list"><button data-a="help"><span class="tile">${I("phone", "sm")}</span><span>Call support<small>${esc((S.support || SUPPORT_PHONE).replace(/^\+91/, "+91 "))}</small></span>${I("chevron-right", "sm")}</button>
+      <div class="menu-list">${!cust && S.support ? `<button data-a="wa"><span class="tile" style="background:#e7f8ee;color:#1fa855">${I("message-circle", "sm")}</span><span>WhatsApp support<small>Kezia team · ${esc(S.support.replace(/^\+91/, "+91 "))}</small></span>${I("chevron-right", "sm")}</button>` : ""}
+        <button data-a="suggest"><span class="tile gold">${I("message-square", "sm")}</span><span>Send a suggestion<small>Ideas and problems go straight to the Kezia team</small></span>${I("chevron-right", "sm")}</button>
         <button data-a="mail"><span class="tile">${I("mail", "sm")}</span><span>Email us<small>${SUPPORT_EMAIL}</small></span>${I("chevron-right", "sm")}</button></div>
       <div class="menu-list"><button data-a="terms"><span class="tile blue">${I("file-text", "sm")}</span><span>Terms, cancellations and refunds</span>${I("chevron-right", "sm")}</button>
         <button data-a="privacy"><span class="tile blue">${I("lock", "sm")}</span><span>Privacy policy</span>${I("chevron-right", "sm")}</button>
@@ -684,8 +728,9 @@
           <div><i>4</i><span>The restaurant's <b>own rider</b> brings your food. Watch them live on the map.</span></div>
           <div><i>5</i><span><b>Refunds</b> for cancelled paid orders come from the restaurant to your UPI. Tell us in the app when it arrives.</span></div></div>
           <p class="note" style="margin-top:14px">Delivery fee: a fixed amount for the first few km, then a small charge per km, by road distance. Each restaurant sets its own minimum order and range.</p>`),
-      help: () => call(S.support || SUPPORT_PHONE),
-      mail: () => openExternal("mailto:" + SUPPORT_EMAIL + "?subject=" + encodeURIComponent("Kezia's Food help")),
+      wa: () => whatsapp(S.support, `Hi Kezia team, this is ${S.user && S.user.name || ""} (${S.user && S.user.phone || ""}). `),
+      suggest: () => suggest(),
+      mail: () => mail(),
       terms: () => openExternal(KF.API + "/terms.html"),
       privacy: () => openExternal(KF.API + "/privacy.html"),
       credits: async () => {
@@ -720,5 +765,5 @@
   }
 
   // icons: arrow-right hand shopping-bag
-  KF.customer = { initHome, loadHome, initSearch, search: srch, initOrders, renderOrders, loadOrders, initProfile, openRestaurant, openOrder, login, loadAddresses, chooseAddress, pickPlace, STATUS, OPEN, vegMark };
+  KF.customer = { suggest, initHome, loadHome, initSearch, search: srch, initOrders, renderOrders, loadOrders, initProfile, openRestaurant, openOrder, login, loadAddresses, chooseAddress, pickPlace, STATUS, OPEN, vegMark };
 })();

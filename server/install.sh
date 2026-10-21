@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 # Srinagar Bazaar: one-time VPS setup (Ubuntu 22.04/24.04, run as root).
-#   bash install.sh --domain api.45-92-1-150.sslip.io --review-phone 9XXXXXXXXX [--kezia-owner 9XXXXXXXXX]
+#   bash install.sh --domain api.45-92-1-150.sslip.io --review-phone 9XXXXXXXXX [--kezia-owner 9XXXXXXXXX] [--kezia-sms-key KEY]
 # Safe to run again: it updates the code and keeps your existing passwords and data.
 set -euo pipefail
 
-DOMAIN=""; REVIEW_PHONE=""; KEZIA_OWNER=""; BRANCH="ccr-cade9a1c-6u8263"; DIR=/opt/srinagar-bazaar
+DOMAIN=""; REVIEW_PHONE=""; KEZIA_OWNER=""; KEZIA_SMS_KEY=""; BRANCH="ccr-cade9a1c-6u8263"; DIR=/opt/srinagar-bazaar
 REPO="https://github.com/fazil-mastu/Map.git"
 while [ $# -gt 0 ]; do
   case "$1" in
     --domain) DOMAIN="$2"; shift 2 ;;
     --review-phone) REVIEW_PHONE="$2"; shift 2 ;;
     --kezia-owner) KEZIA_OWNER="$2"; shift 2 ;;
+    --kezia-sms-key) KEZIA_SMS_KEY="$2"; shift 2 ;;
     --branch) BRANCH="$2"; shift 2 ;;
     *) echo "Unknown option $1"; exit 1 ;;
   esac
@@ -70,6 +71,12 @@ if [ -n "$KEZIA_OWNER" ]; then
   grep -q '^KEZIA_OWNER_CODE=' "$ENV" || echo "KEZIA_OWNER_CODE=$(printf '%06d' $(( $(od -An -N4 -tu4 /dev/urandom) % 1000000 )))" >> "$ENV"
 fi
 
+# Kezia's Food login SMS through renflair (key kept only in .env)
+if [ -n "$KEZIA_SMS_KEY" ]; then
+  sed -i '/^KEZIA_SMS_PROVIDER=/d; /^KEZIA_RENFLAIR_API_KEY=/d' "$ENV"
+  { echo "KEZIA_SMS_PROVIDER=renflair"; echo "KEZIA_RENFLAIR_API_KEY=$KEZIA_SMS_KEY"; } >> "$ENV"
+fi
+
 if command -v ufw >/dev/null && ufw status | grep -q active; then ufw allow 80/tcp >/dev/null; ufw allow 443/tcp >/dev/null; fi
 
 echo "==> Starting database, API and HTTPS (first build takes a few minutes)"
@@ -81,6 +88,7 @@ for i in $(seq 1 60); do $COMPOSE exec -T api wget -qO- http://localhost:8080/v1
 $COMPOSE exec -T api node scripts/seed.js
 for i in $(seq 1 40); do $COMPOSE exec -T kezia wget -qO- http://localhost:8090/v1/health >/dev/null 2>&1 && break; sleep 3; done
 $COMPOSE exec -T kezia node scripts/seed.js
+$COMPOSE exec -T kezia node scripts/import_restaurants.js
 
 echo "==> Nightly backups at 02:30"
 chmod +x server/scripts/backup.sh
@@ -108,5 +116,5 @@ Kezia's Food is running.
   Test restaurant login: $KEZIA_TEST_OWNER_PHONE, code $KEZIA_TEST_CODE
   Test customer login:         $KEZIA_TEST_CUSTOMER_PHONE, code $KEZIA_TEST_CODE
 Keep these private. They are stored in $DIR/$ENV
-SMS codes for other numbers appear in:  $COMPOSE logs api kezia | grep OTP   (until SMS_PROVIDER is set up)
+Kezia login SMS: ${KEZIA_SMS_PROVIDER:-console (codes only in: $COMPOSE logs kezia | grep OTP)}
 EOF

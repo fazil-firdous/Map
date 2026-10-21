@@ -18,7 +18,7 @@ const PAID = ["confirmed", "preparing", "out"];
 function view(o, r, as) {
   const v = {
     id: o.id, status: o.status, pay_method: o.pay_method, items: o.items, item_total: o.item_total, delivery_fee: o.delivery_fee, packing: o.packing,
-    total: o.total, km: Number(o.km), address: o.address, note: o.note, utr: o.utr, pay_issue: o.pay_issue, reject_reason: o.reject_reason,
+    total: o.total, km: Number(o.km), promo: o.promo, promo_amount: o.promo_amount, address: o.address, note: o.note, utr: o.utr, pay_issue: o.pay_issue, reject_reason: o.reject_reason,
     cancel_by: o.cancel_by, cancel_reason: o.cancel_reason, refund: o.refund, rating: o.rating, review: o.review,
     rider: o.out_at ? { name: o.rider_name, phone: o.rider_phone, lat: o.rider_lat, lon: o.rider_lon, at: o.rider_at } : null,
     times: { created: o.created_at, accept_by: o.accept_by, accepted: o.accepted_at, pay_by: o.pay_by, pay_claimed: o.pay_claimed_at, confirmed: o.confirmed_at,
@@ -68,14 +68,16 @@ function routes(app) {
     if (pay === "upi" && !r.upi_id) throw bad(`${r.name} hasn't set up UPI yet. Choose cash on delivery`);
     const live = await db.one(`SELECT count(*)::int n FROM orders WHERE user_id = $1 AND status = ANY($2)`, [req.user.id, OPEN]);
     if (live.n >= 3) throw bad("You have 3 orders in progress. Wait for one to finish");
-    const qt = await quote(r, b.items, a.lat, a.lon);
+    const qt = await quote(r, b.items, a.lat, a.lon, req.user);
     if (qt.problems.length) throw bad(qt.problems[0]);
     const pct = r.commission_pct !== null ? Number(r.commission_pct) : Number(await setting("commission_pct")) || 0;
+    // A new-customer free delivery is paid by Kezia: the restaurant still earns the fee, taken off the commission it owes
+    const off = qt.promo ? qt.promo.amount : 0;
     const o = await db.one(`INSERT INTO orders (id, user_id, restaurant_id, status, pay_method, items, item_total, delivery_fee, packing, total, km, commission_pct, commission,
-        address, customer_phone, customer_name, note, accept_by)
-      VALUES ('KF' || nextval('order_no'), $1, $2, 'placed', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, now() + make_interval(mins => $16)) RETURNING *`,
-      [req.user.id, r.id, pay, JSON.stringify(qt.lines), qt.item_total, qt.delivery_fee, qt.packing, qt.total, qt.km, pct, Math.round(qt.item_total * pct / 100),
-       JSON.stringify({ label: a.label, landmark: a.landmark, lat: a.lat, lon: a.lon }), req.user.phone, req.user.name, str(b.note, 200), r.accept_min]);
+        address, customer_phone, customer_name, note, accept_by, promo, promo_amount)
+      VALUES ('KF' || nextval('order_no'), $1, $2, 'placed', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, now() + make_interval(mins => $16), $17, $18) RETURNING *`,
+      [req.user.id, r.id, pay, JSON.stringify(qt.lines), qt.item_total, qt.delivery_fee, qt.packing, qt.total, qt.km, pct, Math.round(qt.item_total * pct / 100) - off,
+       JSON.stringify({ label: a.label, landmark: a.landmark, lat: a.lat, lon: a.lon }), req.user.phone, req.user.name, str(b.note, 200), r.accept_min, qt.promo ? qt.promo.label : null, off]);
     return { order: view(o, r, "customer") };
   });
 

@@ -30,7 +30,9 @@
   KF.badge = (k, v) => { if ((badges[k] || 0) === v) return; badges[k] = v; nav(); };
 
   function tab(k) {
-    if (!tabs().some(t => t[0] === k)) k = KF.firstTab();
+    const managing = k.startsWith("k:") && mode() === "admin" && P.overriding();
+    if (!managing && !tabs().some(t => t[0] === k)) k = KF.firstTab();
+    if (!managing && P.overriding()) P.setOverride(null);
     while (top()) pop();
     const again = k === current;
     current = k;
@@ -47,6 +49,8 @@
     if (k === "profile") drawProfile();
   }
   KF.tab = tab;
+  /** The owner opens a restaurant's kitchen (menu, settings, orders) as if they ran it. */
+  KF.manage = r => { P.setOverride(r); tab("k:menu"); };
   // Logging in or out can change the kind of account: rebuild the bar and open that mode's first screen
   let lastMode = null;
   const remode = () => { const m = mode(); if (m !== lastMode) { lastMode = m; tab(KF.firstTab()); } else nav(); };
@@ -96,7 +100,7 @@
     document.addEventListener("pointerdown", () => bell.unlock(), { once: true });
     const t0 = Date.now();
     if (S.token) {
-      try { const j = await Promise.race([KF.get("/v1/me"), sleep(4000).then(() => null)]); if (j) S.setAuth({ user: j.user, places: j.places }); } catch {}
+      try { const j = await Promise.race([KF.get("/v1/me"), sleep(4000).then(() => null)]); if (j) S.setAuth({ user: j.user, places: j.places, support: j.support }); } catch {}
       C.loadAddresses().then(() => emit("addr"));
     }
     lastMode = mode();
@@ -108,6 +112,13 @@
     setTimeout(() => boot.remove(), 600);
     C.loadOrders();
     if (S.kitchens().length) P.pollKitchen();
+    // Shared links: kezia://r/<id> in the app, or …/app/#r=<id> on the web, open that restaurant
+    const openLink = url => { const m = /(?:\/\/r\/|#r=)([\w-]+)/.exec(url || ""); if (m && mode() === "customer") C.openRestaurant(m[1]); };
+    openLink(location.hash);
+    if (A) {
+      A.addListener("appUrlOpen", e => openLink(e.url));
+      A.getLaunchUrl().then(r => r && openLink(r.url)).catch(() => {});
+    }
   }
   start();
   // icons: house search receipt user bell-ring utensils wallet settings bike chart-column store users

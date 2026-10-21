@@ -5,7 +5,13 @@ UA = {"User-Agent": "KulgamEats/0.1 (fazil.mastu@gmail.com)"}
 OK = {"by", "by-sa", "cc0", "pdm"}
 Q = {"pizza": "pizza slice cheese", "noodles": "chow mein noodles", "momos": "momos dumplings", "biryani": "chicken biryani", "burger": "chicken burger",
      "shawarma": "shawarma wrap", "cake": "chocolate cake slice", "coffee": "cold coffee glass", "kebab": "seekh kebab", "fries": "french fries",
-     "wazwan": "rogan josh mutton curry", "tea": "kashmiri kahwa tea"}
+     "wazwan": "rogan josh mutton curry", "tea": "kashmiri kahwa tea",
+     # 1.2: categories for real menus (80 Degrees)
+     "tandoori": "tandoori chicken", "butterchicken": "butter chicken curry", "paneer": "paneer butter masala", "soup": "hot and sour soup bowl",
+     "pasta": "creamy penne pasta", "friedrice": "chicken fried rice", "shake": "milkshake glass", "mojito": "mojito drink", "icecream": "ice cream scoops",
+     "naan": "butter naan bread", "sandwich": "grilled chicken sandwich", "friedchicken": "fried chicken pieces", "chillichicken": "chilli chicken",
+     "chillipaneer": "chilli paneer", "wrap": "chicken wrap tortilla", "salad": "green salad bowl", "nuggets": "chicken nuggets", "tikka": "chicken tikka skewers",
+     "brownie": "chocolate brownie ice cream", "lime": "fresh lime soda", "rice": "jeera rice bowl", "vegcurry": "mixed vegetable curry"}
 def get(u): return urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=60).read()
 for key, q in Q.items():
     d = OUT / key; d.mkdir(parents=True, exist_ok=True)

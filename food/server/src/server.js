@@ -12,7 +12,8 @@ app.register(require("@fastify/multipart"), { limits: { fileSize: 3 * 1024 * 102
 fs.mkdirSync(config.uploadsDir, { recursive: true });
 app.register(require("@fastify/static"), { root: config.uploadsDir, prefix: "/uploads/", maxAge: "30d", immutable: true });
 app.register(require("@fastify/static"), { root: path.join(__dirname, "..", "admin"), prefix: "/admin/", decorateReply: false });
-app.register(require("@fastify/static"), { root: path.join(__dirname, "..", "public"), prefix: "/", decorateReply: false, index: false });
+// public/: the install page (/), privacy and terms, restaurant images, the APK, and the web app for iPhone (/app/)
+app.register(require("@fastify/static"), { root: path.join(__dirname, "..", "public"), prefix: "/", decorateReply: false, index: ["index.html"], redirect: true });
 
 app.addHook("preHandler", auth.loadUser);
 app.setErrorHandler((err, req, reply) => {
@@ -24,6 +25,7 @@ app.register(async (a) => {
   require("./catalog").routes(a);
   auth.routes(a);
   require("./orders").routes(a);
+  require("./web").routes(a);
   require("./owner").routes(a);
   require("./admin").routes(a);
 });
