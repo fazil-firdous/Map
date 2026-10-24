@@ -29,6 +29,9 @@ module.exports = {
   // Login SMS cost money: at most this many a day in total (stops anyone draining the SMS balance), and per network per hour.
   smsDailyMax: Number(env.SMS_DAILY_MAX || 1000),
   smsPerIpHour: Number(env.SMS_PER_IP_HOUR || 25),
+  // Push notifications: the Firebase service account JSON, base64 (off when empty). FCM_URL only for tests.
+  firebaseKey: env.FIREBASE_KEY_B64 || "",
+  fcmUrl: env.FCM_URL || "",
   // Kulgam district (orders only within this box)
   bbox: { minLat: 33.52, maxLat: 33.75, minLon: 74.80, maxLon: 75.15 },
 };

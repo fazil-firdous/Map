@@ -9,6 +9,7 @@
 const db = require("./db");
 const config = require("./config");
 const { needUser, roleAt, isReview } = require("./auth");
+const push = require("./push");
 const { quote, setting, visible } = require("./catalog");
 const { bad, forbidden, notFound, str } = require("./util");
 
@@ -19,7 +20,7 @@ function view(o, r, as) {
   const v = {
     id: o.id, status: o.status, pay_method: o.pay_method, items: o.items, item_total: o.item_total, delivery_fee: o.delivery_fee, packing: o.packing,
     total: o.total, km: Number(o.km), promo: o.promo, promo_amount: o.promo_amount, address: o.address, note: o.note, utr: o.utr, pay_issue: o.pay_issue, reject_reason: o.reject_reason,
-    cancel_by: o.cancel_by, cancel_reason: o.cancel_reason, refund: o.refund, rating: o.rating, review: o.review,
+    cancel_by: o.cancel_by, cancel_reason: o.cancel_reason, refund: o.refund, rating: o.rating, review: o.review, review_photo: o.review_photo, review_reply: o.review_reply, rated_at: o.rated_at,
     rider: o.out_at ? { name: o.rider_name, phone: o.rider_phone, lat: o.rider_lat, lon: o.rider_lon, at: o.rider_at } : null,
     times: { created: o.created_at, accept_by: o.accept_by, accepted: o.accepted_at, pay_by: o.pay_by, pay_claimed: o.pay_claimed_at, confirmed: o.confirmed_at,
       cancel_until: o.cancel_until, preparing: o.preparing_at, out: o.out_at, delivered: o.delivered_at, closed: o.closed_at },
@@ -79,6 +80,7 @@ function routes(app) {
       VALUES ('KF' || nextval('order_no'), $1, $2, 'placed', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, now() + make_interval(mins => $16), $17, $18) RETURNING *`,
       [req.user.id, r.id, pay, JSON.stringify(qt.lines), qt.item_total, qt.delivery_fee, qt.packing, qt.total, qt.km, pct, Math.round(qt.item_total * pct / 100) - off,
        JSON.stringify({ label: a.label, landmark: a.landmark, lat: a.lat, lon: a.lon }), req.user.phone, req.user.name, str(b.note, 200), r.accept_min, qt.promo ? qt.promo.label : null, off]);
+    push.orderChanged(o, r, req.log);
     return { order: view(o, r, "customer") };
   });
 
@@ -97,6 +99,7 @@ function routes(app) {
     if (await access(req, o) !== "customer") throw forbidden();
     const utr = String(req.body?.utr || "").replace(/\D/g, "").slice(-12) || null;
     const n = await step(o.id, ["accepted"], { status: "pay_claimed", utr, pay_issue: false }, "pay_claimed_at = now()");
+    push.orderChanged(n, r, req.log);
     return { order: view(n, r, "customer") };
   });
 
@@ -115,6 +118,7 @@ function routes(app) {
       const paid = PAID.includes(o.status) && o.pay_method === "upi" || o.status === "pay_claimed";
       n = await step(o.id, OPEN, { status: "cancelled", cancel_by: "restaurant", cancel_reason: reason || "Cancelled by the restaurant", refund: paid ? "due" : null }, "closed_at = now()");
     }
+    push.orderChanged(n, r, req.log);
     return { order: view(n, r, as) };
   });
 
@@ -123,7 +127,7 @@ function routes(app) {
     if (await access(req, o) !== "customer") throw forbidden();
     const stars = Math.round(Number(req.body?.rating));
     if (!(stars >= 1 && stars <= 5)) throw bad("Choose 1 to 5 stars");
-    const n = await db.one("UPDATE orders SET rating = $2, review = $3 WHERE id = $1 AND status = 'delivered' AND rating IS NULL RETURNING *", [o.id, stars, str(req.body?.review, 300)]);
+    const n = await db.one("UPDATE orders SET rating = $2, review = $3, rated_at = now() WHERE id = $1 AND status = 'delivered' AND rating IS NULL RETURNING *", [o.id, stars, str(req.body?.review, 300)]);
     if (!n) throw bad("You can rate a delivered order once");
     await db.q("UPDATE restaurants SET rating_sum = rating_sum + $2, rating_count = rating_count + 1 WHERE id = $1", [r.id, stars]);
     return { order: view(n, r, "customer") };
@@ -153,6 +157,7 @@ function routes(app) {
     const as = await access(req, o);
     if (as === "customer") throw forbidden("Only the restaurant's team can do this");
     const n = await fn(o, r, as, req);
+    if (n.status !== o.status || n.pay_issue !== o.pay_issue) push.orderChanged(n, r, req.log);
     return { order: view(n, r, as) };
   });
   act("accept", (o, r, as) => { team(as, "owner", "manager");
@@ -203,8 +208,9 @@ function routes(app) {
 function startSweeper(log) {
   const run = async () => {
     try {
-      await db.q(`UPDATE orders SET status = 'expired', cancel_by = 'system', cancel_reason = 'The restaurant didn''t respond in time', closed_at = now() WHERE status = 'placed' AND accept_by < now()`);
-      await db.q(`UPDATE orders SET status = 'expired', cancel_by = 'system', cancel_reason = 'Payment wasn''t made in time', closed_at = now() WHERE status = 'accepted' AND pay_by < now()`);
+      const gone = [...await db.many(`UPDATE orders SET status = 'expired', cancel_by = 'system', cancel_reason = 'The restaurant didn''t respond in time', closed_at = now() WHERE status = 'placed' AND accept_by < now() RETURNING *`),
+        ...await db.many(`UPDATE orders SET status = 'expired', cancel_by = 'system', cancel_reason = 'Payment wasn''t made in time', closed_at = now() WHERE status = 'accepted' AND pay_by < now() RETURNING *`)];
+      for (const o of gone) push.orderChanged(o, await db.one("SELECT id, name FROM restaurants WHERE id = $1", [o.restaurant_id]), log);
     } catch (e) { log.error(e); }
   };
   run(); return setInterval(run, 15000);

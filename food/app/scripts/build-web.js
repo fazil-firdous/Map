@@ -24,5 +24,7 @@ fs.writeFileSync(path.join(www, "js/icons.js"), `/* Lucide icons (ISC licence, l
 
 // KF_API=same-origin: the web version served by the API itself (kezia.<domain>/app/) calls its own server
 const api = process.env.KF_API === "same-origin" ? "" : process.env.KF_API || "https://kezia.45-92-1-150.sslip.io";
-fs.writeFileSync(path.join(www, "js/config.js"), `window.KF_CONFIG = ${JSON.stringify({ api, version: require("../package.json").version })};\n`);
+// push: only in the Android app, and only when it's built with the Firebase file (without it, registering would crash)
+const push = process.env.KF_API !== "same-origin" && fs.existsSync(path.join(root, "android/app/google-services.json"));
+fs.writeFileSync(path.join(www, "js/config.js"), `window.KF_CONFIG = ${JSON.stringify({ api, version: require("../package.json").version, push })};\n`);
 console.log(`web ready: ${Object.keys(icons).length} icons, API ${api || "(same origin)"}`);

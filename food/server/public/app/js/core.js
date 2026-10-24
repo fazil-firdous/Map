@@ -34,13 +34,14 @@
   // ---- state kept on this phone ----
   const S = {
     token: ls.get("kf_token", null), user: ls.get("kf_user", null), places: ls.get("kf_places", []),
-    cart: ls.get("kf_cart", null), addrId: ls.get("kf_addr", null), addresses: [], here: ls.get("kf_here", null), support: ls.get("kf_support", null),
+    cart: ls.get("kf_cart", null), addrId: ls.get("kf_addr", null), addresses: [], here: ls.get("kf_here", null), support: ls.get("kf_support", null), push: ls.get("kf_push", false),
     skew: 0,
     saveCart() { ls.set("kf_cart", this.cart); },
     setAuth(j) {
       this.token = j.token || this.token; this.user = j.user; this.places = j.places || [];
       ls.set("kf_token", this.token); ls.set("kf_user", this.user); ls.set("kf_places", this.places);
       if ("support" in j) { this.support = j.support || null; ls.set("kf_support", this.support); } // only restaurant teams, riders and the owner get it
+      if ("push" in j) { this.push = !!j.push; ls.set("kf_push", this.push); }
     },
     clearAuth() { this.token = null; this.user = null; this.places = []; this.addresses = []; this.addrId = null; this.support = null; ["kf_token", "kf_user", "kf_places", "kf_addr", "kf_support"].forEach(ls.del); },
     get addr() { return this.addresses.find(a => a.id === this.addrId) || null; },
@@ -123,6 +124,45 @@
     } else if (window.Notification && Notification.permission === "granted" && document.hidden) new Notification(title, { body });
   }
   async function askNotify() { const N = plugin("LocalNotifications"); if (N) { try { notifyAsked = true; await N.requestPermissions(); } catch {} } }
+
+  // Push notifications: new orders and order updates even when the app is closed. Only in the Android app built with
+  // the Firebase file (KF_CONFIG.push), and only when the server has its Firebase key (S.push from /v1/me).
+  let pushOn = false;
+  async function pushSetup() {
+    const P = plugin("PushNotifications");
+    if (!P || !KF_CONFIG.push || !S.push || !S.token) return;
+    if (pushOn) { const t = ls.get("kf_ptoken", null); if (t) post("/v1/push/token", { token: t, platform: "android" }).catch(() => {}); return; } // another login on this phone
+    pushOn = true;
+    try {
+      await P.createChannel({ id: "orders", name: "New orders and deliveries", description: "Rings loudly for new orders", importance: 5, sound: "order_bell", vibration: true, visibility: 1 });
+      await P.createChannel({ id: "updates", name: "Order updates", description: "How your order is going", importance: 4, visibility: 1 });
+      let p = await P.checkPermissions();
+      if (p.receive !== "granted") p = await P.requestPermissions();
+      if (p.receive !== "granted") return;
+      await P.addListener("registration", t => { ls.set("kf_ptoken", t.value); post("/v1/push/token", { token: t.value, platform: "android" }).catch(() => {}); });
+      await P.addListener("pushNotificationActionPerformed", a => emit("pushopen", (a.notification && a.notification.data) || {}));
+      await P.addListener("pushNotificationReceived", n => emit("pushin", n.data || {}));
+      await P.register();
+    } catch (e) { console.warn("push", e); }
+  }
+  /** On logout: this phone stops getting that account's notifications. */
+  async function pushForget() { const t = ls.get("kf_ptoken", null); if (t && S.token) { try { await post("/v1/push/forget", { token: t }); } catch {} } }
+
+  /** Shrink a photo on the phone before uploading (max 1280 px, JPEG). */
+  async function shrink(file) {
+    const url = URL.createObjectURL(file);
+    try {
+      const im = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("Couldn't read that photo")); i.src = url; });
+      const k = Math.min(1, 1280 / Math.max(im.width, im.height)), c = document.createElement("canvas");
+      c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+      return await new Promise(res => c.toBlob(res, "image/jpeg", .84));
+    } finally { URL.revokeObjectURL(url); }
+  }
+  const ago = d => { if (!d) return ""; const m = (Date.now() - Date.parse(d)) / 60000;
+    return m < 60 ? "just now" : m < 1440 ? `${Math.floor(m / 60)} h ago` : m < 2880 ? "yesterday" : m < 43200 ? `${Math.floor(m / 1440)} days ago` : new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short" }); };
+
+  // Install links: the web app opened from kezia…/app/?ref=<code> remembers the link (sent with the sign-up)
+  const ref = (() => { try { const r = new URLSearchParams(location.search).get("ref"); if (r && /^[a-z0-9-]{1,40}$/.test(r)) { if (ls.get("kf_ref", null) !== r) { ls.set("kf_ref", r); setTimeout(() => post("/v1/ref", { code: r }).catch(() => {}), 1500); } } } catch {} return ls.get("kf_ref", null); })();
 
   // Restaurant bell: a loud two-tone chime that repeats until the order is answered
   const bell = (() => {
@@ -292,7 +332,7 @@
   }
   const pin = (kind, icon) => L.divIcon({ className: "", html: `<div class="mk ${kind}">${I(icon, "sm")}</div>`, iconSize: [40, 40], iconAnchor: [20, 20] });
 
-  window.KF = { API, native, plugin, $, $$, esc, h, I, rs, img, bg, bgc, sleep, ls, time, when, plural, phone10, S, now, api, get, post, on, emit,
+  window.KF = { API, native, plugin, pushSetup, pushForget, ref, shrink, ago, $, $$, esc, h, I, rs, img, bg, bgc, sleep, ls, time, when, plural, phone10, S, now, api, get, post, on, emit,
     haptic, openExternal, call, position, watch, notify, askNotify, bell, push, pop, popAll, top, stack, sheet, topSheet, confirm, ask, toast, fail, busy, bind,
     skelCards, skelLines, empty, topbar, lift, map, pin };
 })();

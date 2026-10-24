@@ -47,8 +47,8 @@
   <div class="app"><img src="/app/img/icons/icon-512.png" alt="Kezia's Food logo">
     <div><h1>Kezia's Food</h1><div class="dev">Made in Kulgam</div><div class="sub">Food delivery · Kulgam district</div></div></div>
   <div class="facts"><div><b>Free</b><span>to download</span></div><div><b>Kulgam</b><span>restaurants</span></div><div><b>UPI or cash</b><span>pay the restaurant</span></div><div><b>Live</b><span>rider map</span></div></div>
-  <a class="btn" id="install" href="/kezias-food.apk">⬇ Install the app</a>
-  <div class="two"><a class="btn ghost" href="/app/">Open in browser</a><button class="btn ghost" id="iphone"> iPhone</button></div>
+  <a class="btn" id="install" href="/dl/direct">⬇ Install the app</a>
+  <div class="two"><a class="btn ghost" id="web" href="/app/">Open in browser</a><button class="btn ghost" id="iphone"> iPhone</button></div>
   <p class="note" id="hint">Android: download, open the file and allow "Install unknown apps" once.</p>
   <div class="play"><i>⏳</i><span><b>Coming soon to the Play Store</b>Kezia's Food isn't on the Play Store yet because of a few issues on our side. It will be there soon. Until then, install it from here: it's the same app, and it updates the same way.</span></div>
 
@@ -77,8 +77,11 @@
 <div class="sheet" id="sheet"><div><h2 style="margin-top:0">Add Kezia's Food to your iPhone</h2>
   <ol><li>Open <b>kezia…/app</b> in <b>Safari</b> (tap the button below)</li><li>Tap the <b>Share</b> button (square with an arrow)</li><li>Choose <b>Add to Home Screen</b>, then <b>Add</b></li></ol>
   <p class="sub">The Kezia's Food icon appears on your home screen and opens like an app.</p>
-  <a class="btn" href="/app/">Open Kezia's Food</a></div></div>
+  <a class="btn" id="web2" href="/app/">Open Kezia's Food</a></div></div>
 <script>
+  // install links (/i/<code> → /?ref=<code>): the download and the web app carry the link so it gets the credit
+  const ref = (new URLSearchParams(location.search).get("ref") || "").replace(/[^a-z0-9-]/g, "").slice(0, 40);
+  if (ref) { document.getElementById("install").href = "/dl/" + ref; ["web", "web2"].forEach(id => document.getElementById(id).href = "/app/?ref=" + ref); }
   const ios = /iPhone|iPad|iPod/.test(navigator.userAgent), sheet = document.getElementById("sheet");
   if (ios) { const b = document.getElementById("install"); b.textContent = " Get it on iPhone"; b.href = "#"; b.onclick = e => { e.preventDefault(); sheet.classList.add("on"); };
     document.getElementById("hint").textContent = "On iPhone, Kezia's Food works from your home screen: no App Store needed."; }

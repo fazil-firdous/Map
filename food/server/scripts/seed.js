@@ -4,7 +4,7 @@ const db = require("../src/db");
 
 const MENU = [
   ["Pizza", [["Margherita Pizza", 199, true, "8 inch · cheese, tomato, oregano", "asset:pizza-1.jpg", true], ["Chicken Tikka Pizza", 269, false, "8 inch · tandoori chicken, onion, capsicum", "asset:pizza-2.jpg", true],
-             ["BBQ Chicken Pizza", 349, false, "10 inch · smoky BBQ sauce, double cheese", "asset:pizza-3.jpg"]]],
+             ["BBQ Chicken Pizza", 349, false, "10 inch · smoky BBQ sauce, double cheese", "asset:pizza-2.jpg"]]],
   ["Wazwan", [["Rista (2 pcs)", 260, false, "Meatballs in red gravy", "asset:wazwan.jpg", true], ["Rogan Josh", 290, false, "Mutton in Kashmiri chilli gravy", "asset:wazwan.jpg"],
               ["Gushtaba (2 pcs)", 310, false, "Meatballs in yoghurt gravy", "asset:wazwan.jpg"], ["Wazwan Trami for 2", 1199, false, "Rista, rogan josh, tabak maaz, kebab, gushtaba, rice", "asset:wazwan.jpg"]]],
   ["Burgers & Rolls", [["Zinger Burger", 169, false, "Crispy chicken, lettuce, mayo", "asset:burger.jpg", true], ["Chicken Shawarma Roll", 139, false, "Garlic sauce, pickles", "asset:rolls.jpg"],
@@ -17,7 +17,7 @@ const MENU = [
 
 async function testRestaurant() {
   await db.q(`INSERT INTO restaurants (id, name, phone, area, address, lat, lon, cuisines, photo, status, is_open, upi_id, upi_name, cod, prep_min)
-    VALUES ('KF-TEST', 'Kezia''s Test Kitchen', $1, 'Kulgam town', 'Near Ghanta Ghar, Kulgam', 33.6463, 75.0193, 'Pizza · Wazwan · Chinese · Biryani', 'asset:pizza-3.jpg',
+    VALUES ('KF-TEST', 'Kezia''s Test Kitchen', $1, 'Kulgam town', 'Near Ghanta Ghar, Kulgam', 33.6463, 75.0193, 'Pizza · Wazwan · Chinese · Biryani', 'asset:pizza-2.jpg',
             'test', true, 'kezias.test@upi', 'Kezia''s Test Kitchen', true, 20)
     ON CONFLICT (id) DO NOTHING`, [process.env.TEST_OWNER_PHONE ? "+91" + process.env.TEST_OWNER_PHONE.replace(/\D/g, "").slice(-10) : null]);
   const has = await db.one("SELECT count(*)::int n FROM menu_sections WHERE restaurant_id = 'KF-TEST'");
@@ -32,8 +32,8 @@ async function testRestaurant() {
   const b = await db.one("SELECT count(*)::int n FROM banners WHERE restaurant_id = 'KF-TEST'");
   if (!b.n) {
     await db.q(`INSERT INTO banners (kicker, title, subtitle, photo, restaurant_id, sort) VALUES
-      ('WAZWAN NIGHTS', 'Kezia''s Test Kitchen', 'Trami for 2 from ₹1,199', 'asset:banner-wazwan.jpg', 'KF-TEST', 1),
-      ('PIZZA TIME', 'Hot pizza in 30 min', 'From ₹199 · Kulgam town', 'asset:banner-pizza.jpg', 'KF-TEST', 2)`);
+      ('WAZWAN NIGHTS', 'Kezia''s Test Kitchen', 'Trami for 2 from ₹1,199', 'asset:wazwan.jpg', 'KF-TEST', 1),
+      ('PIZZA TIME', 'Hot pizza in 30 min', 'From ₹199 · Kulgam town', 'asset:pizza-1.jpg', 'KF-TEST', 2)`);
   }
 }
 

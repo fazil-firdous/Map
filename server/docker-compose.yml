@@ -64,6 +64,7 @@ services:
       OWNER_PHONE: ${KEZIA_OWNER_PHONE:-}
       OWNER_CODE: ${KEZIA_OWNER_CODE:-}
       SMS_DAILY_MAX: ${KEZIA_SMS_DAILY_MAX:-1000}
+      FIREBASE_KEY_B64: ${KEZIA_FIREBASE_KEY_B64:-}
       REVIEW_PHONE: ${KEZIA_REVIEW_PHONE:-}
       REVIEW_CODE: ${KEZIA_REVIEW_CODE:-}
       KEZIA_PLATFORM_UPI: ${KEZIA_PLATFORM_UPI:-}
@@ -78,6 +79,8 @@ services:
     environment:
       API_DOMAIN: ${API_DOMAIN:?set API_DOMAIN, e.g. api.srinagarbazaar.in}
       KEZIA_DOMAIN: ${KEZIA_DOMAIN:?set KEZIA_DOMAIN, e.g. kezia.example.com}
+      # every address Kezia's Food answers on: its own domain plus the old one, so installed apps keep working
+      KEZIA_SITES: ${KEZIA_SITES:-${KEZIA_DOMAIN}}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

@@ -393,3 +393,18 @@ textarea.input { min-height: 84px; resize: none; line-height: 1.45; }
 @keyframes steam { 0% { opacity: 0; transform: translateY(10px) scaleY(.6); } 40% { opacity: .9; } 100% { opacity: 0; transform: translateY(-26px) scaleY(1.1); } }
 @keyframes toastin { from { opacity: 0; transform: translate(-50%, 12px) scale(.96); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+
+/* ---- reviews ---- */
+.rstars { display: inline-flex; gap: 1px; color: var(--line-2); } .rstars i { display: inline-flex; } .rstars i.on { color: var(--gold); }
+.rvrow { display: flex; gap: 12px; overflow-x: auto; padding: 4px var(--gut) 10px; scroll-snap-type: x mandatory; scrollbar-width: none; } .rvrow::-webkit-scrollbar { display: none; }
+.rv { flex: none; width: 250px; background: #fff; border-radius: 18px; padding: 14px; box-shadow: var(--e1), inset 0 0 0 1px var(--line); scroll-snap-align: start; display: flex; flex-direction: column; gap: 6px; }
+.rv.wide { width: auto; margin: 0 var(--gut) 12px; }
+.rv p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--ink); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; } .rv.wide p { -webkit-line-clamp: unset; }
+.rvph { display: block; width: 100%; max-width: 260px; aspect-ratio: 4 / 3; border-radius: 14px; background-size: cover; background-position: center; background-color: var(--g-soft); }
+.rvreply { background: var(--g-soft); border-radius: 12px; padding: 9px 11px; font-size: 13px; line-height: 1.45; color: var(--ink-2); } .rvreply b { color: var(--g); font-size: 12px; }
+.rvsum { display: flex; gap: 18px; align-items: center; margin: 14px var(--gut) 0; } .rvsum .big { display: block; font-size: 40px; line-height: 1; letter-spacing: -.02em; margin-bottom: 4px; }
+.rvbar { display: grid; grid-template-columns: 12px 1fr 28px; gap: 8px; align-items: center; font-size: 12px; font-weight: 700; } .rvbar i { height: 7px; border-radius: 9px; background: var(--line); overflow: hidden; }
+.rvbar i b { display: block; height: 100%; border-radius: 9px; background: var(--gold); }
+button.rating { border: 0; cursor: pointer; }
+.rstars i.on svg { fill: currentColor; }
+.facts.four { grid-template-columns: repeat(4, 1fr); } .facts.four b { font-size: 18px; }

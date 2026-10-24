@@ -3,10 +3,13 @@
 #   bash install.sh --domain api.45-92-1-150.sslip.io [--kezia-owner 9XXXXXXXXX] [--kezia-sms-key KEY]
 #     [--kezia-review 9XXXXXXXXX]   demo login for Play Store reviewers (fixed code; its orders never reach a restaurant)
 #     [--kezia-clean-start]         ONE TIME before going live: backup, then delete all orders, the test restaurant and test logins
+#     [--kezia-domain keziasfood.in] Kezia's Food on its own domain (point its A record at this VPS first); the old address keeps working
+#     [--kezia-firebase-key key.json] push notifications: the Firebase service account key file (kept only in .env)
+#     [--backup-b2 KEYID:APPKEY:BUCKET] copy the nightly backups to Backblaze B2 (off this VPS)
 # Safe to run again: it updates the code and keeps your existing passwords and data.
 set -euo pipefail
 
-DOMAIN=""; REVIEW_PHONE=""; KEZIA_OWNER=""; KEZIA_SMS_KEY=""; KEZIA_REVIEW=""; KEZIA_CLEAN=0; BRANCH="ccr-cade9a1c-6u8263"; DIR=/opt/srinagar-bazaar
+DOMAIN=""; REVIEW_PHONE=""; KEZIA_OWNER=""; KEZIA_SMS_KEY=""; KEZIA_REVIEW=""; KEZIA_CLEAN=0; KEZIA_NEW_DOMAIN=""; KEZIA_FB=""; B2=""; BACKUP_TO=""; BRANCH="ccr-cade9a1c-6u8263"; DIR=/opt/srinagar-bazaar
 REPO="https://github.com/fazil-mastu/Map.git"
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -16,6 +19,10 @@ while [ $# -gt 0 ]; do
     --kezia-sms-key) KEZIA_SMS_KEY="$2"; shift 2 ;;
     --kezia-review) KEZIA_REVIEW="$2"; shift 2 ;;
     --kezia-clean-start) KEZIA_CLEAN=1; shift ;;
+    --kezia-domain) KEZIA_NEW_DOMAIN="$2"; shift 2 ;;
+    --kezia-firebase-key) KEZIA_FB="$2"; shift 2 ;;
+    --backup-b2) B2="$2"; shift 2 ;;
+    --backup-remote) BACKUP_TO="$2"; shift 2 ;;
     --branch) BRANCH="$2"; shift 2 ;;
     *) echo "Unknown option $1"; exit 1 ;;
   esac
@@ -86,6 +93,45 @@ if [ -n "$KEZIA_SMS_KEY" ]; then
   { echo "KEZIA_SMS_PROVIDER=renflair"; echo "KEZIA_RENFLAIR_API_KEY=$KEZIA_SMS_KEY"; } >> "$ENV"
 fi
 
+# Kezia's Food on its own domain. The old address stays on too, so apps already installed keep working.
+if [ -n "$KEZIA_NEW_DOMAIN" ]; then
+  OLD=$(grep '^KEZIA_DOMAIN=' "$ENV" | cut -d= -f2)
+  NEW="${KEZIA_NEW_DOMAIN#https://}"; NEW="${NEW%/}"
+  SITES="$NEW"
+  case "$NEW" in www.*) ;; *.*.*) ;; *) SITES="$SITES, www.$NEW" ;; esac
+  [ -n "$OLD" ] && [ "$OLD" != "$NEW" ] && SITES="$SITES, $OLD"
+  OLDSITES=$(grep '^KEZIA_SITES=' "$ENV" | cut -d= -f2- || true)
+  for s in $(echo "$OLDSITES" | tr ',' ' '); do case ", $SITES," in *", $s,"*) ;; *) SITES="$SITES, $s" ;; esac; done
+  sed -i '/^KEZIA_DOMAIN=/d; /^KEZIA_SITES=/d' "$ENV"
+  { echo "KEZIA_DOMAIN=$NEW"; echo "KEZIA_SITES=$SITES"; } >> "$ENV"
+  echo "==> Kezia's Food answers on: $SITES"
+fi
+
+# Push notifications: the Firebase service account key, base64 in .env (never in git)
+if [ -n "$KEZIA_FB" ]; then
+  [ -f "$KEZIA_FB" ] || { echo "Firebase key file not found: $KEZIA_FB"; exit 1; }
+  grep -q '"private_key"' "$KEZIA_FB" || { echo "That file isn't a Firebase service account key (no private_key)"; exit 1; }
+  sed -i '/^KEZIA_FIREBASE_KEY_B64=/d' "$ENV"
+  echo "KEZIA_FIREBASE_KEY_B64=$(base64 -w0 "$KEZIA_FB")" >> "$ENV"
+  echo "==> Push notifications key saved. You can delete $KEZIA_FB now."
+fi
+
+# Off-site backups with rclone: Backblaze B2 (--backup-b2 KEYID:APPKEY:BUCKET) or any rclone remote you set up yourself
+if [ -n "$B2" ] || [ -n "$BACKUP_TO" ]; then
+  command -v rclone >/dev/null || apt-get install -y -qq rclone >/dev/null
+  if [ -n "$B2" ]; then
+    IFS=: read -r B2ID B2KEY B2BUCKET <<< "$B2"
+    [ -n "$B2BUCKET" ] || { echo "Use --backup-b2 KEYID:APPKEY:BUCKET"; exit 1; }
+    rclone config create kezia-b2 b2 account "$B2ID" key "$B2KEY" >/dev/null
+    BACKUP_TO="kezia-b2:$B2BUCKET/backups"
+  fi
+  rclone lsd "${BACKUP_TO%%/*}" >/dev/null 2>&1 || rclone mkdir "$BACKUP_TO" || { echo "Couldn't reach $BACKUP_TO: check the key and bucket name"; exit 1; }
+  sed -i '/^BACKUP_REMOTE=/d' "$ENV"; echo "BACKUP_REMOTE=$BACKUP_TO" >> "$ENV"
+  echo "==> Nightly backups will also be copied to $BACKUP_TO"
+fi
+
+grep -q '^KEZIA_SITES=' "$ENV" || echo "KEZIA_SITES=$(grep '^KEZIA_DOMAIN=' "$ENV" | cut -d= -f2)" >> "$ENV"
+
 if command -v ufw >/dev/null && ufw status | grep -q active; then ufw allow 80/tcp >/dev/null; ufw allow 443/tcp >/dev/null; fi
 
 echo "==> Starting database, API and HTTPS (first build takes a few minutes)"
@@ -130,4 +176,6 @@ Kezia's Food is running.
   Play Store demo login: ${KEZIA_REVIEW_PHONE:-not set (add --kezia-review 9XXXXXXXXX when you submit to Play)}${KEZIA_REVIEW_CODE:+, code $KEZIA_REVIEW_CODE}
 Keep these private. They are stored in $DIR/$ENV
 Kezia login SMS: ${KEZIA_SMS_PROVIDER:-console (codes only in: $COMPOSE logs kezia | grep OTP)}
+Push notifications: ${KEZIA_FIREBASE_KEY_B64:+on}${KEZIA_FIREBASE_KEY_B64:-off (add --kezia-firebase-key key.json)}
+Off-site backups: ${BACKUP_REMOTE:-off (add --backup-b2 KEYID:APPKEY:BUCKET)}
 EOF

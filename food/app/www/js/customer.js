@@ -47,7 +47,7 @@
         const code = () => boxes.map(b => b.value).join("");
         const verify = () => busy($("[data-verify]", box), async () => {
           if (code().length !== 6) throw new Error("Enter all 6 digits");
-          const j = await post("/v1/auth/otp/verify", { phone, code: code(), name: name || undefined });
+          const j = await post("/v1/auth/otp/verify", { phone, code: code(), name: name || undefined, ref: KF.ref || undefined });
           S.setAuth(j); await loadAddresses(); ok = true; haptic("success");
           toast(`Welcome${j.user.name ? ", " + j.user.name.split(" ")[0] : ""}!`); emit("auth"); s.close();
         });
@@ -174,6 +174,40 @@
     <span class="row" style="gap:6px;font-weight:800">View cart ${I("chevron-right", "sm")}</span></button>` : "";
 
   // Today's special card (home screen and restaurant page)
+  // ---------- reviews ----------
+  const starsHTML = n => `<span class="rstars">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= n ? "on" : ""}">${I("star", "xs")}</i>`).join("")}</span>`;
+  const reviewCard = (x, wide = false) => `<div class="rv ${wide ? "wide" : ""}">
+      <div class="row between"><b>${esc(x.name)}</b>${starsHTML(x.stars)}</div>
+      ${x.text ? `<p>${esc(x.text)}</p>` : ""}
+      ${x.photo ? `<button class="rvph" data-a="rvphoto" data-src="${esc(KF.img(x.photo))}" ${KF.bgc(x.photo)} aria-label="Photo"></button>` : ""}
+      <div class="muted small">${esc(x.dishes || "")}${x.at ? ` · ${KF.ago(x.at)}` : ""}</div>
+      ${x.reply ? `<div class="rvreply"><b>Reply from the restaurant</b><br>${esc(x.reply)}</div>` : ""}</div>`;
+  const photoSheet = src => sheet(`<img src="${esc(src)}" alt="" style="width:100%;border-radius:18px;display:block">`);
+  /** The restaurant page's "What people say" strip. */
+  async function loadReviews(r, box) {
+    let j; try { j = await get(`/v1/restaurants/${encodeURIComponent(r.id)}/reviews`); } catch { return; }
+    if (!j.reviews.length) return;
+    box.innerHTML = `<div class="sec" style="margin-top:16px"><h2>${I("star", "sm")} What people say</h2><button data-a="reviews">All ${j.count}</button></div>
+      <div class="rvrow">${j.reviews.slice(0, 6).map(x => reviewCard(x)).join("")}</div>`;
+  }
+  function openReviews(r) {
+    push(async (el, scr) => {
+      el.innerHTML = `${topbar("Reviews")}<div class="scroll">${skelLines(4)}</div>`;
+      let all = [], j;
+      const draw = () => {
+        const max = Math.max(1, ...j.spread);
+        $(".scroll", el).innerHTML = `<div class="card rvsum"><div><b class="big">${j.rating ?? "–"}</b>${starsHTML(Math.round(j.rating || 0))}<div class="muted small">${plural(j.count, "rating")}</div></div>
+            <div class="grow">${j.spread.map((n, i) => `<div class="rvbar"><span>${5 - i}</span><i><b style="width:${n / max * 100}%"></b></i><span class="muted">${n}</span></div>`).join("")}</div></div>
+          <h3 class="pad" style="margin:18px 0 6px">${esc(r.name)}</h3>
+          ${all.length ? all.map(x => reviewCard(x, true)).join("") : empty("star", "No reviews with words yet", "People rate after their food arrives.")}
+          ${j.reviews.length === 20 ? `<button class="btn ghost" data-a="more" style="margin:12px var(--gut);width:calc(100% - 2*var(--gut))">Show more</button>` : ""}<div style="height:30px"></div>`;
+      };
+      const load = async () => { j = await get(`/v1/restaurants/${encodeURIComponent(r.id)}/reviews?offset=${all.length}`); all = all.concat(j.reviews); draw(); };
+      bind(el, { back: () => pop(scr), rvphoto: b => photoSheet(b.dataset.src), more: b => busy(b, load) });
+      try { await load(); } catch (e) { $(".scroll", el).innerHTML = empty("circle-alert", "Couldn't load reviews", e.message); }
+    });
+  }
+
   const spCard = (sp, showRest = true) => `<button class="sp" data-a="special" data-r="${esc(sp.restaurant_id)}" data-item="${sp.item_id || ""}">
       <span class="im" ${bg(sp.photo)}><em>${I("flame", "xs")} ${esc(sp.title)}</em></span>
       <span class="bd"><b class="ell">${esc(sp.item || sp.title)}${sp.size ? ` <span class="muted">(${esc(sp.size)})</span>` : ""}</b>
@@ -192,6 +226,25 @@
         <div class="meta ell">${esc(r.cuisines || "")}</div><div class="meta">${esc(r.area || "")}${r.km !== null ? ` · ${r.km} km` : ""}</div>
         <div class="fee">${fee}</div></div></button>`;
   }
+  /** Home: a nudge to rate the last delivered order (for 3 days) */
+  const rateCard = () => {
+    const o = (ords.list || []).find(x => x.status === "delivered" && !x.rating && Date.now() - Date.parse(x.created) < 3 * 86400000);
+    return o ? `<button class="card row" data-a="rateme" data-id="${esc(o.id)}" style="width:calc(100% - 2*var(--gut));text-align:left;margin-top:14px"><span class="tile gold">${I("star", "sm")}</span>
+      <span class="grow"><b>How was ${esc(o.restaurant.name)}?</b><br><span class="muted small">Rate your food and add a photo. It helps others choose</span></span>${I("chevron-right", "sm")}</button>` : "";
+  };
+  /** Once, after someone logs in: how did they hear about Kezia's Food? (the owner sees which promotion works) */
+  function askHeard() {
+    if (!S.user || S.user.heard || KF.ls.get("kf_heard_asked", 0) || KF.topSheet() || KF.top()) return;
+    KF.ls.set("kf_heard_asked", 1);
+    const opts = [["Instagram", "camera"], ["Friend or family", "users"], ["Poster or restaurant", "store"], ["WhatsApp", "message-circle"], ["Other", "sparkles"]];
+    const s = sheet(`<h2>One quick question</h2><p class="sub">How did you hear about Kezia's Food?</p>
+      <div class="list">${opts.map(([t, ic]) => `<button class="li" data-h="${t}" style="width:100%;text-align:left"><span class="tile">${I(ic, "sm")}</span><span class="grow"><b>${t}</b></span>${I("chevron-right", "sm")}</button>`).join("")}</div>
+      <button class="btn ghost" data-skip style="margin-top:12px">Skip</button>`);
+    $$("[data-h]", s).forEach(b => { b.onclick = async () => { s.close(); try { const j = await api("PATCH", "/v1/me", { heard: b.dataset.h }); S.setAuth({ user: j.user, places: S.places }); toast("Thank you!", "heart"); } catch {} }; });
+    $("[data-skip]", s).onclick = () => s.close();
+  }
+  // icons: camera users store message-circle sparkles
+
   function renderHome() {
     const el = home.el, d = home.data, u = S.user, a = S.addr;
     const where = a ? `<b>${esc(a.label)} ${I("chevron-down", "xs")}</b><span class="ell">${esc(a.landmark)}</span>` : `<b>${S.here ? "Near you" : "Kulgam town"} ${I("chevron-down", "xs")}</b><span>Tap to set your delivery address</span>`;
@@ -200,7 +253,7 @@
       <div class="home-head"><div class="row between"><button class="loc grow" data-a="where"><span class="pin">${I("map-pin")}</span><span class="grow">${where}</span></button>
         <button class="avatar" data-a="me" aria-label="Profile">${u && u.name ? esc(u.name[0].toUpperCase()) : I("user", "sm")}</button></div>
         <div class="hello">${greet()}${u && u.name ? ", " + esc(u.name.split(" ")[0]) : ""}<b>What are you craving?</b></div>
-        <button class="searchbox" data-a="search">${I("search")}<span>Search pizza, wazwan, momos…</span></button></div>
+        <button class="searchbox" data-a="search">${I("search")}<span>Search pizza, wazwan, momos…</span></button>${rateCard()}</div>
       ${d ? (d.banners.length ? `<div class="bans">${d.banners.map(b => `<button class="ban" data-a="ban" data-id="${esc(b.restaurant_id || "")}" style="background-image:linear-gradient(90deg, rgb(8 40 22 / .85), rgb(8 40 22 / .1) 75%), url('${esc(KF.img(b.photo))}')">
           ${b.kicker ? `<small>${esc(b.kicker)}</small>` : ""}<b>${esc(b.title)}</b>${b.subtitle ? `<span>${esc(b.subtitle)}</span>` : ""}${b.restaurant_id ? `<em>Order now ${I("chevron-right", "xs")}</em>` : ""}</button>`).join("")}</div>
           <div class="dots">${d.banners.map((_, i) => `<i class="${i ? "" : "on"}"></i>`).join("")}</div>` : "")
@@ -238,6 +291,7 @@
     home.el = el;
     bind(el, {
       where: () => chooseAddress(),
+      rateme: b => openOrder(b.dataset.id),
       me: () => KF.tab("profile"),
       search: () => KF.tab("search"),
       rest: b => openRestaurant(b.dataset.id),
@@ -336,12 +390,13 @@
             <button class="iconbtn glass" data-a="callr" aria-label="Call restaurant">${I("phone")}</button></div></div>
           <div class="rinfo fadein"><div class="row between" style="align-items:flex-start"><div class="grow"><h1>${esc(r.name)}</h1><div class="meta">${esc(r.cuisines || "")}</div>
             <div class="meta">${I("map-pin", "xs")} ${esc(r.address || r.area || "")}</div></div>
-            ${r.rating ? `<span class="rating" style="flex-direction:column;padding:6px 9px;font-size:14px">${r.rating} ${I("star", "xs")}<small style="font-size:9.5px;opacity:.9">${plural(r.ratings, "rating")}</small></span>` : `<span class="rating new">NEW</span>`}</div>
+            ${r.rating ? `<button class="rating" data-a="reviews" style="flex-direction:column;padding:6px 9px;font-size:14px">${r.rating} ${I("star", "xs")}<small style="font-size:9.5px;opacity:.9">${plural(r.ratings, "rating")}</small></button>` : `<span class="rating new">NEW</span>`}</div>
             <div class="facts"><div><b>${I("clock", "xs")} ${r.eta}</b><span>minutes</span></div><div>${fee}</div><div><b>${rs(r.min_order)}</b><span>minimum order</span></div></div>
             <div class="own">${I("bike", "sm")} Delivered by ${esc(r.name)}'s own rider · ${r.rules.per_km ? `then ${rs(r.rules.per_km)}/km after ${r.rules.base_km} km` : "flat fee"}</div>
             ${r.status === "test" ? `<div class="warn" style="margin-top:12px">${I("info", "sm")} This is a test restaurant for trying the app. Orders are not real.</div>` : ""}
             ${r.is_open ? "" : `<div class="warn red" style="margin-top:12px">${I("moon", "sm")} Closed right now${r.hours ? ` · Opens ${esc(r.hours)}` : ""}. You can still look at the menu.</div>`}</div>
           ${(j.specials || []).length ? `<div class="sec" style="margin-top:16px"><h2>${I("flame", "sm")} Today's specials</h2></div><div class="specials">${j.specials.map(sp => spCard(sp, false)).join("")}</div>` : ""}
+          <div data-reviews></div>
           <div class="menutabs" style="top:calc(var(--sat) + 58px)"><div class="chips"><button class="chip" data-a="veg" aria-pressed="false">${vegMark(true)} Veg only</button>
             ${secs.map(s => `<button class="chip" data-a="jump" data-sec="${s.id}">${esc(s.name)}</button>`).join("")}</div></div>
           <div data-menu>${menuHTML()}</div><div style="height:110px"></div>
@@ -360,9 +415,11 @@
       const refreshBar = () => { $("[data-cartbar]", el).innerHTML = cartbar(); };
       const off = () => { if (!scr.alive) return; items.forEach((_, id) => { const box = $(`[data-addbox="${id}"]`, el); if (box) box.innerHTML = addHTML(items.get(id)); }); refreshBar(); };
       on("cart", off);
+      loadReviews(r, $("[data-reviews]", el));
       bind(el, {
         back: () => pop(scr),
         callr: () => r.phone ? call(r.phone) : toast("No phone number listed", "info"),
+        reviews: () => openReviews(r), rvphoto: b => photoSheet(b.dataset.src),
         inc: async b => { const it = items.get(Number(b.dataset.id)); if (await setQty(r, it, qtyOf(it.id) + 1)) { refreshItem(it.id); refreshBar(); } },
         sizes: b => {
           const it = items.get(Number(b.dataset.id));
@@ -509,7 +566,10 @@
             return `<i style="--c:${["#0f8a4f", "#e8a317", "#22b46a", "#f2bd45", "#d23a3a"][i % 5]};--x:${Math.round(Math.cos(a) * d)}px;--y:${Math.round(Math.sin(a) * d)}px;animation-delay:${i % 4 * 40}ms"></i>`; }).join("");
           body = `<div class="center" style="padding-top:24px;padding-bottom:10px"><div><div class="burst">${conf}<div class="ok">${I("check")}</div></div><h1>Delivered. Enjoy your meal!</h1>
             <p>${esc(r.name)} delivered at ${time(o.times.delivered)}.</p></div></div>
-            <div class="card" style="text-align:center" data-rate>${o.rating ? `<h3>Your rating</h3><div class="stars">${[1, 2, 3, 4, 5].map(n => `<span class="${n <= o.rating ? "on" : ""}" style="color:${n <= o.rating ? "var(--gold)" : "var(--line-2)"}">${I("star", "lg")}</span>`).join("")}</div>${o.review ? `<p class="note">"${esc(o.review)}"</p>` : ""}`
+            <div class="card" style="text-align:center" data-rate>${o.rating ? `<h3>Your rating</h3><div class="stars">${[1, 2, 3, 4, 5].map(n => `<span class="${n <= o.rating ? "on" : ""}" style="color:${n <= o.rating ? "var(--gold)" : "var(--line-2)"}">${I("star", "lg")}</span>`).join("")}</div>${o.review ? `<p class="note">"${esc(o.review)}"</p>` : ""}
+                ${o.review_photo ? `<button class="rvph" data-a="rvphoto" data-src="${esc(KF.img(o.review_photo))}" ${KF.bgc(o.review_photo)} style="margin:10px auto 0" aria-label="Your photo"></button>`
+                  : o.rated_at && Date.now() - Date.parse(o.rated_at) > 6.5 * 86400000 ? "" : `<button class="btn soft sm" data-a="rvadd" style="margin-top:12px">${I("camera", "sm")} Add a photo of your food</button><input type="file" accept="image/*" data-rvfile hidden>`}
+                ${o.review_reply ? `<div class="rvreply" style="text-align:left;margin-top:12px"><b>Reply from ${esc(o.restaurant.name)}</b><br>${esc(o.review_reply)}</div>` : ""}`
               : `<h3>How was the food?</h3><div class="stars">${[1, 2, 3, 4, 5].map(n => `<button data-a="star" data-n="${n}" aria-label="${n} stars">${I("star", "lg")}</button>`).join("")}</div>
                 <textarea class="input" data-review placeholder="Tell others what you liked (optional)" style="margin-top:14px;min-height:64px" hidden></textarea><button class="btn" data-a="rate" style="margin-top:12px" hidden>Send rating</button>`}</div>
             ${detailsHTML(o)}<div class="pad"><button class="btn soft" data-a="again">${I("refresh-cw", "sm")} Order again</button></div>`;
@@ -623,6 +683,10 @@
         star: b => { const n = Number(b.dataset.n); $$("[data-a=star]", el).forEach(s => s.classList.toggle("on", Number(s.dataset.n) <= n)); el.dataset.stars = n; haptic();
           $("[data-review]", el).hidden = false; $("[data-a=rate]", el).hidden = false; },
         rate: b => busy(b, async () => { const j = await post(`/v1/orders/${o.id}/rate`, { rating: Number(el.dataset.stars), review: $("[data-review]", el).value }); toast("Thanks for rating!", "heart"); show(j.order); }),
+        rvphoto: b => photoSheet(b.dataset.src),
+        rvadd: () => { const f = $("[data-rvfile]", el); f.value = ""; f.onchange = () => f.files[0] && busy(null, async () => {
+          toast("Uploading photo…", "image"); const fd = new FormData(); fd.append("file", await KF.shrink(f.files[0]), "food.jpg");
+          const j = await api("POST", `/v1/orders/${o.id}/review-photo`, fd); show({ ...o, review_photo: j.photo }); toast("Photo added. Thank you!", "heart"); }); f.click(); },
         gotrefund: b => busy(b, async () => { const j = await post(`/v1/orders/${o.id}/refund-received`); show(j.order); }),
         again: () => { pop(scr); openRestaurant(o.restaurant.id); },
       });
@@ -652,6 +716,7 @@
     if (!S.token) { ords.list = null; KF.badge("orders", 0); return; }
     try {
       const j = await get("/v1/orders"); ords.list = j.orders;
+      if (home.el && home.data && !!$("[data-a=rateme]", home.el) !== !!rateCard()) renderHome();
       const open = j.orders.filter(o => OPEN.includes(o.status));
       KF.badge("orders", open.length);
       // Tell the customer when an order moves on while they're somewhere else in the app (or the app is in the background)
@@ -759,7 +824,7 @@
         sheet(`<h2>Photo credits</h2><p class="sub">Food photos are openly licensed. Thank you to the photographers.</p><div class="list">${all.map(([u, v]) => `<div class="li" style="grid-template-columns:40px 1fr">
           <span class="tile" style="background:url('${esc(u)}') center/cover"></span><span class="small"><b>${esc(v.title)}</b><br>by ${esc(v.by)} · ${esc(v.license)}<br><span class="muted selectable" style="word-break:break-all">${esc(v.source)}</span></span></div>`).join("")}</div>`);
       },
-      logout: async () => { if (!(await confirm("Log out?", "Your cart stays on this phone.", "Log out"))) return; try { await KF.post("/v1/auth/logout"); } catch {} S.clearAuth(); emit("auth"); emit("places"); draw(); toast("Logged out"); },
+      logout: async () => { if (!(await confirm("Log out?", "Your cart stays on this phone.", "Log out"))) return; await KF.pushForget(); try { await KF.post("/v1/auth/logout"); } catch {} S.clearAuth(); emit("auth"); emit("places"); draw(); toast("Logged out"); },
       delete: async () => {
         if (!(await confirm("Delete your account?", "This removes your name, phone number and addresses. Past orders stay with restaurants without your details. This can't be undone.", "Delete forever", true))) return;
         busy(null, async () => { await api("DELETE", "/v1/me"); S.clearAuth(); emit("auth"); emit("places"); draw(); toast("Account deleted"); });
@@ -786,5 +851,5 @@
   }
 
   // icons: arrow-right hand shopping-bag
-  KF.customer = { suggest, initHome, loadHome, initSearch, search: srch, initOrders, renderOrders, loadOrders, initProfile, openRestaurant, openOrder, login, loadAddresses, chooseAddress, pickPlace, STATUS, OPEN, vegMark };
+  KF.customer = { askHeard, reviewCard, photoSheet, suggest, initHome, loadHome, initSearch, search: srch, initOrders, renderOrders, loadOrders, initProfile, openRestaurant, openOrder, login, loadAddresses, chooseAddress, pickPlace, STATUS, OPEN, vegMark };
 })();

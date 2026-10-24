@@ -28,6 +28,9 @@ app.register(async (a) => {
   require("./web").routes(a);
   require("./owner").routes(a);
   require("./admin").routes(a);
+  require("./push").routes(a, auth);
+  require("./growth").routes(a);
+  require("./reviews").routes(a);
 });
 
 if (require.main === module) {

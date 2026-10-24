@@ -9,8 +9,8 @@
 	}
 }
 
-# Kezia's Food API
-{$KEZIA_DOMAIN} {
+# Kezia's Food API (all its addresses, comma-separated: its own domain and the old sslip.io one)
+{$KEZIA_SITES} {
 	encode zstd gzip
 	reverse_proxy kezia:8090
 	header {

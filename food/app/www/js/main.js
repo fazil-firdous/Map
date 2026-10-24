@@ -61,6 +61,10 @@
     C.initHome(layers.home); C.initSearch(layers.search); C.initOrders(layers.orders); P.init(layers.kitchen); AD.init(layers.admin); drawProfile = C.initProfile(layers.profile);
     on("places", remode);
     on("auth", remode);
+    on("auth", () => { if (S.token) { KF.pushSetup(); if (mode() === "customer") setTimeout(() => C.askHeard(), 1200); } });
+    // tapping a notification opens the right screen; one arriving while the app is open refreshes it
+    on("pushopen", d => { KF.popAll(); if (d.kitchen) tab("k:orders"); else if (d.rider) tab("k:rides"); else if (d.order) { tab("orders"); C.openOrder(d.order); } });
+    on("pushin", () => { P.pollKitchen(); P.pollRides(); C.loadOrders(); });
   }
 
   function welcome() {
@@ -101,7 +105,8 @@
     document.addEventListener("pointerdown", () => bell.unlock(), { once: true });
     const t0 = Date.now();
     if (S.token) {
-      try { const j = await Promise.race([KF.get("/v1/me"), sleep(4000).then(() => null)]); if (j) S.setAuth({ user: j.user, places: j.places, support: j.support }); } catch {}
+      try { const j = await Promise.race([KF.get("/v1/me"), sleep(4000).then(() => null)]); if (j) S.setAuth({ user: j.user, places: j.places, support: j.support, push: j.push }); } catch {}
+      KF.pushSetup();
       C.loadAddresses().then(() => emit("addr"));
     }
     lastMode = mode();
@@ -111,6 +116,7 @@
     if (!KF.ls.get("kf_welcomed", 0)) await welcome();
     tab(KF.firstTab());
     setTimeout(() => boot.remove(), 600);
+    if (S.token && mode() === "customer") setTimeout(() => C.askHeard(), 6000);
     C.loadOrders();
     if (S.kitchens().length) P.pollKitchen();
     // Shared links: kezia://r/<id> in the app, or …/app/#r=<id> on the web, open that restaurant

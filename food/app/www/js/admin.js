@@ -2,7 +2,7 @@
 // numbers and requests to approve, all orders, and users with the most active first. Uses the /v1/admin API.
 (() => {
   const { $, $$, esc, I, rs, bgc, S, get, post, api, sheet, confirm, ask, toast, fail, busy, bind, haptic, on, skelLines, empty, when, plural, call } = KF;
-  const { STATUS, OPEN } = KF.customer;
+  const { STATUS, OPEN, reviewCard, photoSheet } = KF.customer;
   const A = { el: null, view: "home", dash: null, rest: null, rfilter: "live", ofilter: "", usort: "active", uq: "" };
   const ago = d => { if (!d) return "never"; const m = (Date.now() - Date.parse(d)) / 60000;
     return m < 60 ? `${Math.max(1, Math.round(m))} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : (Math.round(m / 1440) === 1 ? "1 day ago" : `${Math.round(m / 1440)} days ago`); };
@@ -68,6 +68,9 @@
       <button class="card row" data-a="suggestions" style="width:calc(100% - 2*var(--gut));text-align:left"><span class="tile gold">${I("message-square", "sm")}</span>
         <span class="grow"><b>Suggestions</b><br><span class="muted small">${t.suggestions_new ? `${plural(t.suggestions_new, "new suggestion")} to read` : "Ideas and problems people send from the app"}</span></span>
         ${t.suggestions_new ? `<span class="pill solid">${t.suggestions_new}</span>` : I("chevron-right", "sm")}</button>
+      <div class="two pad" style="margin-top:12px">
+        <button class="card" data-a="links" style="margin:0;text-align:left"><span class="tile">${I("link", "sm")}</span><b style="display:block;margin-top:8px">Install links</b><span class="muted small">Which post or poster works</span></button>
+        <button class="card" data-a="reviewsall" style="margin:0;text-align:left"><span class="tile gold">${I("star", "sm")}</span><b style="display:block;margin-top:8px">Reviews</b><span class="muted small">See and hide reviews</span></button></div>
       <div class="sec"><h2>Commission per restaurant</h2><button data-a="rates">${I("pencil", "xs")} Edit</button></div>
       <div class="card" style="padding:4px 14px" data-rates><p class="note">Loading…</p></div>
       <div class="sec"><h2>Top restaurants · 30 days</h2><button data-a="goto" data-v="rest">All</button></div>
@@ -222,6 +225,59 @@
     });
   }
 
+  // ---------- install links ----------
+  // One link per Instagram post, poster or restaurant: kezia…/i/<code> opens the install page and is counted.
+  const linkBase = () => (KF.API || location.origin).replace(/\/$/, "");
+  async function copyLink(url) {
+    try { await navigator.clipboard.writeText(url); toast("Link copied", "copy"); }
+    catch { sheet(`<h2>Your link</h2><p class="sub">Copy it from here:</p><p class="selectable" style="word-break:break-all;font-weight:700">${esc(url)}</p>`); }
+  }
+  function openLinks() {
+    KF.push(async (el, scr) => {
+      el.innerHTML = `${KF.topbar("Install links")}<div class="scroll">${skelLines(4)}</div>`;
+      let j;
+      const stat = (n, l) => `<div><b>${n}</b><span>${l}</span></div>`;
+      const card = (x, canDelete) => `<div class="card"><div class="row between"><b>${esc(x.label)}</b>${canDelete ? `<button class="iconbtn plain" data-a="ldel" data-code="${esc(x.code)}" aria-label="Delete">${I("trash-2", "sm")}</button>` : ""}</div>
+          ${x.code === "direct" ? `<p class="muted small" style="margin:4px 0 0">People who opened the install page without a link</p>` : `<button class="link small selectable" data-a="lcopy" data-url="${esc(x.share ? linkBase() + x.share : `${linkBase()}/i/${x.code}`)}" style="word-break:break-all;text-align:left">${I("copy", "xs")} ${esc(x.share ? linkBase() + x.share : `${linkBase()}/i/${x.code}`)}</button>`}
+          <div class="facts four" style="margin-top:12px">${stat(x.visits, "visits")}${stat(x.downloads, "downloads")}${stat(x.signups, "sign-ups")}${stat(x.orders, "orders")}</div></div>`;
+      const draw = async () => {
+        try { j = await get("/v1/admin/links"); } catch (e) { $(".scroll", el).innerHTML = empty("circle-alert", "Couldn't load", e.message); return; }
+        const heardTotal = j.heard.reduce((a, h) => a + h.n, 0);
+        $(".scroll", el).innerHTML = `<div class="pad" style="margin:14px 0"><button class="btn shine" data-a="lnew" style="width:100%">${I("plus", "sm")} New link</button>
+            <p class="note">Make a link for each Instagram post, story, poster or restaurant counter. Visits and app downloads are counted for every link; sign-ups and orders for people who use the browser version.</p></div>
+          ${heardTotal ? `<div class="card"><h3 style="margin-top:0">How people heard about you</h3>${j.heard.map(h => `<div class="rvbar" style="grid-template-columns:150px 1fr 36px;margin:6px 0"><span>${esc(h.heard)}</span><i><b style="width:${h.n / heardTotal * 100}%;background:var(--g)"></b></i><span class="muted">${h.n}</span></div>`).join("")}<p class="note" style="margin-bottom:0">Customers answer this once after they log in.</p></div>` : ""}
+          ${j.links.map(x => card(x, true)).join("") || `<p class="note pad">No links yet. Make your first one above.</p>`}
+          ${card(j.direct)}
+          ${j.shares.length ? `<div class="sec"><h2>Restaurants' share links</h2></div>${j.shares.map(x => card(x)).join("")}` : ""}<div style="height:30px"></div>`;
+      };
+      bind(el, { back: () => KF.pop(scr), lcopy: b => copyLink(b.dataset.url),
+        lnew: async () => {
+          const v = await ask("New install link", "Name it after where you'll post it.", [{ k: "label", label: "Name", placeholder: "e.g. Instagram reel 1, Poster at Chunk City" }], "Make link");
+          if (v && v.label) busy(null, async () => { const r = await post("/v1/admin/links", { label: v.label }); await draw(); copyLink(`${linkBase()}/i/${r.link.code}`); });
+        },
+        ldel: async b => { if (!(await confirm("Delete this link?", "Its numbers are kept, but the link stops counting new visits.", "Delete", true))) return; busy(b, async () => { await api("DELETE", `/v1/admin/links/${b.dataset.code}`); draw(); }); } });
+      draw();
+    });
+  }
+
+  // ---------- reviews ----------
+  function openAllReviews() {
+    KF.push(async (el, scr) => {
+      el.innerHTML = `${KF.topbar("Reviews")}<div class="scroll">${skelLines(4)}</div>`;
+      let list = [];
+      const draw = async () => {
+        try { list = (await get("/v1/admin/reviews")).reviews; } catch (e) { $(".scroll", el).innerHTML = empty("circle-alert", "Couldn't load", e.message); return; }
+        $(".scroll", el).innerHTML = `<p class="note pad" style="margin:14px 0">Hide a review that's abusive or fake: its words, photo and stars disappear from the restaurant's page.</p>` + (list.length ? list.map(x => `<div style="${x.hidden ? "opacity:.55" : ""}">
+            <div class="pad muted small" style="margin-bottom:4px">${esc(x.restaurant)} · ${esc(x.phone || "")}</div>${reviewCard(x, true)}
+            <div class="pad" style="margin:-4px 0 16px"><button class="btn ${x.hidden ? "soft" : "ghost"} sm" data-a="rvhide" data-id="${esc(x.id)}" data-h="${x.hidden ? 0 : 1}">${x.hidden ? "Show again" : "Hide"}</button></div></div>`).join("")
+          : empty("star", "No reviews yet", "Customers rate after their food arrives."));
+      };
+      bind(el, { back: () => KF.pop(scr), rvphoto: b => photoSheet(b.dataset.src),
+        rvhide: b => busy(b, async () => { await api("PATCH", `/v1/admin/reviews/${b.dataset.id}`, { hidden: b.dataset.h === "1" }); toast(b.dataset.h === "1" ? "Hidden" : "Shown again"); draw(); }) });
+      draw();
+    });
+  }
+
   // ---------- wiring ----------
   function init(el) {
     A.el = el;
@@ -272,6 +328,8 @@
       },
       rates: () => toast("Tap a restaurant to change its rate", "badge-percent"),
       suggestions: () => openSuggestions(),
+      links: () => openLinks(),
+      reviewsall: () => openAllReviews(),
       ofilter: b => { A.ofilter = b.dataset.f; haptic(); drawOrders(); },
       order: b => orderSheet(A.orders.find(o => o.id === b.dataset.id)),
       usort: b => { A.usort = b.dataset.f; haptic(); drawUsers(); },
@@ -283,6 +341,6 @@
   }
   function show(view) { if (view) A.view = view; frame(); }
 
-  // icons: chart-column store receipt users
+  // icons: chart-column store receipt users link copy
   KF.admin = { init, show };
 })();

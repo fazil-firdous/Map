@@ -61,7 +61,8 @@ async function myPlaces(user) {
     FROM restaurants r LEFT JOIN staff s ON s.restaurant_id = r.id AND s.phone = $2
     WHERE r.owner_id = $1 OR s.phone IS NOT NULL ORDER BY r.name`, [user.id, user.phone]);
 }
-const publicUser = u => ({ id: u.id, name: u.name, phone: u.phone, role: u.role });
+const publicUser = u => ({ id: u.id, name: u.name, phone: u.phone, role: u.role, heard: u.heard || null });
+const HEARD = ["Instagram", "Friend or family", "Poster or restaurant", "WhatsApp", "Other"];
 
 function routes(app) {
   app.post("/v1/auth/otp/start", { config: { rateLimit: { max: 8, timeWindow: "1 hour", keyGenerator: phoneKey, allowList: fixedAllowed, hook: "preHandler" } } }, async (req) => {
@@ -95,7 +96,9 @@ function routes(app) {
     if (o.code_hash !== hmac(phone + ":" + code)) { await db.q("UPDATE otps SET attempts = attempts + 1 WHERE phone = $1", [phone]); throw bad("Wrong code"); }
     await db.q("DELETE FROM otps WHERE phone = $1", [phone]);
     const name = str(req.body?.name, 40);
-    let user = await db.one(`INSERT INTO users (phone, name) VALUES ($1, $2) ON CONFLICT (phone) DO UPDATE SET name = COALESCE(users.name, EXCLUDED.name) RETURNING *`, [phone, name]);
+    let user = await db.one(`INSERT INTO users (phone, name) VALUES ($1, $2) ON CONFLICT (phone) DO UPDATE SET name = COALESCE(users.name, EXCLUDED.name) RETURNING *, (xmax = 0) AS created`, [phone, name]);
+    // a new customer who came through an install link (web app): count the signup for that link
+    if (user.created && req.body?.ref) await require("./growth").signup(user.id, req.body.ref);
     if (user.banned && !isOwner(phone)) throw forbidden("This number is blocked. Contact support");
     // A restaurant the owner handed to this number becomes theirs now
     await db.q("UPDATE restaurants SET owner_id = $1, pending_owner_phone = NULL WHERE pending_owner_phone = $2", [user.id, phone]);
@@ -104,7 +107,7 @@ function routes(app) {
     // The test owner manages the test restaurant (local tests).
     if (config.test.ownerPhone && phone === normPhone(config.test.ownerPhone)) await db.q("UPDATE restaurants SET owner_id = $1 WHERE id = 'KF-TEST' AND owner_id IS NULL", [user.id]);
     const places = await myPlaces(user);
-    return { token: await sessionFor(user.id), user: publicUser(user), places, support: await supportFor(user, places) };
+    return { token: await sessionFor(user.id), user: publicUser(user), places, support: await supportFor(user, places), push: require("./push").enabled() };
   });
 
   // The support WhatsApp number goes only to restaurant teams, riders and the owner, never to customers
@@ -115,7 +118,7 @@ function routes(app) {
   };
   app.get("/v1/me", { preHandler: needUser }, async (req) => {
     const places = await myPlaces(req.user);
-    return { user: publicUser(req.user), places, support: await supportFor(req.user, places) };
+    return { user: publicUser(req.user), places, support: await supportFor(req.user, places), push: require("./push").enabled() };
   });
   // Suggestions box (anyone logged in)
   app.post("/v1/suggestions", { preHandler: needUser, config: { rateLimit: { max: 10, timeWindow: "1 hour" } } }, async (req) => {
@@ -127,7 +130,8 @@ function routes(app) {
     return { ok: true };
   });
   app.patch("/v1/me", { preHandler: needUser }, async (req) => {
-    const u = await db.one("UPDATE users SET name = COALESCE($2, name) WHERE id = $1 RETURNING *", [req.user.id, str(req.body?.name, 40)]);
+    const heard = HEARD.includes(req.body?.heard) ? req.body.heard : null;
+    const u = await db.one("UPDATE users SET name = COALESCE($2, name), heard = COALESCE($3, heard) WHERE id = $1 RETURNING *", [req.user.id, str(req.body?.name, 40), heard]);
     return { user: publicUser(u) };
   });
   app.post("/v1/auth/logout", { preHandler: needUser }, async (req) => {

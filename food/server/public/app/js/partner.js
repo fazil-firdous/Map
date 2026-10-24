@@ -4,7 +4,7 @@
 (() => {
   const { $, $$, esc, h, I, rs, bg, S, get, post, api, sheet, confirm, ask, toast, fail, busy, bind, haptic, emit, on, skelLines, empty, when, time, plural, now,
     notify, bell, openExternal, call, watch, phone10 } = KF;
-  const { vegMark, STATUS } = KF.customer;
+  const { vegMark, STATUS, reviewCard, photoSheet } = KF.customer;
   const K = { el: null, rid: KF.ls.get("kf_rid", null), view: "orders", live: [], hist: [], data: null, earn: null, seen: new Set(KF.ls.get("kf_rang", [])), scope: "live" };
   const pct = () => (K.data ? Number(K.data.restaurant.commission_pct) : 0);
   const keep = price => price - Math.round(price * pct() / 100);
@@ -269,15 +269,28 @@
     }) });
   }
 
-  /** Shrink a photo on the phone before uploading (max 1280 px, JPEG). */
-  async function shrink(file) {
-    const url = URL.createObjectURL(file);
-    try {
-      const im = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("Couldn't read that photo")); i.src = url; });
-      const k = Math.min(1, 1280 / Math.max(im.width, im.height)), c = document.createElement("canvas");
-      c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
-      return await new Promise(res => c.toBlob(res, "image/jpeg", .84));
-    } finally { URL.revokeObjectURL(url); }
+  const shrink = KF.shrink; // max 1280 px JPEG
+
+  // Customer reviews of this restaurant, with a reply to each
+  function openKReviews() {
+    const rid = place().id;
+    KF.push(async (el, scr) => {
+      el.innerHTML = `${KF.topbar("Customer reviews")}<div class="scroll">${skelLines(4)}</div>`;
+      let list = [];
+      const draw = async () => {
+        try { list = (await get(`/v1/restaurant/${rid}/reviews`)).reviews; } catch (e) { $(".scroll", el).innerHTML = empty("circle-alert", "Couldn't load", e.message); return; }
+        $(".scroll", el).innerHTML = `<p class="note pad" style="margin:14px 0">Customers see your reply under their review. A short thank-you brings people back.</p>` + (list.length ? list.map(x => `<div style="position:relative">${reviewCard(x, true)}
+            <div class="pad" style="margin:-4px 0 16px">${x.hidden ? `<span class="pill">Hidden by Kezia's Food</span>` : `<button class="btn soft sm" data-a="reply" data-id="${esc(x.id)}">${I("message-circle", "xs")} ${x.reply ? "Edit reply" : "Reply"}</button>`}</div></div>`).join("")
+          : empty("star", "No reviews yet", "After a delivery, customers can rate their food and add a photo."));
+      };
+      bind(el, { back: () => KF.pop(scr), rvphoto: b => photoSheet(b.dataset.src),
+        reply: async b => {
+          const x = list.find(r => r.id === b.dataset.id);
+          const v = await ask(`Reply to ${x.name}`, x.text ? `"${x.text}"` : "", [{ k: "text", label: "Your reply", type: "textarea", value: x.reply || "", placeholder: "Thank you! Come again soon." }], "Send reply");
+          if (v) busy(null, async () => { await post(`/v1/restaurant/${rid}/reviews/${x.id}/reply`, { text: v.text }); toast("Reply saved"); draw(); });
+        } });
+      draw();
+    });
   }
   function pickPhoto(path) {
     const f = $("[data-file]", K.el); f.value = "";
@@ -343,7 +356,10 @@
     const r = K.data.restaurant, staff = K.data.staff;
     const f = (k, label, extra = "", type = "text", mode = "text") => `<label class="field">${label}<input class="input" data-k="${k}" type="${type}" inputmode="${mode}" value="${esc(r[k] ?? "")}" ${extra}></label>`;
     const n = (k, label, unit) => `<label class="field">${label}<div class="row"><input class="input" data-k="${k}" inputmode="decimal" value="${esc(r[k] ?? "")}"><span class="muted small" style="flex:none;width:34px">${unit}</span></div></label>`;
-    b.innerHTML = `<div class="card"><h3>Payments</h3><div class="form">${f("upi_id", "Your UPI ID (customers pay here)", 'placeholder="yourname@okaxis" autocapitalize="off"')}${f("upi_name", "Name on UPI", 'placeholder="As shown in UPI apps"')}
+    const rr = K.data.restaurant, avg = rr.rating_count ? Math.round(rr.rating_sum / rr.rating_count * 10) / 10 : null;
+    b.innerHTML = `<button class="card row" data-a="kreviews" style="width:calc(100% - 2*var(--gut));text-align:left"><span class="tile gold">${I("star", "sm")}</span>
+        <span class="grow"><b>Customer reviews</b><br><span class="muted small">${avg ? `${avg} ★ from ${plural(rr.rating_count, "rating")} · reply to say thanks` : "Reviews appear here after deliveries"}</span></span>${I("chevron-right", "sm")}</button>
+      <div class="card"><h3>Payments</h3><div class="form">${f("upi_id", "Your UPI ID (customers pay here)", 'placeholder="yourname@okaxis" autocapitalize="off"')}${f("upi_name", "Name on UPI", 'placeholder="As shown in UPI apps"')}
         <div class="row between"><span><b>Cash on delivery</b><br><span class="muted small">Riders collect cash. Customers who refuse orders twice lose this</span></span><span class="switch" role="switch" data-t="cod" aria-checked="${r.cod}"></span></div></div></div>
       <div class="card"><h3>Delivery charges</h3><div class="two" style="margin-top:0">${n("base_fee", "Fixed fee", "₹")}${n("base_km", "Covers first", "km")}${n("per_km", "Then per km", "₹")}${n("max_km", "Deliver up to", "km")}
         ${n("min_order", "Minimum order", "₹")}${n("packing", "Packing charge", "₹")}</div>
@@ -523,6 +539,7 @@
       paydue: () => payDue(),
       gobill: () => KF.tab("k:money"),
       savesettings: b => saveSettings(b),
+      kreviews: () => openKReviews(),
       addstaff: async () => {
         const s = sheet(`<h2>Add to your team</h2><p class="sub">They log in to Kezia's Food with this number.</p><div class="form">
           <div class="seg" data-role><button data-r="rider" aria-pressed="true">Rider</button><button data-r="manager" aria-pressed="false">Manager</button></div>

@@ -1,6 +1,9 @@
 // Share links for restaurants: kezia.<domain>/r/<id>. WhatsApp and Instagram show a preview card (photo, name),
 // and the page opens the restaurant in the app (or installs it, or opens the web version on iPhone).
 const db = require("./db");
+const growth = require("./growth");
+// link previews (WhatsApp, Instagram, Facebook…) fetch the page too: don't count those as visits
+const PREVIEW = /bot|crawler|spider|facebookexternalhit|whatsapp|telegram|slack|discord|preview|instagram|twitter/i;
 
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const photo = p => !p ? "/app/img/icons/icon-512.png" : p.startsWith("asset:") ? "/app/img/food/" + p.slice(6) : p;
@@ -10,7 +13,8 @@ function routes(app) {
     const r = await db.one("SELECT id, name, area, cuisines, photo, status FROM restaurants WHERE id = $1 AND status IN ('active', 'test')", [req.params.id]);
     const base = `https://${req.headers.host}`;
     if (!r) return reply.redirect("/");
-    const id = encodeURIComponent(r.id), img = base + photo(r.photo);
+    const id = encodeURIComponent(r.id), img = base + photo(r.photo), ref = encodeURIComponent("r-" + r.id);
+    if (!PREVIEW.test(req.headers["user-agent"] || "") && !req.query.app) growth.record("r-" + r.id, "visit", req).catch(() => {});
     const intent = `intent://r/${id}#Intent;scheme=kezia;package=in.keziasfood.app;S.browser_fallback_url=${encodeURIComponent(base + "/r/" + id + "?app=none")};end`;
     reply.type("text/html; charset=utf-8").header("cache-control", "public, max-age=300");
     return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -25,8 +29,8 @@ h1{margin:0;font-size:25px;letter-spacing:-.02em}.sub{color:#56655c;font-size:14
 <body><main><div class="hero" style="background-image:url('${esc(photo(r.photo))}')"></div>
 <div class="card"><h1>${esc(r.name)}</h1><div class="sub">${esc(r.cuisines || "")}${r.area ? " · " + esc(r.area) : ""}</div>
 <a class="btn" id="open" href="kezia://r/${id}">Open in Kezia's Food</a>
-<a class="btn ghost" href="/kezias-food.apk">Install the app (Android)</a>
-<a class="btn ghost" href="/app/#r=${id}">Order in the browser · iPhone</a></div>
+<a class="btn ghost" href="/dl/${ref}">Install the app (Android)</a>
+<a class="btn ghost" href="/app/?ref=${ref}#r=${id}">Order in the browser · iPhone</a></div>
 <div class="brand"><img src="/app/img/icons/icon-192.png" alt="">Kezia's Food · Kulgam</div></main>
 <script>if (/Android/.test(navigator.userAgent)) document.getElementById("open").href = ${JSON.stringify(intent)};</script></body></html>`;
   });
