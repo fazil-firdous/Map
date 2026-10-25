@@ -7,7 +7,7 @@
  "lat": 33.6473,
  "lon": 75.0102,
  "cuisines": "Pizza · Momos · Chinese · Burgers · Shakes",
- "photo": "/img/lib/pz-chicken-4-wide.jpg",
+ "photo": "/img/r/panda-cafe/cover.jpg",
  "commission_pct": 2,
  "cod": true,
  "prep_min": 25,
@@ -853,5 +853,11 @@
     }
    ]
   }
- ]
+ ],
+ "banner": {
+  "kicker": "NOW ON KEZIA",
+  "title": "Panda Cafe",
+  "subtitle": "Pizza, momos & shakes · Degree College Road",
+  "photo": "/img/r/panda-cafe/banner.jpg"
+ }
 }

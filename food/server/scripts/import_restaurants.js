@@ -9,7 +9,16 @@ const path = require("path");
 const db = require("../src/db");
 const { ratePct, priced } = require("../src/pricing");
 
+// Restaurants taken off for now (their files wait in data/later/). Removed from the server only while nobody owns
+// them and they have no orders, so nothing real is ever deleted.
+const REMOVED = ["zoon-and-zafran"];
+
 (async () => {
+  for (const id of REMOVED) {
+    const gone = await db.one(`DELETE FROM restaurants WHERE id = $1 AND owner_id IS NULL AND NOT EXISTS (SELECT 1 FROM orders WHERE restaurant_id = $1) RETURNING name`, [id]);
+    if (gone) console.log(`${gone.name}: removed for now`);
+    else await db.q("UPDATE restaurants SET status = 'suspended', is_open = false WHERE id = $1 AND status <> 'suspended'", [id]);
+  }
   const dir = path.join(__dirname, "..", "data", "restaurants");
   for (const f of fs.readdirSync(dir).filter(f => f.endsWith(".json")).sort()) {
     const r = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8"));

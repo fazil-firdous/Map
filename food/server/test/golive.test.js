@@ -31,12 +31,15 @@ test("each login SMS is logged for the daily limit", async () => {
   assert.equal(after, before + 1);
 });
 
-test("new restaurants are added hidden, with prices that pay them exactly", async () => {
-  for (const id of ["panda-cafe", "zoon-and-zafran"]) {
+test("new restaurants are added hidden, with prices that pay them exactly; Zoon & Zafran is off for now", async () => {
+  assert.equal((await db.query("SELECT count(*)::int n FROM restaurants WHERE id = 'zoon-and-zafran'")).rows[0].n, 0, "removed for now");
+  for (const id of ["panda-cafe"]) {
     const r = (await db.query("SELECT status, (SELECT count(*)::int FROM menu_items WHERE restaurant_id = $1) n FROM restaurants WHERE id = $1", [id])).rows[0];
     assert.equal(r.status, "pending", id); assert.ok(r.n > 50, id);
   }
-  const blast = (await db.query("SELECT variants FROM menu_items WHERE restaurant_id = 'zoon-and-zafran' AND name = 'Chicken Blast'")).rows[0];
-  assert.deepEqual(blast.variants.map(v => v.net), [199, 349, 499]);
+  // Panda's menu: Roast Chicken Pizza R/M/L 220/360/500 to the restaurant; customers pay that plus 2%
+  const blast = (await db.query("SELECT variants FROM menu_items WHERE restaurant_id = 'panda-cafe' AND name = 'Roast Chicken Pizza'")).rows[0];
+  assert.deepEqual(blast.variants.map(v => v.net), [220, 360, 500]);
+  assert.deepEqual(blast.variants.map(v => v.p), [224, 367, 510]);
   for (const v of blast.variants) assert.equal(v.p - Math.round(v.p * 0.02), v.net);
 });
