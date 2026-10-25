@@ -23,7 +23,7 @@
   function frame() {
     A.el.innerHTML = `<div class="page-grad fadein" style="display:flex;flex-direction:column;height:100%"><div class="rm-head"><div class="row between">
         <span class="row"><span class="tile">${I("sparkles", "sm")}</span><span><b style="font-size:17px">Kezia's Food</b><br><span class="muted small">Owner account${S.user && S.user.name ? " · " + esc(S.user.name) : ""}</span></span></span>
-        <button class="iconbtn" data-a="refresh" aria-label="Refresh">${I("refresh-cw", "sm")}</button></div><div class="vtitle">${TITLES[A.view]}</div></div>
+        <span class="row" style="gap:8px"><button class="btn sm soft" data-a="shop" style="white-space:nowrap">${I("shopping-bag", "sm")} Order food</button><button class="iconbtn" data-a="refresh" aria-label="Refresh">${I("refresh-cw", "sm")}</button></span></div><div class="vtitle">${TITLES[A.view]}</div></div>
       <div class="scroll" data-body></div></div>`;
     draw();
   }
@@ -284,6 +284,7 @@
     bind(el, {
       refresh: b => { b.classList.add("spin1"); setTimeout(() => b.classList.remove("spin1"), 700); haptic(); draw(); },
       goto: b => KF.tab("a:" + b.dataset.v),
+      shop: () => KF.shop(true),
       requests: () => { A.rfilter = "pending"; KF.tab("a:rest"); },
       metric: b => { A.metric = b.dataset.m; haptic(); drawHome(); },
       day: b => { const d = A.days[b.dataset.i]; $("[data-dayinfo]", el).textContent = `${d.dt.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}: ${d.orders} orders · ${rs(d.food)} · yours ${rs(d.commission)}`; haptic(); },

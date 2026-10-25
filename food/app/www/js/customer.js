@@ -770,6 +770,9 @@
       <div class="pad row" style="margin:6px 0 18px">${u ? `<span class="avatar" style="width:58px;height:58px;font-size:22px">${esc((u.name || "K")[0].toUpperCase())}</span>
         <span class="grow"><b style="font-size:20px">${esc(u.name || "Add your name")}</b><br><span class="muted">${esc(u.phone)}</span></span><button class="iconbtn" data-a="name" aria-label="Edit name">${I("pencil", "sm")}</button>`
         : `<span class="grow"><div class="brand" style="text-align:left">Kezia's Food</div><span class="muted">Kulgam's own food app</span></span>`}</div>
+      ${md === "customer" && KF.isOwner() ? `<div class="modecard"><span class="tile">${I("sparkles", "sm")}</span><span class="grow"><b>Owner of Kezia's Food</b><br><span class="small">You're ordering as a customer</span></span></div>
+        <div class="pad" style="margin:-4px 0 14px"><button class="btn" data-a="ownerpanel">${I("sparkles", "sm")} Back to owner panel</button></div>` : ""}
+      ${md === "admin" ? `<div class="menu-list"><button data-a="shopnow"><span class="tile gold">${I("shopping-bag", "sm")}</span><span>Order food<small>Use the customer screens to place an order from your account</small></span>${I("chevron-right", "sm")}</button></div>` : ""}
       ${badge ? `<div class="modecard"><span class="tile">${I(badge[0], "sm")}</span><span><b>${badge[1]}</b><br><span class="small">${badge[2]}</span></span></div>` : ""}
       ${u ? "" : `<div class="card"><h3>Log in</h3><p class="note" style="margin:0 0 12px">Customers, restaurants and riders all log in here with their phone number.</p><button class="btn" data-a="login">Log in with phone</button></div>`}
       ${u && cust ? `<div class="menu-list"><button data-a="addrs"><span class="tile">${I("map-pin", "sm")}</span><span>Saved addresses<small>${S.addresses.length === 1 ? "1 address" : S.addresses.length + " addresses"}</small></span>${I("chevron-right", "sm")}</button>
@@ -790,6 +793,8 @@
     const draw = () => renderProfile(el);
     bind(el, {
       login: () => login(),
+      ownerpanel: () => KF.shop(false),
+      shopnow: () => KF.shop(true),
       name: async () => { const v = await ask("Your name", "Restaurants see this on your orders.", [{ k: "name", label: "Name", value: S.user.name || "" }]);
         if (!v || !v.name) return; busy(null, async () => { const j = await api("PATCH", "/v1/me", { name: v.name }); S.setAuth({ user: j.user, places: S.places }); draw(); toast("Saved"); }); },
       addrs: () => {

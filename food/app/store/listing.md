@@ -60,7 +60,7 @@ Made in Kulgam, for Kulgam.
 - **Permissions:** location (delivery address, rider tracking), notifications (order alerts).
 
 ## Release
-1. **Testing → Internal testing → Create release**, upload `kezias-food-1.6.0.aab`, add yourself and helpers by
+1. **Testing → Internal testing → Create release**, upload `kezias-food-1.6.1.aab`, add yourself and helpers by
    Gmail. Live in minutes, no review wait.
 2. **Testing → Closed testing**: same AAB, add at least **12 testers** (Gmail addresses) who opt in and use the app
    for **14 days in a row**. Required for new personal accounts before production.

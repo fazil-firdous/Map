@@ -8,8 +8,11 @@
   const layers = {};
   let current = null;
 
-  const mode = () => (S.user && S.user.role === "admin" ? "admin" : S.kitchens().length ? "kitchen" : S.rides().length ? "rider" : "customer");
+  // The owner can switch to the customer screens to place orders from their own account (kf_shop), and back
+  const mode = () => (S.user && S.user.role === "admin" ? (KF.ls.get("kf_shop", 0) ? "customer" : "admin") : S.kitchens().length ? "kitchen" : S.rides().length ? "rider" : "customer");
   KF.mode = mode;
+  KF.isOwner = () => !!(S.user && S.user.role === "admin");
+  KF.shop = on => { KF.ls.set("kf_shop", on ? 1 : 0); P.setOverride(null); remode(); if (on) KF.toast("Ordering as a customer. Back to the owner panel from You", "shopping-bag"); };
   function tabs() {
     return {
       customer: [["home", "house", "Home"], ["search", "search", "Search"], ["orders", "receipt", "Orders"], ["profile", "user", "You"]],

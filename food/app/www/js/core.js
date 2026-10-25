@@ -43,7 +43,7 @@
       if ("support" in j) { this.support = j.support || null; ls.set("kf_support", this.support); } // only restaurant teams, riders and the owner get it
       if ("push" in j) { this.push = !!j.push; ls.set("kf_push", this.push); }
     },
-    clearAuth() { this.token = null; this.user = null; this.places = []; this.addresses = []; this.addrId = null; this.support = null; ["kf_token", "kf_user", "kf_places", "kf_addr", "kf_support"].forEach(ls.del); },
+    clearAuth() { this.token = null; this.user = null; this.places = []; this.addresses = []; this.addrId = null; this.support = null; ["kf_token", "kf_user", "kf_places", "kf_addr", "kf_support", "kf_shop"].forEach(ls.del); },
     get addr() { return this.addresses.find(a => a.id === this.addrId) || null; },
     /** Where to price delivery from: the chosen address, else this phone's position, else Kulgam town. */
     get point() { const a = this.addr; return a ? { lat: a.lat, lon: a.lon } : this.here || { lat: 33.6450, lon: 75.0190 }; },
